@@ -5,7 +5,8 @@
   "description": "PQC Deps: post-quantum readiness catalog for open-source libraries",
   "license": "MIT",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "site"
   ],
   "engines": {
     "node": ">=22"
@@ -17,10 +18,15 @@
     "test:watch": "vitest",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "dev": "npm run dev -w @pqc-deps/site",
+    "dev:examples": "cross-env PQC_DATA_DIR=data/examples npm run dev -w @pqc-deps/site",
+    "build": "npm run build -w @pqc-deps/site",
+    "build:examples": "cross-env PQC_DATA_DIR=data/examples npm run build -w @pqc-deps/site"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "cross-env": "^10.1.0",
     "prettier": "^3.9.10",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
