@@ -80,6 +80,12 @@ export function mergeProposal(
     draft.overall_status = 'n/a';
   }
 
+  // "unknown" from this run means "found nothing new", not "the old evidence is wrong".
+  if (draft.overall_status === 'unknown' && existing.overall_status !== 'unknown') {
+    draft.overall_status = existing.overall_status;
+    kept.push(`overall_status "${existing.overall_status}" (the model found no new evidence)`);
+  }
+
   // If overall_status contradicts the data, fall back to the conservative derivation.
   const statusErrors = lintLibrary(draft, today).filter(
     (i) => i.severity === 'error' && i.path === 'overall_status',

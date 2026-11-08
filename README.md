@@ -16,7 +16,8 @@ exchange, since which version, and what's planned. Every claim links to a source
 | `data/libraries/*.yaml` | The catalog. One file per library. |
 | `data/examples/*.yaml` | Fictional entries for tests and local development. |
 | `data/schema/library.schema.json` | JSON Schema generated from the Zod schema (editor autocomplete). |
-| `proposals/` | Evidence-pipeline output awaiting human review. |
+| `pipeline/` | Evidence pipeline: fetch sources, ask an LLM for a cited proposal, verify quotes, open a PR. |
+| `proposals/` | Local pipeline output awaiting human review (git-ignored). |
 
 ## Local development
 
@@ -65,6 +66,50 @@ future CLI and GitHub Action can reuse it. Useful library fields:
 3. Run `npm run validate`, then open a pull request.
 
 See `data/examples/example-tls.yaml` for an entry that uses every field.
+
+## Evidence pipeline
+
+The pipeline drafts catalog updates; **a human reviews every change**. It
+never commits to `main`.
+
+1. **Fetch** GitHub releases, PQC-related issues and PRs, the changelog, and
+   any `pipeline.watch_urls` (docs, mailing lists, non-GitHub release pages).
+2. **Filter** to passages that mention ML-KEM, Kyber, ML-DSA, SLH-DSA,
+   X25519MLKEM768, post-quantum, etc. (about 9k tokens for OpenSSL).
+3. **Ask an LLM** for a structured proposal. Every claim must cite a document
+   and a verbatim quote, and the prompt forbids using the model's own memory.
+4. **Verify** each quote against the fetched text. A claim whose quote isn't
+   there, or whose version number isn't stated in the evidence, goes back to
+   `unknown`. Existing sourced claims are never downgraded.
+5. **Output** a proposed YAML file and a Markdown review report.
+
+### Setup
+
+```bash
+cp .env.example .env   # then fill in a provider
+```
+
+| Variable | Meaning |
+| --- | --- |
+| `LLM_PROVIDER` | `anthropic` (default) or `openai-compatible` |
+| `ANTHROPIC_API_KEY` | For Claude. Default model `claude-opus-5-5`; override with `LLM_MODEL`. |
+| `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | For `openai-compatible` providers (Gemini, Groq, OpenRouter, Ollama…), handy for free testing |
+| `LLM_DELAY_MS` | Pause between libraries (free-tier rate limits) |
+| `GITHUB_TOKEN` | Optional locally (falls back to `gh auth token`) |
+
+Weaker free models usually produce more `unknown` fields, because more of
+their quotes fail verification. They don't produce more wrong claims.
+
+### Running
+
+```bash
+npm run pipeline -- openssl --dry-run   # fetch + filter only, no LLM
+npm run pipeline -- openssl             # write proposals/openssl.{yaml,md}
+npm run pipeline -- openssl --apply     # write into data/libraries/ (review with git diff)
+npm run pipeline -- --stale 90 --pr     # new branch + PR with a report per library
+npm run pipeline -- --unknown           # everything still unknown
+npm run stale -- --days 90              # list entries due for re-verification
+```
 
 ## Licenses
 
