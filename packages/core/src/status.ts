@@ -1,5 +1,5 @@
 /** Human-facing labels and descriptions for the status taxonomy. */
-import type { Algorithm, Status, SupportLevel } from './schema';
+import type { Algorithm, Ecosystem, Status, SupportLevel } from './schema';
 
 export const STATUS_INFO: Record<Status, { label: string; description: string }> = {
   ready: {
@@ -65,4 +65,15 @@ export const STATUS_RANK: Record<Status, number> = {
   'no-plan': 4,
   'n/a': 5,
   unknown: 6,
+};
+
+export const ECOSYSTEM_LABEL: Record<Ecosystem, string> = {
+  'c-cpp': 'C / C++',
+  go: 'Go',
+  rust: 'Rust',
+  jvm: 'Java / JVM',
+  python: 'Python',
+  javascript: 'JavaScript / Node',
+  dotnet: '.NET',
+  platform: 'OS / platform',
 };
