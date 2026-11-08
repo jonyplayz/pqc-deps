@@ -12,7 +12,7 @@ exchange, since which version, and what's planned. Every claim links to a source
 | Path | What |
 | --- | --- |
 | `site/` | Astro static site: home, catalog, library pages, methodology, about, JSON API. |
-| `packages/core` | Zod schema, lint rules, YAML loader (later: manifest parsers, matching). Shared by site, pipeline and future CLI. |
+| `packages/core` | Zod schema, lint rules, YAML loader, manifest parsers and matching (`src/check/`). Shared by site, pipeline and future CLI. |
 | `data/libraries/*.yaml` | The catalog. One file per library. |
 | `data/examples/*.yaml` | Fictional entries for tests and local development. |
 | `data/schema/library.schema.json` | JSON Schema generated from the Zod schema (editor autocomplete). |
@@ -38,6 +38,22 @@ Builds made from `data/examples` show a banner and are marked `noindex`.
 
 The site also publishes a static JSON API: `/api/catalog.json` and
 `/api/libraries/<id>.json`.
+
+## Manifest checker
+
+`/check` parses dependency files **in the browser** and matches them against
+`/api/catalog.json`. Supported: `package.json`, `package-lock.json`,
+`requirements.txt`, `pyproject.toml`, `go.mod`, `pom.xml`, `build.gradle(.kts)`,
+`libs.versions.toml`, `Cargo.toml`, `Cargo.lock`.
+
+The logic lives in `packages/core/src/check/` (browser-safe, no Zod) so the
+future CLI and GitHub Action can reuse it. Useful library fields:
+
+- `package_names`: how packages map to a library, per registry
+- `implicit_for`: registries where this runtime/stdlib applies automatically
+  (e.g. Node.js crypto for every npm project)
+- `separate_versioning`: registries whose package versions don't follow the
+  library's versions (e.g. a `-sys` binding crate), so no version comparison
 
 ## Adding or editing a library
 
