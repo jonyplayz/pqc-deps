@@ -1,13 +1,28 @@
 /** Node-only helpers: read the data directory from disk. */
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { parseLibraryYaml, type LoadError } from './load';
 import type { Library } from './schema';
 
 export * from './load';
 
-export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+/**
+ * The repo root: the nearest ancestor of the working directory whose
+ * package.json declares workspaces. Derived from cwd (not import.meta.url)
+ * because bundlers such as Astro/Vite move this module during builds.
+ */
+function findRepoRoot(start: string): string {
+  let dir = resolve(start);
+  for (;;) {
+    const pkg = join(dir, 'package.json');
+    if (existsSync(pkg) && JSON.parse(readFileSync(pkg, 'utf8')).workspaces) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) return resolve(start);
+    dir = parent;
+  }
+}
+
+export const REPO_ROOT = findRepoRoot(process.cwd());
 
 /**
  * Directory holding the library YAML files. Defaults to data/libraries;

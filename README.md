@@ -11,6 +11,7 @@ exchange, since which version, and what's planned. Every claim links to a source
 
 | Path | What |
 | --- | --- |
+| `site/` | Astro static site: home, catalog, library pages, methodology, about, JSON API. |
 | `packages/core` | Zod schema, lint rules, YAML loader (later: manifest parsers, matching). Shared by site, pipeline and future CLI. |
 | `data/libraries/*.yaml` | The catalog. One file per library. |
 | `data/examples/*.yaml` | Fictional entries for tests and local development. |
@@ -27,7 +28,16 @@ npm test             # unit + data tests
 npm run validate     # schema + lint all YAML files
 npm run typecheck
 npm run schema:json  # regenerate the JSON Schema after editing schema.ts
+
+npm run dev:examples   # site at http://localhost:4321 using fictional example data
+npm run dev            # site using the real catalog in data/libraries
+npm run build          # static build into site/dist (fails if any data file is invalid)
 ```
+
+Builds made from `data/examples` show a banner and are marked `noindex`.
+
+The site also publishes a static JSON API: `/api/catalog.json` and
+`/api/libraries/<id>.json`.
 
 ## Adding or editing a library
 

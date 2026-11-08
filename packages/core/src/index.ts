@@ -3,3 +3,4 @@ export * from './schema';
 export * from './lint';
 export * from './status';
 export * from './load';
+export * from './delegation';

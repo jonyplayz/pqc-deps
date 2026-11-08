@@ -1,0 +1,54 @@
+name: Suggest a correction
+description: Report wrong, missing or outdated information about a library.
+title: '[Correction] '
+labels: [data, correction]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping keep the catalog accurate. Every change needs a public source,
+        so please include a link.
+  - type: input
+    id: library
+    attributes:
+      label: Library id
+      description: The last part of the library page URL, e.g. `openssl`.
+      placeholder: openssl
+    validations:
+      required: true
+  - type: dropdown
+    id: field
+    attributes:
+      label: What's wrong?
+      multiple: true
+      options:
+        - Overall status
+        - Algorithm support / version
+        - Roadmap or ETA
+        - FIPS status
+        - Delegation (which library does the crypto)
+        - Package names
+        - Upgrade guidance
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: What should it say?
+      placeholder: ML-KEM has been supported since 3.5.0 and is on by default.
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Source(s)
+      description: Links to release notes, docs, commits, issues or maintainer posts. Quote the relevant sentence if you can.
+    validations:
+      required: true
+  - type: checkboxes
+    id: maintainer
+    attributes:
+      label: Are you a maintainer of this library?
+      options:
+        - label: Yes, I maintain this library

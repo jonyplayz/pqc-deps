@@ -1,0 +1,27 @@
+name: Request a library
+description: Ask us to track a library that isn't in the catalog yet.
+title: '[Request] '
+labels: [data, new-library]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Library name
+    validations:
+      required: true
+  - type: input
+    id: repo
+    attributes:
+      label: Repository or homepage URL
+    validations:
+      required: true
+  - type: input
+    id: packages
+    attributes:
+      label: Package names
+      description: e.g. npm `jose`, PyPI `cryptography`, Maven `org.bouncycastle:bcprov-jdk18on`
+  - type: textarea
+    id: why
+    attributes:
+      label: Anything we should know?
+      description: Known PQC support, plans, or which library it delegates crypto to (with links if possible).

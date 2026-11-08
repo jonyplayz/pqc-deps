@@ -1,0 +1,40 @@
+---
+import { ALGORITHM_INFO, SUPPORT_LABEL, type Algorithm, type Library, applicableAlgorithms } from '@pqc-deps/core';
+interface Props {
+  library: Library;
+  algorithm: Algorithm;
+}
+const { library, algorithm } = Astro.props;
+const applicable = applicableAlgorithms(library).includes(algorithm);
+const s = library.algorithms[algorithm];
+const level = !applicable && !s ? 'na' : (s?.support ?? 'unknown');
+const symbol = { yes: '✓', partial: '◐', no: '✕', unknown: '?', na: '–' }[level];
+const label =
+  level === 'na'
+    ? 'Not applicable'
+    : SUPPORT_LABEL[level as keyof typeof SUPPORT_LABEL] +
+      (s?.since_version ? ` since ${s.since_version}` : '') +
+      (s?.experimental ? ' (experimental)' : '');
+---
+
+<span class={`mark m-${level}`} title={`${ALGORITHM_INFO[algorithm].label}: ${label}`}>
+  <span aria-hidden="true">{symbol}</span>
+  <span class="sr-only">{label}</span>
+</span>
+
+<style>
+  .mark {
+    display: inline-grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .m-yes { color: var(--st-ready); background: var(--st-ready-bg); }
+  .m-partial { color: var(--st-partial); background: var(--st-partial-bg); }
+  .m-no { color: var(--st-no-plan); background: var(--st-no-plan-bg); }
+  .m-unknown { color: var(--st-unknown); background: var(--st-unknown-bg); }
+  .m-na { color: var(--muted); }
+</style>

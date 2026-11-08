@@ -1,0 +1,120 @@
+---
+import Base from '../layouts/Base.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import { ALGORITHM_INFO, ALGORITHMS, STATUS_INFO, STATUSES, UPCOMING_ALGORITHMS } from '@pqc-deps/core';
+import { SITE } from '../config';
+---
+
+<Base
+  title="Methodology"
+  description="How PQC Deps defines post-quantum readiness statuses, collects and verifies evidence, and keeps entries up to date."
+>
+  <div class="prose">
+    <h1>Methodology</h1>
+    <p class="lede">
+      How we decide a library's status, where the evidence comes from, and how often it's checked.
+    </p>
+
+    <h2>Status definitions</h2>
+    <p>Each library gets exactly one overall status.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th scope="col">Status</th><th scope="col">Meaning</th></tr></thead>
+      <tbody>
+        {
+          STATUSES.map((s) => (
+            <tr>
+              <td><StatusBadge status={s} /></td>
+              <td>{STATUS_INFO[s].description}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="prose">
+    <p>
+      "Where it applies" matters. Each entry lists the algorithms that are relevant to it: a JWT
+      library has no TLS key exchange, and a TLS library may not expose signatures. A library is{' '}
+      <em>ready</em> when post-quantum protection is on by default for at least one applicable
+      algorithm, in a stable release, without experimental flags.
+    </p>
+
+    <h2>Algorithms tracked</h2>
+    <ul>
+      {
+        ALGORITHMS.map((a) => (
+          <li>
+            <strong>{ALGORITHM_INFO[a].label}</strong> ({ALGORITHM_INFO[a].standard}):{' '}
+            {ALGORITHM_INFO[a].kind.toLowerCase()}
+            {UPCOMING_ALGORITHMS.includes(a) && '. Tracked ahead of standardization.'}
+          </li>
+        ))
+      }
+    </ul>
+    <p>
+      For each algorithm we record whether it's supported (yes, partial, no or unknown), the first
+      stable version, whether it's on by default or opt-in, and whether it's experimental.
+    </p>
+
+    <h2>Evidence rules</h2>
+    <ul>
+      <li>
+        <strong>Every claim cites a source</strong>: release notes, changelogs, documentation,
+        commits, issues, pull requests or maintainer posts.
+      </li>
+      <li>
+        <strong>Every source carries a verbatim quote</strong>, so you can find the exact sentence on
+        the page.
+      </li>
+      <li>
+        <strong>No source means unknown.</strong> We don't fill gaps from memory or assumptions.
+      </li>
+      <li>
+        Each entry has a <em>last verified</em> date. Entries older than {SITE.staleAfterDays} days
+        are flagged as possibly out of date.
+      </li>
+    </ul>
+
+    <h2>How data is collected</h2>
+    <ol>
+      <li>
+        An automated pipeline fetches each library's recent releases, changelog, documentation and
+        GitHub issues and pull requests that mention ML-KEM, Kyber, ML-DSA, Dilithium, SLH-DSA,
+        X25519MLKEM768, post-quantum or PQC.
+      </li>
+      <li>
+        A language model drafts a status proposal from that material, citing a quote for every field.
+      </li>
+      <li>
+        The pipeline checks that each quote really appears in the fetched page. Any field whose quote
+        can't be found is dropped back to unknown.
+      </li>
+      <li>
+        The proposal is opened as a pull request. <strong>A human reviews every change</strong> before
+        it's published. The pipeline can't publish on its own.
+      </li>
+    </ol>
+
+    <h2>Update frequency</h2>
+    <p>
+      The pipeline re-runs weekly to catch new releases. Anyone can suggest a correction at any time
+      through a GitHub issue or pull request.
+    </p>
+
+    <h2>Delegation</h2>
+    <p>
+      Many packages don't implement cryptography themselves: they call the platform's crypto,
+      OpenSSL, or another library. We record this as a <em>delegates to</em> link and show the chain,
+      so you can see which library actually needs to support post-quantum algorithms.
+    </p>
+
+    <h2>Limits</h2>
+    <p>
+      This is not a security audit. Support in a library doesn't mean your application uses it: you
+      may still need to upgrade, configure or call new APIs. Always check the linked sources.
+    </p>
+  </div>
+</Base>

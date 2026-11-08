@@ -1,0 +1,36 @@
+---
+import { STATUS_INFO, type Status } from '@pqc-deps/core';
+interface Props {
+  status: Status;
+  size?: 'sm' | 'lg';
+}
+const { status, size = 'sm' } = Astro.props;
+const info = STATUS_INFO[status];
+const cls = status === 'n/a' ? 'na' : status;
+---
+
+<span class={`badge st-${cls} ${size}`} title={info.description}>{info.label}</span>
+
+<style>
+  .badge {
+    display: inline-block;
+    font-weight: 650;
+    font-size: 0.8rem;
+    line-height: 1;
+    padding: 0.35em 0.6em;
+    border-radius: 999px;
+    white-space: nowrap;
+    border: 1px solid currentColor;
+  }
+  .lg {
+    font-size: 1rem;
+    padding: 0.4em 0.8em;
+  }
+  .st-ready { color: var(--st-ready); background: var(--st-ready-bg); }
+  .st-available { color: var(--st-available); background: var(--st-available-bg); }
+  .st-partial { color: var(--st-partial); background: var(--st-partial-bg); }
+  .st-planned { color: var(--st-planned); background: var(--st-planned-bg); }
+  .st-no-plan { color: var(--st-no-plan); background: var(--st-no-plan-bg); }
+  .st-unknown { color: var(--st-unknown); background: var(--st-unknown-bg); }
+  .st-na { color: var(--st-na); background: var(--st-na-bg); }
+</style>
