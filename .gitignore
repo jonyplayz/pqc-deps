@@ -8,3 +8,8 @@ dist/
 .DS_Store
 .cache/
 graphify-out/
+
+# Pipeline output (review locally; PRs carry the reports)
+proposals/*
+!proposals/.gitkeep
+!proposals/README.md

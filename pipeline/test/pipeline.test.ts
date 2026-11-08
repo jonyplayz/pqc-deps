@@ -1,0 +1,415 @@
+import { describe, expect, it } from 'vitest';
+import { parse as parseYaml } from 'yaml';
+import { LibrarySchema, lintLibrary, parseLibraryYaml, type Library } from '@pqc-deps/core';
+import { excerptDoc, selectEvidence } from '../src/excerpt';
+import { htmlToText, htmlTitle } from '../src/fetch/html';
+import { guessKind } from '../src/fetch/url';
+import { githubRepo } from '../src/fetch/github';
+import type { FetchedDoc } from '../src/fetch/types';
+import type { LlmClient, LlmRequest } from '../src/llm/types';
+import { libraryToYaml, reportMarkdown } from '../src/output';
+import { extractJson, buildUserPrompt } from '../src/prompt';
+import { proposalJsonSchema, type Proposal } from '../src/proposal';
+import { proposeForLibrary } from '../src/run';
+import { checkQuote, normalizeForMatch } from '../src/verify';
+import { deriveStatus } from '../src/merge';
+
+const TODAY = '2026-11-08';
+const lib = (o: Partial<Library> = {}): Library =>
+  LibrarySchema.parse({
+    id: 'demo-tls',
+    name: 'DemoTLS',
+    ecosystem: 'c-cpp',
+    repo: 'https://github.com/demo/demo-tls',
+    overall_status: 'unknown',
+    last_verified: '2026-01-01',
+    ...o,
+  });
+
+// ---------------------------------------------------------------- helpers
+
+describe('html', () => {
+  it('extracts readable text and title', () => {
+    const html = `<html><head><title>Release &amp; notes</title><style>x{}</style></head>
+<body><nav>menu</nav><h1>DemoTLS 3.5</h1><p>Adds <b>ML-KEM</b>&nbsp;support.</p><ul><li>One</li><li>Two</li></ul>
+<script>alert(1)</script></body></html>`;
+    expect(htmlTitle(html)).toBe('Release & notes');
+    const text = htmlToText(html);
+    expect(text).toContain('DemoTLS 3.5');
+    expect(text).toContain('Adds ML-KEM support.');
+    expect(text).toContain('- One');
+    expect(text).not.toMatch(/alert|menu|x\{\}/);
+  });
+});
+
+describe('fetch helpers', () => {
+  it('derives owner/name from repo URLs', () => {
+    expect(githubRepo(lib())).toBe('demo/demo-tls');
+    expect(githubRepo(lib({ repo: 'https://gitlab.com/x/y' }))).toBeUndefined();
+    expect(
+      githubRepo(
+        lib({ repo: 'https://gitlab.com/x/y', pipeline: { watch_urls: [], github: 'a/b' } }),
+      ),
+    ).toBe('a/b');
+  });
+  it('guesses source kinds from URLs', () => {
+    expect(guessKind('https://example.org/news/3.5-release-notes.html')).toBe('release-notes');
+    expect(guessKind('https://lists.example.org/pipermail/dev/2026/01.html')).toBe('mailing-list');
+    expect(guessKind('https://example.org/blog/pqc')).toBe('blog');
+    expect(guessKind('https://example.org/docs/tls')).toBe('docs');
+  });
+});
+
+describe('excerpts', () => {
+  it('keeps PQC passages with context and the header lines', () => {
+    const text = [
+      'Release 3.5.0',
+      'date',
+      'intro',
+      ...Array(20).fill('unrelated'),
+      'Added ML-KEM-768 to the default groups.',
+      ...Array(20).fill('more'),
+    ].join('\n');
+    const { excerpt, hits } = excerptDoc(text, 1);
+    expect(hits).toBe(1);
+    expect(excerpt).toMatch(/^Release 3\.5\.0/);
+    expect(excerpt).toContain('Added ML-KEM-768');
+    expect(excerpt).toContain('[…]');
+    expect(excerpt.split('\n').filter((l) => l === 'unrelated')).toHaveLength(1);
+  });
+  it('drops docs without PQC mentions, prefers release notes, respects the budget', () => {
+    const docs: FetchedDoc[] = [
+      { url: 'https://x/i1', title: 'Issue', kind: 'issue', text: 'Please add Kyber' },
+      { url: 'https://x/r1', title: 'Rel', kind: 'release-notes', text: 'Adds ML-DSA' },
+      { url: 'https://x/n', title: 'Noise', kind: 'release-notes', text: 'Bug fixes only' },
+    ];
+    const { selected } = selectEvidence(docs);
+    expect(selected.map((d) => [d.id, d.title])).toEqual([
+      ['D1', 'Rel'],
+      ['D2', 'Issue'],
+    ]);
+    expect(selectEvidence(docs, { maxCharsTotal: 15 }).dropped).toBe(1);
+  });
+});
+
+describe('quote verification', () => {
+  const doc = {
+    id: 'D1',
+    url: 'u',
+    title: 't',
+    kind: 'docs' as const,
+    text: 'Version 3.5 adds **ML-KEM** support.\nIt’s   enabled by default — see docs.',
+  };
+  it('accepts exact, whitespace-, case-, quote- and markdown-insensitive matches', () => {
+    expect(checkQuote('version 3.5 adds ML-KEM support.', doc).ok).toBe(true);
+    expect(checkQuote("It's enabled by default - see docs", doc).ok).toBe(true);
+  });
+  it('accepts ellipsis-joined fragments only in order', () => {
+    expect(checkQuote('Version 3.5 adds … enabled by default', doc).ok).toBe(true);
+    expect(checkQuote('enabled by default ... Version 3.5 adds', doc).ok).toBe(false);
+  });
+  it('rejects fabricated, too-short or mis-cited quotes', () => {
+    expect(checkQuote('Version 3.5 adds ML-DSA support.', doc)).toEqual({
+      ok: false,
+      reason: 'quote not found in the document',
+    });
+    expect(checkQuote('ML-KEM', doc).ok).toBe(false);
+    expect(checkQuote('Version 3.5 adds ML-KEM support.', undefined).ok).toBe(false);
+  });
+  it('normalizes consistently', () => {
+    expect(normalizeForMatch('  A’B  “c”  ')).toBe('a\'b "c"');
+  });
+});
+
+describe('prompt + schema', () => {
+  it('extracts JSON from fenced or chatty answers', () => {
+    expect(extractJson('Sure!\n```json\n{"a":1}\n```')).toEqual({ a: 1 });
+    expect(extractJson('{"a":{"b":2}} trailing')).toEqual({ a: { b: 2 } });
+    expect(() => extractJson('no json')).toThrow();
+  });
+  it('produces a closed JSON Schema for structured outputs', () => {
+    const s = proposalJsonSchema() as any;
+    expect(s.$schema).toBeUndefined();
+    expect(s.additionalProperties).toBe(false);
+    expect(s.properties.algorithms.properties['ml-kem'].additionalProperties).toBe(false);
+  });
+  it('omits pipeline config and lists documents', () => {
+    const p = buildUserPrompt(lib({ pipeline: { watch_urls: ['https://secret.example'] } }), [
+      {
+        id: 'D1',
+        url: 'https://x',
+        title: 'T "q"',
+        kind: 'docs',
+        text: '',
+        excerpt: 'ML-KEM',
+        hits: 1,
+      },
+    ]);
+    expect(p).not.toContain('secret.example');
+    expect(p).toContain(`<document id="D1" kind="docs" title="T 'q'"`);
+  });
+});
+
+describe('deriveStatus', () => {
+  const src = [
+    {
+      url: 'https://x',
+      title: 't',
+      kind: 'docs' as const,
+      quote: 'quote text here',
+      retrieved: TODAY,
+    },
+  ];
+  it('is conservative', () => {
+    expect(
+      deriveStatus(
+        lib({
+          algorithms: { 'hybrid-tls': { support: 'yes', default_enabled: true, sources: src } },
+        }),
+      ),
+    ).toBe('ready');
+    expect(deriveStatus(lib({ algorithms: { 'ml-kem': { support: 'yes', sources: src } } }))).toBe(
+      'available',
+    );
+    expect(
+      deriveStatus(lib({ algorithms: { 'ml-kem': { support: 'partial', sources: src } } })),
+    ).toBe('partial');
+    expect(deriveStatus(lib())).toBe('unknown');
+  });
+});
+
+// ---------------------------------------------------------------- end to end with fakes
+
+const DOCS: FetchedDoc[] = [
+  {
+    url: 'https://github.com/demo/demo-tls/releases/tag/v3.5.0',
+    title: 'DemoTLS 3.5.0',
+    kind: 'release-notes',
+    date: '2026-04-01',
+    text: 'Release DemoTLS 3.5.0\n\n- Added ML-KEM-512, ML-KEM-768 and ML-KEM-1024 (FIPS 203).\n- X25519MLKEM768 is now the default key share for TLS 1.3.\n- Fixed a memory leak.',
+  },
+  {
+    url: 'https://github.com/demo/demo-tls/issues/42',
+    title: 'Issue #42: ML-DSA support',
+    kind: 'issue',
+    date: '2026-05-01',
+    text: 'Issue #42: ML-DSA support\nState: open\n\nMaintainer: we plan to ship ML-DSA in 3.7, targeted for 2027-03.',
+  },
+  {
+    url: 'https://example.com/unrelated',
+    title: 'Unrelated',
+    kind: 'docs',
+    text: 'Nothing about quantum here.',
+  },
+];
+
+const claim = (
+  o: Partial<Proposal['algorithms']['ml-kem']> = {},
+): Proposal['algorithms']['ml-kem'] => ({
+  support: 'unknown',
+  since_version: null,
+  default_enabled: null,
+  experimental: null,
+  notes: null,
+  evidence: [],
+  ...o,
+});
+
+function fakeProposal(): Proposal {
+  return {
+    algorithms: {
+      'ml-kem': claim({
+        support: 'yes',
+        since_version: '3.5.0',
+        evidence: [
+          { doc: 'D1', quote: 'Added ML-KEM-512, ML-KEM-768 and ML-KEM-1024 (FIPS 203).' },
+        ],
+      }),
+      'hybrid-tls': claim({
+        support: 'yes',
+        since_version: '3.5.0',
+        default_enabled: true,
+        experimental: false,
+        evidence: [
+          { doc: 'D1', quote: 'X25519MLKEM768 is now the default key share for TLS 1.3.' },
+        ],
+      }),
+      // Fabricated: this sentence is not in any document.
+      'slh-dsa': claim({
+        support: 'yes',
+        since_version: '3.6.0',
+        evidence: [{ doc: 'D1', quote: 'Added SLH-DSA signatures in 3.6.0.' }],
+      }),
+      // Real quote, but the version is invented.
+      'ml-dsa': claim({
+        support: 'partial',
+        since_version: '3.4.0',
+        evidence: [{ doc: 'D2', quote: 'we plan to ship ML-DSA in 3.7, targeted for 2027-03' }],
+      }),
+      'fn-dsa': claim(),
+      hqc: claim(),
+    },
+    roadmap: {
+      target_version: '3.7',
+      target_date: '2027-03',
+      confidence: 'tentative',
+      summary: 'ML-DSA planned for 3.7.',
+      evidence: [{ doc: 'D2', quote: 'we plan to ship ML-DSA in 3.7, targeted for 2027-03.' }],
+    },
+    fips: {
+      status: 'validated',
+      certificates: ['#9999'],
+      algorithms: ['ml-kem'],
+      notes: null,
+      evidence: [{ doc: 'D9', quote: 'FIPS 140-3 certificate #9999 covers ML-KEM' }],
+    },
+    overall_status: 'ready',
+    upgrade_notes: 'Upgrade to 3.5.0 or later; hybrid key exchange is on by default.',
+    reviewer_notes: 'ML-DSA is only planned.',
+  };
+}
+
+function fakeLlm(answer: string | (() => string)): LlmClient & { calls: LlmRequest[] } {
+  const calls: LlmRequest[] = [];
+  return {
+    label: 'fake/model',
+    calls,
+    async completeJson(req) {
+      calls.push(req);
+      return typeof answer === 'function' ? answer() : answer;
+    },
+  };
+}
+
+describe('proposeForLibrary (end to end with fake fetch + fake LLM)', () => {
+  const fetchEvidence = async () => ({ docs: DOCS, warnings: [] });
+
+  it('keeps verified claims, drops fabricated ones, and yields a valid file', async () => {
+    const llm = fakeLlm(JSON.stringify(fakeProposal()));
+    const r = await proposeForLibrary(lib(), { fetchEvidence, llm, today: TODAY });
+    expect(r.error).toBeUndefined();
+    const l = r.library!;
+
+    expect(l.algorithms['ml-kem']).toMatchObject({ support: 'yes', since_version: '3.5.0' });
+    expect(l.algorithms['ml-kem']!.sources[0]).toMatchObject({
+      url: DOCS[0]!.url,
+      kind: 'release-notes',
+      retrieved: TODAY,
+    });
+    expect(l.algorithms['hybrid-tls']).toMatchObject({ support: 'yes', default_enabled: true });
+    expect(l.algorithms['slh-dsa']).toBeUndefined(); // fabricated quote → unknown
+    expect(l.algorithms['ml-dsa']).toMatchObject({ support: 'partial' });
+    expect(l.algorithms['ml-dsa']!.since_version).toBeUndefined(); // invented version dropped
+    expect(l.roadmap).toMatchObject({ target_version: '3.7', target_date: '2027-03' });
+    expect(l.fips).toBeUndefined(); // cites a document that doesn't exist
+    expect(l.overall_status).toBe('ready');
+    expect(l.last_verified).toBe(TODAY);
+
+    const reasons = r.dropped.map((d) => `${d.field}: ${d.reason}`);
+    expect(reasons).toEqual(
+      expect.arrayContaining([
+        'algorithms.slh-dsa: quote not found in the document',
+        'algorithms.ml-dsa.since_version: version not stated in the quoted evidence or document title',
+        'fips: cites a document id that does not exist',
+      ]),
+    );
+
+    // The model only saw documents that mention PQC.
+    expect(llm.calls[0]!.user).toContain('DemoTLS 3.5.0');
+    expect(llm.calls[0]!.user).not.toContain('Nothing about quantum');
+
+    // Round-trip through YAML and the real validator.
+    const yaml = libraryToYaml(l);
+    expect(yaml.startsWith('# yaml-language-server')).toBe(true);
+    const parsed = parseLibraryYaml(yaml, 'demo-tls.yaml');
+    expect(parsed.ok).toBe(true);
+    expect(lintLibrary(l, TODAY).filter((i) => i.severity === 'error')).toEqual([]);
+    expect(Object.keys(parseYaml(yaml))[0]).toBe('id');
+
+    const md = reportMarkdown(r, lib());
+    expect(md).toContain('Dropped (failed verification');
+    expect(md).toContain('X25519MLKEM768 is now the default key share');
+  });
+
+  it('downgrades an overall status the verified data does not support', async () => {
+    const p = fakeProposal();
+    p.algorithms['hybrid-tls'] = claim({
+      support: 'yes',
+      evidence: [{ doc: 'D1', quote: 'this sentence was never written anywhere' }],
+    });
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence,
+      llm: fakeLlm(JSON.stringify(p)),
+      today: TODAY,
+    });
+    expect(r.library!.overall_status).toBe('available');
+    expect(r.warnings.join()).toMatch(/contradicts the verified data/);
+  });
+
+  it('never downgrades existing sourced claims to unknown', async () => {
+    const existing = lib({
+      overall_status: 'available',
+      algorithms: {
+        'ml-kem': {
+          support: 'yes',
+          since_version: '3.5.0',
+          sources: [
+            {
+              url: 'https://old',
+              title: 'old',
+              kind: 'docs',
+              quote: 'old verified quote',
+              retrieved: '2026-01-01',
+            },
+          ],
+        },
+      },
+    });
+    const p = fakeProposal();
+    p.algorithms['ml-kem'] = claim();
+    p.algorithms['hybrid-tls'] = claim();
+    p.overall_status = 'unknown';
+    const r = await proposeForLibrary(existing, {
+      fetchEvidence,
+      llm: fakeLlm(JSON.stringify(p)),
+      today: TODAY,
+    });
+    expect(r.library!.algorithms['ml-kem']!.sources[0]!.url).toBe('https://old');
+    expect(r.kept.join()).toMatch(/algorithms\.ml-kem/);
+    expect(r.library!.overall_status).toBe('available');
+  });
+
+  it('retries once on invalid JSON, then reports an error', async () => {
+    let n = 0;
+    const llm = fakeLlm(() => (n++ === 0 ? 'not json' : JSON.stringify(fakeProposal())));
+    const ok = await proposeForLibrary(lib(), { fetchEvidence, llm, today: TODAY });
+    expect(ok.error).toBeUndefined();
+    expect(llm.calls).toHaveLength(2);
+
+    const bad = await proposeForLibrary(lib(), {
+      fetchEvidence,
+      llm: fakeLlm('{"nope": true}'),
+      today: TODAY,
+    });
+    expect(bad.error).toMatch(/didn't match the proposal schema/);
+    expect(bad.library).toBeUndefined();
+  });
+
+  it('dry run fetches and filters without calling the model', async () => {
+    const r = await proposeForLibrary(lib(), { fetchEvidence, today: TODAY });
+    expect(r.docs).toHaveLength(2);
+    expect(r.library).toBeUndefined();
+    expect(reportMarkdown(r, lib())).toContain('Dry run');
+  });
+
+  it('skips the model when nothing mentions PQC', async () => {
+    const llm = fakeLlm('{}');
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence: async () => ({ docs: [DOCS[2]!], warnings: [] }),
+      llm,
+      today: TODAY,
+    });
+    expect(llm.calls).toHaveLength(0);
+    expect(r.warnings.join()).toMatch(/nothing to propose/);
+  });
+});
