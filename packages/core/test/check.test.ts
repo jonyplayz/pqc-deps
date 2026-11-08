@@ -216,10 +216,8 @@ describe('checkManifest', () => {
       ...catalog,
       L({ id: 'x-crypto', ecosystem: 'go', package_names: { go: ['golang.org/x/crypto'] } }),
     ]);
-    const r = checkManifest(parseManifest('module m
-
-require golang.org/x/crypto v0.29.0
-', { filename: 'go.mod' }), idx);
+    const gomod = 'module m\n\nrequire golang.org/x/crypto v0.29.0\n';
+    const r = checkManifest(parseManifest(gomod, { filename: 'go.mod' }), idx);
     expect(r.findings.map((f) => [f.library.id, f.matchedBy]).sort()).toEqual([
       ['x-crypto', 'package'],
       ['x-ssh', 'module'],
