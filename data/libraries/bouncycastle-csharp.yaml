@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: bouncycastle-csharp
+name: Bouncy Castle (C#)
+ecosystem: dotnet
+description: Cryptography library for .NET.
+homepage: https://www.bouncycastle.org
+repo: https://github.com/bcgit/bc-csharp
+package_names:
+  nuget:
+    - BouncyCastle.Cryptography
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

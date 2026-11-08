@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: paramiko
+name: Paramiko
+ecosystem: python
+description: SSHv2 protocol implementation for Python.
+homepage: https://www.paramiko.org
+repo: https://github.com/paramiko/paramiko
+package_names:
+  pypi:
+    - paramiko
+delegates_to:
+  - id: python-cryptography
+    condition: for primitives
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: rustls
+name: rustls
+ecosystem: rust
+description: TLS library written in Rust.
+repo: https://github.com/rustls/rustls
+package_names:
+  cargo:
+    - rustls
+delegates_to:
+  - id: aws-lc-rs
+    condition: with the aws-lc-rs crypto provider
+  - id: ring
+    condition: with the ring crypto provider
+applicable_algorithms:
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

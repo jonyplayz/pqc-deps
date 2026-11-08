@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: rustcrypto-slh-dsa
+name: RustCrypto slh-dsa
+ecosystem: rust
+description: Pure Rust SLH-DSA implementation from RustCrypto.
+repo: https://github.com/RustCrypto/signatures
+package_names:
+  cargo:
+    - slh-dsa
+applicable_algorithms:
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: aws-lc-rs
+name: aws-lc-rs
+ecosystem: rust
+description: Rust bindings to AWS-LC with a ring-compatible API.
+repo: https://github.com/aws/aws-lc-rs
+package_names:
+  cargo:
+    - aws-lc-rs
+delegates_to:
+  - id: aws-lc
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

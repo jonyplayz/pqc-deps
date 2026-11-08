@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: python-cryptography
+name: cryptography (pyca)
+ecosystem: python
+description: Cryptographic recipes and primitives for Python.
+homepage: https://cryptography.io
+repo: https://github.com/pyca/cryptography
+package_names:
+  pypi:
+    - cryptography
+delegates_to:
+  - id: openssl
+    condition: OpenSSL bundled in the official wheels
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

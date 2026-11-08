@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: rustcrypto-ml-kem
+name: RustCrypto ml-kem
+ecosystem: rust
+description: Pure Rust ML-KEM implementation from RustCrypto.
+repo: https://github.com/RustCrypto/KEMs
+package_names:
+  cargo:
+    - ml-kem
+applicable_algorithms:
+  - ml-kem
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

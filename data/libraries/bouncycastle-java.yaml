@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: bouncycastle-java
+name: Bouncy Castle (Java)
+ecosystem: jvm
+description: Cryptography APIs and JCA provider for Java.
+homepage: https://www.bouncycastle.org
+repo: https://github.com/bcgit/bc-java
+package_names:
+  maven:
+    - org.bouncycastle:bcprov-jdk18on
+    - org.bouncycastle:bcprov-jdk15to18
+    - org.bouncycastle:bcpkix-jdk18on
+    - org.bouncycastle:bctls-jdk18on
+    - org.bouncycastle:bcutil-jdk18on
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: libsodium
+name: libsodium
+ecosystem: c-cpp
+description: Portable, easy-to-use crypto library (NaCl fork).
+homepage: https://doc.libsodium.org
+repo: https://github.com/jedisct1/libsodium
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

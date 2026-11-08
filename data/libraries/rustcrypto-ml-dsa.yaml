@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: rustcrypto-ml-dsa
+name: RustCrypto ml-dsa
+ecosystem: rust
+description: Pure Rust ML-DSA implementation from RustCrypto.
+repo: https://github.com/RustCrypto/signatures
+package_names:
+  cargo:
+    - ml-dsa
+applicable_algorithms:
+  - ml-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: mbedtls
+name: Mbed TLS
+ecosystem: c-cpp
+description: TLS and cryptography library for embedded systems.
+homepage: https://www.trustedfirmware.org/projects/mbed-tls/
+repo: https://github.com/Mbed-TLS/mbedtls
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

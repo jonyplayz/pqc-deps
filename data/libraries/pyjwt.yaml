@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: pyjwt
+name: PyJWT
+ecosystem: python
+description: JSON Web Tokens for Python.
+homepage: https://pyjwt.readthedocs.io
+repo: https://github.com/jpadilla/pyjwt
+package_names:
+  pypi:
+    - PyJWT
+delegates_to:
+  - id: python-cryptography
+    condition: for asymmetric algorithms (the crypto extra)
+applicable_algorithms:
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

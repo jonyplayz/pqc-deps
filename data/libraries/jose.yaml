@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: jose
+name: jose (panva)
+ecosystem: javascript
+description: JWA, JWS, JWE, JWT and JWK for JavaScript runtimes.
+repo: https://github.com/panva/jose
+package_names:
+  npm:
+    - jose
+delegates_to:
+  - id: nodejs-crypto
+    condition: in Node.js
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

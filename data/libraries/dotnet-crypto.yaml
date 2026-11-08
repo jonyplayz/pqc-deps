@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: dotnet-crypto
+name: .NET cryptography
+ecosystem: dotnet
+description: System.Security.Cryptography and SslStream in .NET.
+homepage: https://learn.microsoft.com/dotnet/standard/security/cryptography-model
+repo: https://github.com/dotnet/runtime
+implicit_for:
+  - nuget
+delegates_to:
+  - id: openssl
+    condition: on Linux
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

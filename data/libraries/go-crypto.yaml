@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: go-crypto
+name: Go standard library crypto
+ecosystem: go
+description: Go's built-in crypto and crypto/tls packages.
+homepage: https://pkg.go.dev/crypto
+repo: https://github.com/golang/go
+implicit_for:
+  - go
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08
+pipeline:
+  watch_urls:
+    - https://pkg.go.dev/crypto/tls
+    - https://go.dev/doc/devel/release

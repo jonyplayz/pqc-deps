@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: aws-lc
+name: AWS-LC
+ecosystem: c-cpp
+description: AWS's general-purpose cryptographic library, derived from BoringSSL.
+repo: https://github.com/aws/aws-lc
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08
