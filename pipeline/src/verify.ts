@@ -39,14 +39,23 @@ export function checkQuote(quote: string, doc: EvidenceDoc | undefined): QuoteCh
     .filter(Boolean);
   const total = parts.reduce((n, p) => n + p.length, 0);
   if (total < MIN_QUOTE_CHARS) return { ok: false, reason: 'quote is too short to be meaningful' };
+  // Try with whitespace collapsed, then with whitespace removed entirely: models
+  // often re-join wrapped changelog lines without the space. Every other
+  // character must still match exactly.
+  const inOrder = (hay: string, frags: string[]) => {
+    let from = 0;
+    for (const p of frags) {
+      const at = hay.indexOf(p, from);
+      if (at === -1) return false;
+      from = at + p.length;
+    }
+    return true;
+  };
   const hay = normalizeForMatch(doc.text);
-  let from = 0;
-  for (const p of parts) {
-    const at = hay.indexOf(p, from);
-    if (at === -1) return { ok: false, reason: 'quote not found in the document' };
-    from = at + p.length;
-  }
-  return { ok: true };
+  if (inOrder(hay, parts)) return { ok: true };
+  const strip = (s: string) => s.replace(/\s+/g, '');
+  if (inOrder(strip(hay), parts.map(strip))) return { ok: true };
+  return { ok: false, reason: 'quote not found in the document' };
 }
 
 export interface Dropped {

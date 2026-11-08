@@ -104,6 +104,12 @@ describe('quote verification', () => {
     expect(checkQuote('version 3.5 adds ML-KEM support.', doc).ok).toBe(true);
     expect(checkQuote("It's enabled by default - see docs", doc).ok).toBe(true);
   });
+  it('tolerates line-wrap joins without a space, but nothing else', () => {
+    const wrapped = { ...doc, text: 'ported from C++ to C,
+   refactored, and integrated into the providers.' };
+    expect(checkQuote('ported from C++ to C,refactored, and integrated', wrapped).ok).toBe(true);
+    expect(checkQuote('ported from C++ to Rust, refactored, and integrated', wrapped).ok).toBe(false);
+  });
   it('accepts ellipsis-joined fragments only in order', () => {
     expect(checkQuote('Version 3.5 adds … enabled by default', doc).ok).toBe(true);
     expect(checkQuote('enabled by default ... Version 3.5 adds', doc).ok).toBe(false);
