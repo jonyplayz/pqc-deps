@@ -692,3 +692,36 @@ describe('withRetry', () => {
     expect(m).toBe(1);
   });
 });
+
+describe('third-run fixes', () => {
+  it('ignores markdown backticks the model leaves out', () => {
+    const doc = {
+      id: 'D1',
+      url: 'u',
+      title: 't',
+      kind: 'release-notes' as const,
+      text: 'Add `prefer-post-quantum` to default features of the `aws-lc-rs` provider.',
+    };
+    expect(
+      checkQuote('Add prefer-post-quantum to default features of the aws-lc-rs provider.', doc).ok,
+    ).toBe(true);
+  });
+
+  it('keeps model notes out of the published data', async () => {
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence: async () => ({ docs: DOCS, warnings: [] }),
+      llm: fakeLlm(
+        JSON.stringify({
+          ...fakeProposal(),
+          algorithms: {
+            ...fakeProposal().algorithms,
+            'ml-kem': { ...fakeProposal().algorithms['ml-kem'], notes: 'ML-KEM-1004 is supported' },
+          },
+        }),
+      ),
+      today: TODAY,
+    });
+    expect(r.library!.algorithms['ml-kem']!.notes).toBeUndefined();
+    expect(r.reviewerNotes).toContain('ml-kem (model note, unverified): ML-KEM-1004 is supported');
+  });
+});

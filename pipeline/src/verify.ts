@@ -19,7 +19,8 @@ export const MIN_QUOTE_CHARS = 12;
 export function normalizeForMatch(s: string): string {
   return s
     .normalize('NFKC')
-    .replace(/[‘’‛`´]/g, "'")
+    .replace(/`/g, '') // markdown code spans: models often drop the backticks
+    .replace(/[‘’‛´]/g, "'")
     .replace(/[“”„]/g, '"')
     .replace(/[‐-―]/g, '-')
     .replace(/[*_]+/g, '')
@@ -245,7 +246,7 @@ export function verifyProposal(
       ...(since ? { since_version: since } : {}),
       ...(defaultOn !== null ? { default_enabled: defaultOn } : {}),
       ...(c.experimental !== null ? { experimental: c.experimental } : {}),
-      ...(c.notes ? { notes: c.notes } : {}),
+      // The model's free-text notes are not verified, so they go to the reviewer, not the data.
       sources: toSources(ev, docs, today),
     };
   }
@@ -330,7 +331,14 @@ export function verifyProposal(
     ...(fips ? { fips } : {}),
     overall_status: overall,
     ...(proposal.upgrade_notes ? { upgrade_notes: proposal.upgrade_notes } : {}),
-    reviewer_notes: proposal.reviewer_notes,
+    reviewer_notes: [
+      proposal.reviewer_notes,
+      ...Object.entries(proposal.algorithms)
+        .filter(([a, c]) => c.notes && algorithms[a as Algorithm])
+        .map(([a, c]) => `- ${a} (model note, unverified): ${c.notes}`),
+    ]
+      .filter(Boolean)
+      .join('\n'),
     dropped,
     warnings,
   };

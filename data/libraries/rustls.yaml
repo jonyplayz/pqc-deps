@@ -13,6 +13,8 @@ delegates_to:
   - id: ring
     condition: with the ring crypto provider
 applicable_algorithms:
+  - ml-kem
+  - ml-dsa
   - hybrid-tls
 overall_status: unknown
 algorithms: {}
