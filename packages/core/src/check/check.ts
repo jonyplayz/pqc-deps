@@ -131,12 +131,14 @@ function matchDependency(
   if (!pkgs) return [];
   const key = normalizeName(dep.registry, dep.name);
   const exact = pkgs.get(key);
-  if (exact) return [{ lib: exact, matchedBy: 'package' }];
-  if (dep.registry !== 'go') return [];
-  // go.mod lists modules; the catalog may track a package inside one (golang.org/x/crypto/ssh).
-  const out: Array<{ lib: Library; matchedBy: 'module'; note: string }> = [];
+  if (dep.registry !== 'go') return exact ? [{ lib: exact, matchedBy: 'package' }] : [];
+  // go.mod lists modules; the catalog may also track packages inside one
+  // (golang.org/x/crypto/ssh inside golang.org/x/crypto). Report both.
+  const out: Array<{ lib: Library; matchedBy: 'package' | 'module'; note?: string }> = exact
+    ? [{ lib: exact, matchedBy: 'package' }]
+    : [];
   for (const [name, lib] of pkgs) {
-    if (name.startsWith(`${key}/`)) {
+    if (name.startsWith(`${key}/`) && lib !== exact) {
       out.push({
         lib,
         matchedBy: 'module',
