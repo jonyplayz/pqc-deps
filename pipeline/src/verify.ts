@@ -126,7 +126,17 @@ function versionMentioned(
 
 /** "On by default" needs a quote about defaults (OpenSSL's "default provider" is a module name, not a setting). */
 const DEFAULT_ON_PATTERN =
-  /\bby default\b|\bon by default\b|\bdefault (key share|group|groups|list|settings?|configuration|algorithms?)\b|\bdefaults? (now )?include|\bdefault\b(?!\s+(and\s+\w+\s+)?providers?\b)/i;
+  /\bby default\b|\bon by default\b|\bdefault (key share|group|groups|list|settings?|configuration|algorithms?)\b|\bdefaults? (now )?include|\bdefault\b(?!\s+(and\s+\w+\s+)?(providers?|implementations?|builds?|modules?|backends?)\b)/i;
+
+/** Each algorithm claim needs a quote that names that algorithm (or its pre-standard name). */
+const ALGORITHM_NAME_PATTERN: Record<string, RegExp> = {
+  'ml-kem': /ML-?KEM|Kyber|FIPS[ -]?203/i,
+  'ml-dsa': /ML-?DSA|Dilithium|FIPS[ -]?204/i,
+  'slh-dsa': /SLH-?DSA|SPHINCS|FIPS[ -]?205/i,
+  'hybrid-tls': /ML-?KEM|Kyber|hybrid|post[- ]?quantum|\bPQC?\b/i,
+  'fn-dsa': /FN-?DSA|Falcon|FIPS[ -]?206/i,
+  hqc: /\bHQC\b/i,
+};
 
 /** FIPS claims need a quote about validation, not just "FIPS provider". */
 const FIPS_PATTERN = /140-[23]|\bcmvp\b|\bcavp\b|certificat|validat/i;
@@ -170,6 +180,15 @@ export function verifyProposal(
     const c: AlgorithmClaim | undefined = proposal.algorithms[a];
     if (!c || c.support === 'unknown') continue;
     let ev = keepVerified(`algorithms.${a}`, c.evidence);
+    // At least one quote must name the algorithm (others may add context, e.g. defaults).
+    if (ev.length && !ev.some((e) => ALGORITHM_NAME_PATTERN[a]!.test(e.quote))) {
+      dropped.push({
+        field: `algorithms.${a}`,
+        claim: ev.map((e) => `"${e.quote.slice(0, 120)}"`).join('; '),
+        reason: `no quote names ${a}`,
+      });
+      ev = [];
+    }
     if (a === 'hybrid-tls') {
       ev = ev.filter((e) => {
         const ok = TLS_CONTEXT_PATTERN.test(e.quote);

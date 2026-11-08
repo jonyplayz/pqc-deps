@@ -507,13 +507,17 @@ describe('changelog headings, default-on and FIPS guards', () => {
     p.algorithms['ml-kem'] = claim({
       support: 'yes',
       default_enabled: true,
-      evidence: [{ doc: 'D1', quote: 'Integrated into the default and FIPS providers.' }],
+      evidence: [
+        { doc: 'D1', quote: 'ML-KEM as specified in FIPS 203.' },
+        { doc: 'D1', quote: 'Integrated into the default and FIPS providers.' },
+      ],
     });
     const r = await proposeForLibrary(lib(), {
       fetchEvidence: async () => ({ docs: [changelog], warnings: [] }),
       llm: fakeLlm(JSON.stringify(p)),
       today: TODAY,
     });
+    expect(r.library!.algorithms['ml-kem']).toMatchObject({ support: 'yes' });
     expect(r.library!.algorithms['ml-kem']!.default_enabled).toBeUndefined();
   });
 });
@@ -606,5 +610,85 @@ describe('reviewer rules from the first full run', () => {
     expect((await run(p)).library!.fips).toBeUndefined();
     p.fips.evidence = [{ doc: 'D1', quote: 'Our FIPS 140-3 certificate #1234 covers ML-KEM.' }];
     expect((await run(p)).library!.fips).toMatchObject({ status: 'validated' });
+  });
+});
+
+describe('second-run rules', () => {
+  const docs: FetchedDoc[] = [
+    {
+      url: 'https://example.com/releases/1.86',
+      title: 'Demo 1.86',
+      kind: 'release-notes',
+      text: 'Release 1.86\n\nThis is mostly a hardening release closing side-channel leaks across classical and post-quantum algorithms.\nML-DSA is now the default implementation behind SIG_ml_dsa_65.',
+    },
+  ];
+  const run = (p: Proposal) =>
+    proposeForLibrary(lib(), {
+      fetchEvidence: async () => ({ docs, warnings: [] }),
+      llm: fakeLlm(JSON.stringify(p)),
+      today: TODAY,
+    });
+  const base = (): Proposal => ({
+    ...fakeProposal(),
+    algorithms: {
+      'ml-kem': claim(),
+      'ml-dsa': claim(),
+      'slh-dsa': claim(),
+      'hybrid-tls': claim(),
+      'fn-dsa': claim(),
+      hqc: claim(),
+    },
+    roadmap: null,
+    fips: null,
+    overall_status: 'unknown',
+  });
+
+  it('a claim needs a quote that names the algorithm', async () => {
+    const p = base();
+    p.algorithms['ml-kem'] = claim({
+      support: 'yes',
+      since_version: '1.86',
+      evidence: [
+        {
+          doc: 'D1',
+          quote:
+            'This is mostly a hardening release closing side-channel leaks across classical and post-quantum algorithms.',
+        },
+      ],
+    });
+    const r = await run(p);
+    expect(r.library!.algorithms['ml-kem']).toBeUndefined();
+    expect(r.dropped.map((d) => d.reason)).toContain('no quote names ml-kem');
+  });
+
+  it('"default implementation" is not "on by default"', async () => {
+    const p = base();
+    p.algorithms['ml-dsa'] = claim({
+      support: 'yes',
+      default_enabled: true,
+      evidence: [
+        { doc: 'D1', quote: 'ML-DSA is now the default implementation behind SIG_ml_dsa_65.' },
+      ],
+    });
+    const r = await run(p);
+    expect(r.library!.algorithms['ml-dsa']).toMatchObject({ support: 'yes' });
+    expect(r.library!.algorithms['ml-dsa']!.default_enabled).toBeUndefined();
+  });
+});
+
+describe('withRetry', () => {
+  it('retries transient errors only', async () => {
+    const { withRetry, HttpError } = await import('../src/fetch/http');
+    let n = 0;
+    const flaky = () =>
+      n++ < 2 ? Promise.reject(new HttpError('busy', 503)) : Promise.resolve('ok');
+    await expect(withRetry(flaky, [1, 1])).resolves.toBe('ok');
+    let m = 0;
+    const notFound = () => {
+      m++;
+      return Promise.reject(new HttpError('nope', 404));
+    };
+    await expect(withRetry(notFound, [1, 1])).rejects.toThrow('nope');
+    expect(m).toBe(1);
   });
 });
