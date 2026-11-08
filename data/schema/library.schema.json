@@ -58,6 +58,20 @@
         }
       }
     },
+    "separate_versioning": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "npm",
+          "pypi",
+          "go",
+          "maven",
+          "cargo",
+          "nuget"
+        ]
+      }
+    },
     "implicit_for": {
       "type": "array",
       "items": {
