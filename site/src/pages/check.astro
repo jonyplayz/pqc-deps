@@ -1,18 +1,228 @@
 ---
 import Base from '../layouts/Base.astro';
+import Checker from '../components/checker/Checker.tsx';
+import { SITE } from '../config';
 ---
 
 <Base
   title="Check my project"
-  description="Paste a dependency manifest and see which dependencies are quantum-vulnerable. Parsed entirely in your browser."
+  description="Paste a package.json, requirements.txt, go.mod, pom.xml, build.gradle or Cargo.toml and see which dependencies are quantum-vulnerable and what to upgrade. Parsed entirely in your browser."
 >
   <div class="prose">
     <h1>Check my project</h1>
     <p class="lede">
-      Paste a <code>package.json</code>, <code>requirements.txt</code>, <code>go.mod</code>,
-      <code>pom.xml</code>, <code>Cargo.toml</code> or similar, and see which dependencies do
-      cryptography, their post-quantum status, and what to upgrade.
+      Paste or upload a dependency file to see which dependencies do cryptography, their
+      post-quantum status, and what to upgrade.
     </p>
-    <p class="notice">The checker is under construction and will be available soon.</p>
+    <p class="privacy">
+      <strong>Your file stays on your device.</strong> It's parsed by JavaScript in this page and
+      never uploaded. The only request this page makes is to download the public catalog.
+    </p>
+    <p class="muted small">
+      Supported: <code>package.json</code>, <code>package-lock.json</code>,
+      <code>requirements.txt</code>, <code>pyproject.toml</code>, <code>go.mod</code>,
+      <code>pom.xml</code>, <code>build.gradle(.kts)</code>, <code>libs.versions.toml</code>,
+      <code>Cargo.toml</code>, <code>Cargo.lock</code>. Lockfiles give the most accurate results
+      because they list exact and transitive versions.
+    </p>
   </div>
+
+  <Checker client:load repoUrl={SITE.repoUrl} />
+
+  <noscript>
+    <p class="notice">The checker needs JavaScript, because it runs entirely in your browser.</p>
+  </noscript>
 </Base>
+
+<style>
+  .privacy {
+    border-left: 4px solid var(--st-ready);
+    background: var(--st-ready-bg);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+  }
+</style>
+
+<style is:global>
+  .chk {
+    margin-top: 1.5rem;
+  }
+  .chk-input {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    background: var(--surface);
+  }
+  .chk-drag {
+    border-color: var(--accent);
+  }
+  .chk-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+  .chk textarea {
+    width: 100%;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    resize: vertical;
+  }
+  .chk-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    margin-top: 0.75rem;
+  }
+  .chk-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .chk .btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .chk-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: var(--accent);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .chk-muted {
+    color: var(--muted);
+  }
+  .chk-small {
+    font-size: 0.875rem;
+  }
+  .chk-error {
+    color: var(--st-no-plan);
+    background: var(--st-no-plan-bg);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+  }
+  #chk-results {
+    margin-top: 1.5rem;
+    outline: none;
+  }
+  .chk-report {
+    margin-top: 1.5rem;
+  }
+  .chk-report h2 {
+    margin-top: 1rem;
+  }
+  .chk-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+  }
+  .chk-summary li {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  .chk-summary li.chk-bad {
+    border-color: var(--st-no-plan);
+    color: var(--st-no-plan);
+  }
+  .chk-warnings {
+    font-size: 0.85rem;
+    color: var(--st-partial);
+    background: var(--st-partial-bg);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem 0.5rem 1.75rem;
+  }
+  .chk-findings {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .chk-finding {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+  }
+  .chk-finding p {
+    margin: 0.35rem 0 0;
+  }
+  .chk-finding-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .chk-lib {
+    font-weight: 700;
+  }
+  .chk-dep {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin-top: 0.4rem;
+    font-size: 0.875rem;
+  }
+  .chk-ver {
+    color: var(--muted);
+  }
+  .chk-verdict {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.2em 0.55em;
+    border-radius: 6px;
+  }
+  .chk-good { color: var(--st-ready); background: var(--st-ready-bg); }
+  .chk-bad { color: var(--st-no-plan); background: var(--st-no-plan-bg); }
+  .chk-warn { color: var(--st-partial); background: var(--st-partial-bg); }
+  .chk-info { color: var(--st-na); background: var(--st-na-bg); }
+  .chk-muted.chk-verdict, .chk-verdict.chk-muted { background: var(--st-unknown-bg); }
+  .chk-st {
+    font-size: 0.75rem;
+    font-weight: 650;
+    padding: 0.15em 0.5em;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+  }
+  .chk-st-ready { color: var(--st-ready); }
+  .chk-st-available { color: var(--st-available); }
+  .chk-st-partial { color: var(--st-partial); }
+  .chk-st-planned { color: var(--st-planned); }
+  .chk-st-no-plan { color: var(--st-no-plan); }
+  .chk-st-unknown { color: var(--st-unknown); }
+  .chk-st-na { color: var(--st-na); }
+  .chk-chain {
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding-left: 1rem;
+    border-left: 2px solid var(--border);
+  }
+  .chk-chain li {
+    margin: 0.25rem 0;
+  }
+  .chk-chain li::before {
+    content: '↳ ';
+    color: var(--muted);
+  }
+  .chk-plain {
+    padding-left: 1.25rem;
+  }
+  .chk-cols {
+    columns: 14rem;
+  }
+  .chk-details {
+    margin-top: 1.25rem;
+  }
+  .chk-details summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+</style>

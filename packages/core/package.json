@@ -8,7 +8,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./node": "./src/node.ts",
-    "./check": "./src/check/index.ts"
+    "./check": "./src/check/index.ts",
+    "./status": "./src/status.ts",
+    "./constants": "./src/constants.ts"
   },
   "dependencies": {
     "fast-xml-parser": "^5.12.0",
