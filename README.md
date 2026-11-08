@@ -1,6 +1,6 @@
-# PQC Ready
+# PQC Deps
 
-Is your dependency tree ready for post-quantum cryptography? PQC Ready tracks
+Is your dependency tree ready for post-quantum cryptography? PQC Deps tracks
 whether popular open-source crypto libraries support the NIST PQC standards
 (ML-KEM / FIPS 203, ML-DSA / FIPS 204, SLH-DSA / FIPS 205) and hybrid TLS key
 exchange, since which version, and what's planned. Every claim links to a source.

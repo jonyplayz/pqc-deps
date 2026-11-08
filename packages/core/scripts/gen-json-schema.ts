@@ -12,8 +12,8 @@ import { REPO_ROOT } from '../src/node';
 const out = join(REPO_ROOT, 'data/schema/library.schema.json');
 const schema = {
   ...z.toJSONSchema(LibrarySchema, { io: 'input' }),
-  $id: 'https://pqc-ready.pages.dev/schema/library.schema.json',
-  title: 'PQC Ready library entry',
+  $id: 'https://pqc-deps.pages.dev/schema/library.schema.json',
+  title: 'PQC Deps library entry',
 };
 const json = JSON.stringify(schema, null, 2) + '\n';
 
