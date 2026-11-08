@@ -1,0 +1,337 @@
+---
+import Base from '../../layouts/Base.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import DelegationTree from '../../components/DelegationTree.astro';
+import { getLibraries, getLibraryMap, daysSince, isStale } from '../../lib/catalog';
+import { SITE, correctionUrl, editUrl } from '../../config';
+import {
+  ALGORITHMS,
+  ALGORITHM_INFO,
+  ECOSYSTEM_LABEL,
+  STATUS_INFO,
+  SUPPORT_LABEL,
+  UPCOMING_ALGORITHMS,
+  applicableAlgorithms,
+  delegatedFrom,
+  delegationTree,
+  type Library,
+  type Source,
+} from '@pqc-deps/core';
+
+export function getStaticPaths() {
+  return getLibraries().map((library) => ({ params: { id: library.id }, props: { library } }));
+}
+
+const { library: lib } = Astro.props as { library: Library };
+const all = getLibraries();
+const tree = delegationTree(lib, getLibraryMap());
+const usedBy = delegatedFrom(lib.id, all);
+const applicable = applicableAlgorithms(lib);
+const stale = isStale(lib);
+
+// Number every distinct source once; claims refer to these numbers.
+const evidence: Source[] = [];
+const refOf = (s: Source) => {
+  let i = evidence.findIndex((e) => e.url === s.url && e.quote === s.quote);
+  if (i === -1) i = evidence.push(s) - 1;
+  return i + 1;
+};
+const rows = ALGORITHMS.filter((a) => applicable.includes(a) || lib.algorithms[a]).map((a) => {
+  const s = lib.algorithms[a];
+  return { a, s, refs: (s?.sources ?? []).map(refOf) };
+});
+const roadmapRefs = (lib.roadmap?.sources ?? []).map(refOf);
+const fipsRefs = (lib.fips?.sources ?? []).map(refOf);
+const yesNo = (v: boolean | undefined) => (v === undefined ? '?' : v ? 'Yes' : 'No');
+const packages = Object.entries(lib.package_names).flatMap(([reg, names]) =>
+  (names ?? []).map((n) => ({ reg, n })),
+);
+const status = STATUS_INFO[lib.overall_status];
+const desc = `${lib.name} post-quantum status: ${status.label}. ML-KEM, ML-DSA, SLH-DSA and hybrid TLS support, versions, roadmap and sources.`;
+---
+
+<Base
+  title={`${lib.name} PQC status`}
+  description={desc}
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareSourceCode',
+    name: lib.name,
+    description: lib.description,
+    codeRepository: lib.repo,
+    url: lib.homepage,
+    dateModified: lib.last_verified,
+  }}
+>
+  <nav class="crumbs small" aria-label="Breadcrumb"><a href="/catalog">Catalog</a> / {lib.name}</nav>
+
+  <header class="head">
+    <div>
+      <h1>{lib.name}</h1>
+      {lib.description && <p class="lede">{lib.description}</p>}
+    </div>
+    <div class="status-box card">
+      <StatusBadge status={lib.overall_status} size="lg" />
+      <p class="small muted">{status.description}</p>
+    </div>
+  </header>
+
+  <dl class="meta small">
+    <div><dt>Ecosystem</dt><dd>{ECOSYSTEM_LABEL[lib.ecosystem]}</dd></div>
+    {lib.homepage && <div><dt>Homepage</dt><dd><a href={lib.homepage}>{new URL(lib.homepage).host}</a></dd></div>}
+    {lib.repo && <div><dt>Repository</dt><dd><a href={lib.repo}>{new URL(lib.repo).host + new URL(lib.repo).pathname}</a></dd></div>}
+    {
+      packages.length > 0 && (
+        <div>
+          <dt>Packages</dt>
+          <dd>{packages.map((p, i) => (<>{i > 0 && ', '}<code>{p.n}</code> <span class="muted">({p.reg})</span></>))}</dd>
+        </div>
+      )
+    }
+    <div>
+      <dt>Last verified</dt>
+      <dd>
+        <span class="mono">{lib.last_verified}</span>
+        {stale && <span class="stale"> · may be out of date ({daysSince(lib.last_verified)} days)</span>}
+      </dd>
+    </div>
+  </dl>
+
+  {
+    lib.upgrade_notes && (
+      <section class="upgrade card" aria-labelledby="up-h">
+        <h2 id="up-h">What to do</h2>
+        <p>{lib.upgrade_notes}</p>
+      </section>
+    )
+  }
+
+  {
+    tree.length > 0 && (
+      <section aria-labelledby="del-h">
+        <h2 id="del-h">Cryptography provided by</h2>
+        <p class="muted small">
+          {lib.name} relies on these libraries for its asymmetric cryptography. Its PQC support depends on theirs.
+        </p>
+        <DelegationTree nodes={tree} />
+      </section>
+    )
+  }
+
+  <section aria-labelledby="alg-h">
+    <h2 id="alg-h">Algorithm support</h2>
+    {
+      rows.length === 0 ? (
+        <p class="muted">No algorithm data yet.</p>
+      ) : (
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Algorithm</th>
+                <th scope="col">Support</th>
+                <th scope="col">Since</th>
+                <th scope="col">On by default</th>
+                <th scope="col">Experimental</th>
+                <th scope="col">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(({ a, s, refs }) => (
+                <tr>
+                  <th scope="row">
+                    {ALGORITHM_INFO[a].label}
+                    <div class="muted small">
+                      {ALGORITHM_INFO[a].standard}
+                      {UPCOMING_ALGORITHMS.includes(a) && ' · upcoming'}
+                    </div>
+                  </th>
+                  <td>
+                    <span class={`sup sup-${s?.support ?? 'unknown'}`}>{SUPPORT_LABEL[s?.support ?? 'unknown']}</span>
+                    {refs.map((r) => <sup><a href={`#src-${r}`} aria-label={`Source ${r}`}>[{r}]</a></sup>)}
+                  </td>
+                  <td class="mono">{s?.since_version ?? '–'}</td>
+                  <td>{s && s.support !== 'unknown' && s.support !== 'no' ? yesNo(s.default_enabled) : '–'}</td>
+                  <td>{s && s.support !== 'unknown' && s.support !== 'no' ? yesNo(s.experimental) : '–'}</td>
+                  <td class="small">{s?.notes ?? ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+  </section>
+
+  <section aria-labelledby="road-h">
+    <h2 id="road-h">Roadmap</h2>
+    {
+      lib.roadmap ? (
+        <div class="card">
+          <p>
+            {lib.roadmap.summary ?? 'A public plan exists.'}
+            {roadmapRefs.map((r) => <sup><a href={`#src-${r}`}>[{r}]</a></sup>)}
+          </p>
+          <ul class="small">
+            {lib.roadmap.target_version && <li>Target version: <span class="mono">{lib.roadmap.target_version}</span></li>}
+            {lib.roadmap.target_date && <li>Target date: <span class="mono">{lib.roadmap.target_date}</span></li>}
+            <li>Confidence: {lib.roadmap.confidence}</li>
+          </ul>
+        </div>
+      ) : (
+        <p class="muted">No public roadmap recorded.</p>
+      )
+    }
+  </section>
+
+  <section aria-labelledby="fips-h">
+    <h2 id="fips-h">FIPS validation (PQC)</h2>
+    {
+      lib.fips && lib.fips.status !== 'unknown' ? (
+        <p>
+          Status: <strong>{lib.fips.status.replace('-', ' ')}</strong>
+          {lib.fips.algorithms?.length ? ` for ${lib.fips.algorithms.map((a) => ALGORITHM_INFO[a].label).join(', ')}` : ''}
+          {lib.fips.certificates?.length ? `. Certificate ${lib.fips.certificates.join(', ')}` : ''}.
+          {fipsRefs.map((r) => <sup><a href={`#src-${r}`}>[{r}]</a></sup>)}
+          {lib.fips.notes && <span class="muted"> {lib.fips.notes}</span>}
+        </p>
+      ) : (
+        <p class="muted">Unknown.</p>
+      )
+    }
+  </section>
+
+  {lib.notes && (<section><h2>Notes</h2><p class="prose">{lib.notes}</p></section>)}
+
+  {
+    usedBy.length > 0 && (
+      <section aria-labelledby="used-h">
+        <h2 id="used-h">Libraries that rely on {lib.name}</h2>
+        <ul>
+          {usedBy.map((u) => (<li><a href={`/libraries/${u.id}`}>{u.name}</a> <StatusBadge status={u.overall_status} /></li>))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section aria-labelledby="ev-h">
+    <h2 id="ev-h">Evidence</h2>
+    {
+      evidence.length === 0 ? (
+        <p class="muted">No sources yet. Every field above stays unknown until there is evidence.</p>
+      ) : (
+        <ol class="evidence">
+          {evidence.map((s, i) => (
+            <li id={`src-${i + 1}`}>
+              <a href={s.url} rel="noopener">{s.title}</a>
+              <span class="muted small"> · {s.kind.replace('-', ' ')} · retrieved {s.retrieved}</span>
+              <blockquote>{s.quote}</blockquote>
+            </li>
+          ))}
+        </ol>
+      )
+    }
+  </section>
+
+  <section class="fix card">
+    <p>
+      Spotted something wrong or out of date? <a href={correctionUrl(lib.id)}>Suggest a correction</a> or
+      <a href={editUrl(lib.id)}> edit the data file</a> on GitHub.
+    </p>
+  </section>
+  <p class="muted small">
+    Machine-readable: <a href={`/api/libraries/${lib.id}.json`}>/api/libraries/{lib.id}.json</a> · Data from
+    {SITE.name}, CC BY 4.0.
+  </p>
+</Base>
+
+<style>
+  .crumbs {
+    margin-bottom: 0.75rem;
+    color: var(--muted);
+  }
+  .head {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .head > div:first-child {
+    flex: 1 1 24rem;
+  }
+  .status-box {
+    flex: 0 1 18rem;
+  }
+  .status-box p {
+    margin: 0.6rem 0 0;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+    margin: 1.25rem 0 0;
+  }
+  .meta dt {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .meta dd {
+    margin: 0;
+  }
+  .stale {
+    color: var(--st-partial);
+  }
+  .upgrade {
+    margin-top: 1.75rem;
+    border-left: 4px solid var(--accent);
+  }
+  .upgrade h2 {
+    margin: 0.25rem 0 0.25rem;
+    font-size: 1.05rem;
+  }
+  .upgrade p {
+    margin: 0;
+  }
+  th[scope='row'] {
+    font-size: 0.95rem;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text);
+  }
+  .sup {
+    font-weight: 650;
+  }
+  .sup-yes { color: var(--st-ready); }
+  .sup-partial { color: var(--st-partial); }
+  .sup-no { color: var(--st-no-plan); }
+  .sup-unknown { color: var(--st-unknown); }
+  sup a {
+    text-decoration: none;
+    margin-left: 0.15rem;
+  }
+  .evidence li {
+    margin-bottom: 1rem;
+    scroll-margin-top: 1rem;
+  }
+  .evidence li:target {
+    background: var(--st-available-bg);
+    border-radius: 6px;
+  }
+  blockquote {
+    margin: 0.35rem 0 0;
+    padding: 0.4rem 0.75rem;
+    border-left: 3px solid var(--border);
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .fix {
+    margin-top: 2.5rem;
+  }
+  .fix p {
+    margin: 0;
+  }
+</style>
