@@ -1,0 +1,173 @@
+---
+import '../styles/global.css';
+import { SITE } from '../config';
+import { usingExampleData } from '../lib/catalog';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Extra JSON-LD object for this page. */
+  jsonLd?: Record<string, unknown>;
+  noindex?: boolean;
+}
+const { title, description = SITE.description, jsonLd, noindex = false } = Astro.props;
+const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}: ${SITE.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const examples = usingExampleData();
+const nav = [
+  { href: '/catalog', label: 'Catalog' },
+  { href: '/check', label: 'Check my project' },
+  { href: '/methodology', label: 'Methodology' },
+  { href: '/about', label: 'About' },
+];
+const path = Astro.url.pathname.replace(/\/$/, '');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {(noindex || examples) && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="color-scheme" content="light dark" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <a class="sr-only skip" href="#main">Skip to content</a>
+    {
+      examples && (
+        <div class="example-banner" role="note">
+          Sample build: showing <strong>fictional example data</strong>, not real library facts.
+        </div>
+      )
+    }
+    <header class="site-header">
+      <div class="container bar">
+        <a class="brand" href="/">
+          <span class="logo" aria-hidden="true">◆</span>
+          {SITE.name}
+        </a>
+        <nav aria-label="Main">
+          <ul>
+            {
+              nav.map((n) => (
+                <li>
+                  <a href={n.href} aria-current={path === n.href ? 'page' : undefined}>
+                    {n.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main" class="container">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <p>
+          {SITE.name} is a community project. Every claim links to a public source; corrections are
+          welcome on <a href={SITE.repoUrl}>GitHub</a>.
+        </p>
+        <p class="muted small">
+          Code: MIT. Data: <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+          Not affiliated with any library listed. Not security advice.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .skip:focus {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    width: auto;
+    height: auto;
+    clip: auto;
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    z-index: 10;
+  }
+  .example-banner {
+    background: var(--st-partial-bg);
+    color: var(--st-partial);
+    text-align: center;
+    font-size: 0.875rem;
+    padding: 0.4rem 16px;
+  }
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    min-height: 60px;
+    padding-block: 0.5rem;
+  }
+  .brand {
+    font-weight: 750;
+    font-size: 1.1rem;
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .logo {
+    color: var(--accent);
+  }
+  nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-weight: 550;
+    font-size: 0.95rem;
+  }
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--text);
+  }
+  nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+  main {
+    padding-block: 2rem 4rem;
+    min-height: 60vh;
+  }
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding-block: 1.5rem;
+    font-size: 0.9rem;
+  }
+  .site-footer p {
+    margin: 0.25rem 0;
+  }
+</style>
