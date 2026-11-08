@@ -9,6 +9,7 @@ import {
   type Library,
   type Source,
 } from '@pqc-deps/core';
+import { headingAbove } from './excerpt';
 import type { EvidenceDoc } from './fetch/types';
 import type { AlgorithmClaim, Evidence, Proposal } from './proposal';
 
@@ -84,7 +85,18 @@ function toSources(evidence: Evidence[], docs: Map<string, EvidenceDoc>, today: 
   });
 }
 
-/** True if a version string is stated in the quotes or titles of the evidence. */
+/** The changelog/release section heading above the line where a quote starts. */
+export function sectionHeadingFor(text: string, quote: string): string | undefined {
+  const probe = normalizeForMatch(quote.split(/\s*(?:\.\.\.|…|\[…\])\s*/)[0] ?? '').slice(0, 40);
+  if (!probe) return undefined;
+  const lines = text.split(/\r?\n/);
+  const at = lines.findIndex((l) => normalizeForMatch(l).includes(probe));
+  if (at === -1) return undefined;
+  const h = headingAbove(lines, at);
+  return h === undefined ? undefined : lines[h];
+}
+
+/** True if a version is stated in the quotes, document titles or the section headings above the quotes. */
 function versionMentioned(
   version: string,
   evidence: Evidence[],
@@ -94,11 +106,21 @@ function versionMentioned(
   const pattern = new RegExp(`(^|[^0-9.])v?${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^0-9])`);
   return evidence.some((e) => {
     const d = docs.get(e.doc);
+    const heading = d && sectionHeadingFor(d.text, e.quote);
     return (
-      pattern.test(normalizeForMatch(e.quote)) || (d && pattern.test(normalizeForMatch(d.title)))
+      pattern.test(normalizeForMatch(e.quote)) ||
+      (d && pattern.test(normalizeForMatch(d.title))) ||
+      (heading !== undefined && pattern.test(normalizeForMatch(heading)))
     );
   });
 }
+
+/** "On by default" needs a quote about defaults (OpenSSL's "default provider" is a module name, not a setting). */
+const DEFAULT_ON_PATTERN =
+  /\bby default\b|\bon by default\b|\bdefault (key share|group|groups|list|settings?|configuration|algorithms?)\b|\bdefaults? (now )?include|\bdefault\b(?!\s+(and\s+\w+\s+)?providers?\b)/i;
+
+/** FIPS claims need a quote about validation, not just "FIPS provider". */
+const FIPS_PATTERN = /140-[23]|\bcmvp\b|\bcavp\b|certificat|validat/i;
 
 export function verifyProposal(
   proposal: Proposal,
@@ -140,10 +162,19 @@ export function verifyProposal(
       });
       since = undefined;
     }
+    let defaultOn = c.default_enabled;
+    if (defaultOn === true && !ev.some((e) => DEFAULT_ON_PATTERN.test(e.quote))) {
+      dropped.push({
+        field: `algorithms.${a}.default_enabled`,
+        claim: 'true',
+        reason: 'no quote says it is enabled by default',
+      });
+      defaultOn = null;
+    }
     algorithms[a] = {
       support: c.support,
       ...(since ? { since_version: since } : {}),
-      ...(c.default_enabled !== null ? { default_enabled: c.default_enabled } : {}),
+      ...(defaultOn !== null ? { default_enabled: defaultOn } : {}),
       ...(c.experimental !== null ? { experimental: c.experimental } : {}),
       ...(c.notes ? { notes: c.notes } : {}),
       sources: toSources(ev, docs, today),
@@ -179,7 +210,16 @@ export function verifyProposal(
 
   let fips: Library['fips'];
   if (proposal.fips && proposal.fips.status !== 'unknown') {
-    const ev = keepVerified('fips', proposal.fips.evidence);
+    const ev = keepVerified('fips', proposal.fips.evidence).filter((e) => {
+      const ok = FIPS_PATTERN.test(e.quote);
+      if (!ok)
+        dropped.push({
+          field: 'fips',
+          claim: `"${e.quote.slice(0, 160)}"`,
+          reason: 'quote does not mention FIPS 140 validation, CMVP or a certificate',
+        });
+      return ok;
+    });
     if (ev.length) {
       const f = proposal.fips;
       fips = {

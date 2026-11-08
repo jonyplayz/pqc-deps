@@ -413,3 +413,94 @@ describe('proposeForLibrary (end to end with fake fetch + fake LLM)', () => {
     expect(r.warnings.join()).toMatch(/nothing to propose/);
   });
 });
+
+// ---------------------------------------------------------------- guards added after the first real run
+
+describe('changelog headings, default-on and FIPS guards', () => {
+  const changelog: FetchedDoc = {
+    url: 'https://github.com/demo/demo-tls/blob/HEAD/CHANGES.md',
+    title: 'demo/demo-tls CHANGES.md',
+    kind: 'changelog',
+    text: [
+      '# Changelog',
+      '',
+      '### Changes between 3.4 and 3.5.0 [8 Apr 2026]',
+      '',
+      ...Array(12).fill('* Unrelated fix.'),
+      '* ML-KEM as specified in FIPS 203.',
+      '  Integrated into the default and FIPS providers.',
+      '* The default TLS group list now starts with X25519MLKEM768.',
+      '',
+      '### Changes between 3.3 and 3.4 [1 Oct 2025]',
+      '* Unrelated.',
+    ].join('\n'),
+  };
+
+  it('keeps the section heading in excerpts', () => {
+    const { excerpt } = excerptDoc(changelog.text, 1);
+    expect(excerpt).toContain('### Changes between 3.4 and 3.5.0');
+  });
+
+  it('accepts a since_version stated in the heading above the quote; rejects others', async () => {
+    const p = fakeProposal();
+    p.algorithms['ml-kem'] = claim({
+      support: 'yes',
+      since_version: '3.5.0',
+      default_enabled: true,
+      evidence: [{ doc: 'D1', quote: 'ML-KEM as specified in FIPS 203.' }],
+    });
+    p.algorithms['hybrid-tls'] = claim({
+      support: 'yes',
+      since_version: '3.4',
+      default_enabled: true,
+      evidence: [
+        { doc: 'D1', quote: 'The default TLS group list now starts with X25519MLKEM768.' },
+      ],
+    });
+    p.algorithms['ml-dsa'] = claim();
+    p.algorithms['slh-dsa'] = claim();
+    p.roadmap = null;
+    p.fips = {
+      status: 'in-process',
+      certificates: [],
+      algorithms: ['ml-kem'],
+      notes: null,
+      evidence: [{ doc: 'D1', quote: 'Integrated into the default and FIPS providers.' }],
+    };
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence: async () => ({ docs: [changelog], warnings: [] }),
+      llm: fakeLlm(JSON.stringify(p)),
+      today: TODAY,
+    });
+    const l = r.library!;
+
+    expect(l.algorithms['ml-kem']!.since_version).toBe('3.5.0'); // from the heading
+    // "3.4" appears in the same heading ("between 3.4 and 3.5.0"), so the check
+    // can't tell them apart: that one is left to the human reviewer.
+    expect(l.algorithms['hybrid-tls']!.since_version).toBe('3.4');
+    expect(l.algorithms['ml-kem']!.default_enabled).toBeUndefined(); // "ML-KEM as specified…" says nothing about defaults
+    expect(l.algorithms['hybrid-tls']!.default_enabled).toBe(true); // "default TLS group list"
+    expect(l.fips).toBeUndefined(); // "FIPS providers" is not validation
+    expect(r.dropped.map((d) => d.reason)).toEqual(
+      expect.arrayContaining([
+        'no quote says it is enabled by default',
+        'quote does not mention FIPS 140 validation, CMVP or a certificate',
+      ]),
+    );
+  });
+
+  it('treats "default provider" wording as not default-on', async () => {
+    const p = fakeProposal();
+    p.algorithms['ml-kem'] = claim({
+      support: 'yes',
+      default_enabled: true,
+      evidence: [{ doc: 'D1', quote: 'Integrated into the default and FIPS providers.' }],
+    });
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence: async () => ({ docs: [changelog], warnings: [] }),
+      llm: fakeLlm(JSON.stringify(p)),
+      today: TODAY,
+    });
+    expect(r.library!.algorithms['ml-kem']!.default_enabled).toBeUndefined();
+  });
+});
