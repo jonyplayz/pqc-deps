@@ -17,6 +17,8 @@ export const ISSUE_QUERIES = [
 ];
 
 const CHANGELOG_CANDIDATES = [
+  'ChangeLog',
+  'ChangeLog.md',
   'CHANGELOG.md',
   'CHANGES.md',
   'NEWS.md',

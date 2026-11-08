@@ -18,3 +18,6 @@ applicable_algorithms:
 overall_status: unknown
 algorithms: {}
 last_verified: 2026-11-08
+pipeline:
+  watch_urls:
+    - https://www.paramiko.org/changelog.html

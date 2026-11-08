@@ -15,3 +15,7 @@ applicable_algorithms:
 overall_status: unknown
 algorithms: {}
 last_verified: 2026-11-08
+pipeline:
+  watch_urls:
+    - https://openjdk.org/jeps/496
+    - https://openjdk.org/jeps/497
