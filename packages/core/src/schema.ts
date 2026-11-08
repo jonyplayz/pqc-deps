@@ -8,63 +8,22 @@
  */
 import { z } from 'zod';
 
-export const STATUSES = [
-  'ready',
-  'available',
-  'partial',
-  'planned',
-  'no-plan',
-  'unknown',
-  'n/a',
-] as const;
-export type Status = (typeof STATUSES)[number];
-
-export const ECOSYSTEMS = [
-  'c-cpp',
-  'go',
-  'rust',
-  'jvm',
-  'python',
-  'javascript',
-  'dotnet',
-  'platform',
-] as const;
-export type Ecosystem = (typeof ECOSYSTEMS)[number];
-
-/** Package registries the manifest checker can match against. */
-export const REGISTRIES = ['npm', 'pypi', 'go', 'maven', 'cargo', 'nuget'] as const;
-export type Registry = (typeof REGISTRIES)[number];
-
-export const ALGORITHMS = ['ml-kem', 'ml-dsa', 'slh-dsa', 'hybrid-tls', 'fn-dsa', 'hqc'] as const;
-export type Algorithm = (typeof ALGORITHMS)[number];
-
-/** Algorithms whose standards are not final yet. Shown as "upcoming" in the UI. */
-export const UPCOMING_ALGORITHMS: readonly Algorithm[] = ['fn-dsa', 'hqc'];
-
-/** Default `applicable_algorithms` when a file does not set it. */
-export const DEFAULT_APPLICABLE: readonly Algorithm[] = [
-  'ml-kem',
-  'ml-dsa',
-  'slh-dsa',
-  'hybrid-tls',
-];
-
-export const SUPPORT_LEVELS = ['yes', 'partial', 'no', 'unknown'] as const;
-export type SupportLevel = (typeof SUPPORT_LEVELS)[number];
-
-export const SOURCE_KINDS = [
-  'release-notes',
-  'changelog',
-  'docs',
-  'commit',
-  'issue',
-  'pull-request',
-  'maintainer-post',
-  'mailing-list',
-  'blog',
-  'certificate',
-  'other',
-] as const;
+import {
+  STATUSES,
+  ECOSYSTEMS,
+  REGISTRIES,
+  ALGORITHMS,
+  UPCOMING_ALGORITHMS,
+  DEFAULT_APPLICABLE,
+  SUPPORT_LEVELS,
+  SOURCE_KINDS,
+  type Status,
+  type Ecosystem,
+  type Registry,
+  type Algorithm,
+  type SupportLevel,
+} from './constants';
+export * from './constants';
 
 /** YYYY-MM-DD */
 const isoDate = z.iso.date();
@@ -154,6 +113,12 @@ export const LibrarySchema = z.strictObject({
   /** Package identifiers per registry: npm name, PyPI name, Go module path, Maven group:artifact... */
   package_names: PackageNamesSchema.default({}),
   /**
+   * Registries whose package versions do NOT follow the library's own version
+   * numbers (e.g. the cargo `openssl-sys` crate vs OpenSSL releases). The
+   * checker won't compare versions against since_version for these.
+   */
+  separate_versioning: z.array(z.enum(REGISTRIES)).optional(),
+  /**
    * Runtimes / standard libraries that the checker should flag automatically
    * for a manifest of this ecosystem (e.g. Node.js crypto for any package.json).
    */
@@ -185,7 +150,3 @@ export const LibrarySchema = z.strictObject({
 });
 export type Library = z.infer<typeof LibrarySchema>;
 export type LibraryInput = z.input<typeof LibrarySchema>;
-
-export function applicableAlgorithms(lib: Library): readonly Algorithm[] {
-  return lib.applicable_algorithms ?? DEFAULT_APPLICABLE;
-}
