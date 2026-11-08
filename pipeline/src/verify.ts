@@ -9,7 +9,7 @@ import {
   type Library,
   type Source,
 } from '@pqc-deps/core';
-import { headingAbove } from './excerpt';
+import { headingAbove, PQC_PATTERN } from './excerpt';
 import type { EvidenceDoc } from './fetch/types';
 import type { AlgorithmClaim, Evidence, Proposal } from './proposal';
 
@@ -131,6 +131,22 @@ const DEFAULT_ON_PATTERN =
 /** FIPS claims need a quote about validation, not just "FIPS provider". */
 const FIPS_PATTERN = /140-[23]|\bcmvp\b|\bcavp\b|certificat|validat/i;
 
+/** Hybrid TLS claims need a quote about TLS key exchange, not just a hybrid KEM. */
+const TLS_CONTEXT_PATTERN =
+  /\btls\b|\bdtls\b|key ?shares?|supported[_ ]groups?|named groups?|\bgroups? list|handshake|X25519MLKEM768|SecP256r1MLKEM768|SecP384r1MLKEM1024|X25519Kyber768|MLKEM768_X25519/i;
+
+/** Source kinds that can show what a release actually ships. */
+const STRONG_KINDS = new Set([
+  'release-notes',
+  'changelog',
+  'docs',
+  'maintainer-post',
+  'mailing-list',
+  'blog',
+  'certificate',
+]);
+const isMergedPr = (d: EvidenceDoc) => d.kind === 'pull-request' && /^State: merged/m.test(d.text);
+
 export function verifyProposal(
   proposal: Proposal,
   docList: EvidenceDoc[],
@@ -153,12 +169,37 @@ export function verifyProposal(
   for (const a of ALGORITHMS) {
     const c: AlgorithmClaim | undefined = proposal.algorithms[a];
     if (!c || c.support === 'unknown') continue;
-    const ev = keepVerified(`algorithms.${a}`, c.evidence);
+    let ev = keepVerified(`algorithms.${a}`, c.evidence);
+    if (a === 'hybrid-tls') {
+      ev = ev.filter((e) => {
+        const ok = TLS_CONTEXT_PATTERN.test(e.quote);
+        if (!ok)
+          dropped.push({
+            field: 'algorithms.hybrid-tls',
+            claim: `"${e.quote.slice(0, 160)}"`,
+            reason: 'quote is not about TLS key exchange (a hybrid KEM alone is not hybrid TLS)',
+          });
+        return ok;
+      });
+    }
     if (!ev.length) {
       dropped.push({
         field: `algorithms.${a}`,
         claim: `support: ${c.support}`,
         reason: 'no verifiable evidence, left unknown',
+      });
+      continue;
+    }
+    const strong = ev.some((e) => STRONG_KINDS.has(docs.get(e.doc)!.kind));
+    const merged = ev.some((e) => isMergedPr(docs.get(e.doc)!));
+    if (!strong && !(c.support === 'partial' && merged)) {
+      dropped.push({
+        field: `algorithms.${a}`,
+        claim: `support: ${c.support}`,
+        reason:
+          c.support === 'partial'
+            ? 'only issue or unmerged-PR evidence; nothing shows it shipped'
+            : 'only issue/PR evidence; needs release notes, changelog or docs',
       });
       continue;
     }
@@ -220,14 +261,17 @@ export function verifyProposal(
   let fips: Library['fips'];
   if (proposal.fips && proposal.fips.status !== 'unknown') {
     const ev = keepVerified('fips', proposal.fips.evidence).filter((e) => {
-      const ok = FIPS_PATTERN.test(e.quote);
-      if (!ok)
+      const aboutValidation = FIPS_PATTERN.test(e.quote);
+      const aboutPqc = PQC_PATTERN.test(e.quote);
+      if (!aboutValidation || !aboutPqc)
         dropped.push({
           field: 'fips',
           claim: `"${e.quote.slice(0, 160)}"`,
-          reason: 'quote does not mention FIPS 140 validation, CMVP or a certificate',
+          reason: !aboutValidation
+            ? 'quote does not mention FIPS 140 validation, CMVP or a certificate'
+            : 'quote does not say the validation covers PQC algorithms',
         });
-      return ok;
+      return aboutValidation && aboutPqc;
     });
     if (ev.length) {
       const f = proposal.fips;

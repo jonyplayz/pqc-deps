@@ -308,18 +308,21 @@ describe('proposeForLibrary (end to end with fake fetch + fake LLM)', () => {
     });
     expect(l.algorithms['hybrid-tls']).toMatchObject({ support: 'yes', default_enabled: true });
     expect(l.algorithms['slh-dsa']).toBeUndefined(); // fabricated quote → unknown
-    expect(l.algorithms['ml-dsa']).toMatchObject({ support: 'partial' });
-    expect(l.algorithms['ml-dsa']!.since_version).toBeUndefined(); // invented version dropped
+    expect(l.algorithms['ml-dsa']).toBeUndefined(); // only an open issue → unknown
     expect(l.roadmap).toMatchObject({ target_version: '3.7', target_date: '2027-03' });
     expect(l.fips).toBeUndefined(); // cites a document that doesn't exist
     expect(l.overall_status).toBe('ready');
     expect(l.last_verified).toBe(TODAY);
+    // Generated from verified claims only, not the model's wording.
+    expect(l.upgrade_notes).toBe(
+      'ML-KEM and hybrid TLS key exchange: DemoTLS 3.5.0 or later. On by default: hybrid TLS key exchange.',
+    );
 
     const reasons = r.dropped.map((d) => `${d.field}: ${d.reason}`);
     expect(reasons).toEqual(
       expect.arrayContaining([
         'algorithms.slh-dsa: quote not found in the document',
-        'algorithms.ml-dsa.since_version: version not stated in the quoted evidence or document title',
+        'algorithms.ml-dsa: only issue or unmerged-PR evidence; nothing shows it shipped',
         'fips: cites a document id that does not exist',
       ]),
     );
@@ -512,5 +515,96 @@ describe('changelog headings, default-on and FIPS guards', () => {
       today: TODAY,
     });
     expect(r.library!.algorithms['ml-kem']!.default_enabled).toBeUndefined();
+  });
+});
+
+describe('reviewer rules from the first full run', () => {
+  const docs: FetchedDoc[] = [
+    {
+      url: 'https://example.com/releases/1.0',
+      title: 'Demo 1.0',
+      kind: 'release-notes',
+      text: 'Release 1.0\n\nX-Wing, a hybrid KEM combining ML-KEM768 with X25519, is available.\nThe FIPS module has been validated (certificate #1234).\nOur FIPS 140-3 certificate #1234 covers ML-KEM.',
+    },
+    {
+      url: 'https://github.com/demo/demo-tls/pull/9',
+      title: 'PR #9: Add ML-DSA',
+      kind: 'pull-request',
+      text: 'Pull request #9: Add ML-DSA\nState: merged 2026-10-01\n\nAdds ML-DSA signing to the library.',
+    },
+    {
+      url: 'https://github.com/demo/demo-tls/issues/3',
+      title: 'Issue #3: SLH-DSA works for me',
+      kind: 'issue',
+      text: 'Issue #3\nState: open\n\nSLH-DSA signing works fine in my tests.',
+    },
+  ];
+  const run = (p: Proposal) =>
+    proposeForLibrary(lib(), {
+      fetchEvidence: async () => ({ docs, warnings: [] }),
+      llm: fakeLlm(JSON.stringify(p)),
+      today: TODAY,
+    });
+  const base = (): Proposal => ({
+    ...fakeProposal(),
+    algorithms: {
+      'ml-kem': claim(),
+      'ml-dsa': claim(),
+      'slh-dsa': claim(),
+      'hybrid-tls': claim(),
+      'fn-dsa': claim(),
+      hqc: claim(),
+    },
+    roadmap: null,
+    fips: null,
+    overall_status: 'unknown',
+  });
+
+  it('a hybrid KEM is not hybrid TLS', async () => {
+    const p = base();
+    p.algorithms['hybrid-tls'] = claim({
+      support: 'yes',
+      evidence: [
+        { doc: 'D1', quote: 'X-Wing, a hybrid KEM combining ML-KEM768 with X25519, is available.' },
+      ],
+    });
+    const r = await run(p);
+    expect(r.library!.algorithms['hybrid-tls']).toBeUndefined();
+  });
+
+  it('merged PRs can support "partial" but not "yes"; issues support neither', async () => {
+    const p = base();
+    p.algorithms['ml-dsa'] = claim({
+      support: 'partial',
+      evidence: [{ doc: 'D2', quote: 'Adds ML-DSA signing to the library.' }],
+    });
+    p.algorithms['slh-dsa'] = claim({
+      support: 'yes',
+      evidence: [{ doc: 'D3', quote: 'SLH-DSA signing works fine in my tests.' }],
+    });
+    const r = await run(p);
+    expect(r.library!.algorithms['ml-dsa']).toMatchObject({ support: 'partial' });
+    expect(r.library!.algorithms['slh-dsa']).toBeUndefined();
+
+    const p2 = base();
+    p2.algorithms['ml-dsa'] = claim({
+      support: 'yes',
+      evidence: [{ doc: 'D2', quote: 'Adds ML-DSA signing to the library.' }],
+    });
+    expect((await run(p2)).library!.algorithms['ml-dsa']).toBeUndefined();
+  });
+
+  it('FIPS validation must be stated for the PQC algorithms', async () => {
+    const p = base();
+    p.fips = {
+      status: 'validated',
+      certificates: [],
+      algorithms: ['ml-kem'],
+      notes: null,
+      evidence: [{ doc: 'D1', quote: 'The FIPS module has been validated (certificate #1234).' }],
+    };
+    expect((await run(p)).library!.fips).toBeUndefined();
+    p.fips.evidence = [{ doc: 'D1', quote: 'Our FIPS 140-3 certificate #1234 covers ML-KEM.' }];
+    expect((await run(p)).library!.fips).toMatchObject({ status: 'validated' });
   });
 });
