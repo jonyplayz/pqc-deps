@@ -1,0 +1,29 @@
+{
+  "name": "pqc-ready",
+  "private": true,
+  "type": "module",
+  "description": "PQC Ready: post-quantum readiness catalog for open-source libraries",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "validate": "tsx packages/core/scripts/validate.ts",
+    "schema:json": "tsx packages/core/scripts/gen-json-schema.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}
