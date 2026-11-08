@@ -1,0 +1,233 @@
+---
+import Base from '../layouts/Base.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import SupportMark from '../components/SupportMark.astro';
+import { getLibraries, isStale } from '../lib/catalog';
+import {
+  ALGORITHM_INFO,
+  ECOSYSTEM_LABEL,
+  ECOSYSTEMS,
+  STATUS_INFO,
+  STATUS_RANK,
+  STATUSES,
+  type Algorithm,
+} from '@pqc-deps/core';
+
+const libs = getLibraries();
+const columns: Algorithm[] = ['ml-kem', 'ml-dsa', 'slh-dsa', 'hybrid-tls'];
+const searchText = (l: (typeof libs)[number]) =>
+  [l.id, l.name, l.description ?? '', ...Object.values(l.package_names).flat()].join(' ').toLowerCase();
+const supported = (l: (typeof libs)[number]) =>
+  columns.filter((a) => ['yes', 'partial'].includes(l.algorithms[a]?.support ?? '')).join(' ');
+---
+
+<Base
+  title="Catalog"
+  description="Searchable list of open-source crypto libraries and their post-quantum (ML-KEM, ML-DSA, SLH-DSA, hybrid TLS) support status."
+>
+  <h1>Library catalog</h1>
+  <p class="lede">
+    {libs.length} libraries. Filter by ecosystem, status or algorithm; click a library for versions,
+    roadmap and sources.
+  </p>
+
+  <form class="filters" id="filters" role="search" onsubmit="return false">
+    <label>
+      <span>Search</span>
+      <input type="search" name="q" placeholder="Name or package" autocomplete="off" />
+    </label>
+    <label>
+      <span>Ecosystem</span>
+      <select name="ecosystem">
+        <option value="">All</option>
+        {ECOSYSTEMS.map((e) => <option value={e}>{ECOSYSTEM_LABEL[e]}</option>)}
+      </select>
+    </label>
+    <label>
+      <span>Status</span>
+      <select name="status">
+        <option value="">All</option>
+        {STATUSES.map((s) => <option value={s}>{STATUS_INFO[s].label}</option>)}
+      </select>
+    </label>
+    <label>
+      <span>Supports</span>
+      <select name="alg">
+        <option value="">Any algorithm</option>
+        {columns.map((a) => <option value={a}>{ALGORITHM_INFO[a].label}</option>)}
+      </select>
+    </label>
+    <label>
+      <span>Sort</span>
+      <select name="sort">
+        <option value="status">Best status first</option>
+        <option value="name">Name</option>
+        <option value="verified">Recently verified</option>
+      </select>
+    </label>
+  </form>
+
+  <p class="muted small" id="count" aria-live="polite"></p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Library</th>
+          <th scope="col">Ecosystem</th>
+          <th scope="col">Status</th>
+          {
+            columns.map((a) => (
+              <th scope="col" class="c" title={ALGORITHM_INFO[a].standard}>
+                {ALGORITHM_INFO[a].label}
+              </th>
+            ))
+          }
+          <th scope="col">Verified</th>
+        </tr>
+      </thead>
+      <tbody id="rows">
+        {
+          libs.map((l) => (
+            <tr
+              data-search={searchText(l)}
+              data-ecosystem={l.ecosystem}
+              data-status={l.overall_status}
+              data-alg={supported(l)}
+              data-name={l.name.toLowerCase()}
+              data-rank={STATUS_RANK[l.overall_status]}
+              data-verified={l.last_verified}
+            >
+              <td>
+                <a class="lib" href={`/libraries/${l.id}`}>
+                  {l.name}
+                </a>
+                {l.description && <div class="muted small desc">{l.description}</div>}
+              </td>
+              <td class="small">{ECOSYSTEM_LABEL[l.ecosystem]}</td>
+              <td>
+                <StatusBadge status={l.overall_status} />
+              </td>
+              {columns.map((a) => (
+                <td class="c">
+                  <SupportMark library={l} algorithm={a} />
+                </td>
+              ))}
+              <td class="small mono">
+                {l.last_verified}
+                {isStale(l) && <span class="stale" title="Not re-verified recently">stale</span>}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p id="empty" class="empty" hidden>No libraries match these filters.</p>
+  </div>
+  <p class="muted small legend">
+    ✓ supported · ◐ partial or experimental · ✕ not supported · ? unknown · – not applicable
+  </p>
+</Base>
+
+<script>
+  const form = document.getElementById('filters') as HTMLFormElement;
+  const tbody = document.getElementById('rows')!;
+  const rows = Array.from(tbody.querySelectorAll<HTMLTableRowElement>('tr'));
+  const count = document.getElementById('count')!;
+  const empty = document.getElementById('empty')!;
+  const fields = ['q', 'ecosystem', 'status', 'alg', 'sort'] as const;
+
+  // Restore filters from the URL (?q=…&status=…) so links and the home search work.
+  const params = new URLSearchParams(location.search);
+  for (const f of fields) {
+    const el = form.elements.namedItem(f) as HTMLInputElement | HTMLSelectElement | null;
+    const v = params.get(f);
+    if (el && v) el.value = v;
+  }
+
+  function apply() {
+    const v = Object.fromEntries(
+      fields.map((f) => [f, ((form.elements.namedItem(f) as HTMLInputElement).value || '').trim()]),
+    ) as Record<(typeof fields)[number], string>;
+    const q = v.q.toLowerCase();
+    let shown = 0;
+    for (const r of rows) {
+      const d = r.dataset;
+      const ok =
+        (!q || d.search!.includes(q)) &&
+        (!v.ecosystem || d.ecosystem === v.ecosystem) &&
+        (!v.status || d.status === v.status) &&
+        (!v.alg || d.alg!.split(' ').includes(v.alg));
+      r.hidden = !ok;
+      if (ok) shown++;
+    }
+    const sorted = [...rows].sort((a, b) => {
+      const A = a.dataset, B = b.dataset;
+      if (v.sort === 'name') return A.name!.localeCompare(B.name!);
+      if (v.sort === 'verified') return B.verified!.localeCompare(A.verified!);
+      return Number(A.rank) - Number(B.rank) || A.name!.localeCompare(B.name!);
+    });
+    tbody.append(...sorted);
+    count.textContent = `Showing ${shown} of ${rows.length}`;
+    empty.hidden = shown > 0;
+
+    const next = new URLSearchParams();
+    for (const f of fields) if (v[f] && !(f === 'sort' && v[f] === 'status')) next.set(f, v[f]);
+    const qs = next.toString();
+    history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+  }
+  form.addEventListener('input', apply);
+  apply();
+</script>
+
+<style>
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin: 1.5rem 0 0.5rem;
+  }
+  .filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .filters label:first-child {
+    grid-column: span 2;
+  }
+  @media (max-width: 520px) {
+    .filters label:first-child {
+      grid-column: auto;
+    }
+  }
+  .c {
+    text-align: center;
+  }
+  .lib {
+    font-weight: 650;
+  }
+  .desc {
+    max-width: 28rem;
+  }
+  .stale {
+    display: inline-block;
+    margin-left: 0.4rem;
+    font-family: var(--font);
+    font-size: 0.7rem;
+    color: var(--st-partial);
+    background: var(--st-partial-bg);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+  }
+  .empty {
+    padding: 1rem;
+    text-align: center;
+    color: var(--muted);
+  }
+  .legend {
+    margin-top: 0.75rem;
+  }
+</style>

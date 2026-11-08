@@ -1,0 +1,153 @@
+---
+import Base from '../layouts/Base.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import { getLibraries, statusCounts } from '../lib/catalog';
+import { SITE } from '../config';
+import { STATUS_INFO, STATUSES } from '@pqc-deps/core';
+
+const libs = getLibraries();
+const counts = statusCounts(libs);
+const total = libs.length;
+const supporting = counts.ready + counts.available + counts.partial;
+---
+
+<Base
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE.name,
+    url: Astro.site?.toString(),
+    description: SITE.description,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${Astro.site}catalog?q={query}`,
+      'query-input': 'required name=query',
+    },
+  }}
+>
+  <section class="hero">
+    <h1>Are your dependencies ready for post-quantum crypto?</h1>
+    <p class="lede">
+      NIST published the first post-quantum standards in August 2024: ML-KEM (FIPS 203), ML-DSA
+      (FIPS 204) and SLH-DSA (FIPS 205). {SITE.name} tracks which open-source libraries support them,
+      since which version, and what's planned. Every claim links to its source.
+    </p>
+    <form class="search" action="/catalog" method="get" role="search">
+      <label for="q" class="sr-only">Search libraries</label>
+      <input id="q" name="q" type="search" placeholder="Search libraries, e.g. openssl, jose, rustls" />
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    <p>
+      <a class="btn" href="/check">Check my project →</a>
+      <span class="muted small">Paste a package.json, go.mod, requirements.txt… Parsed in your browser.</span>
+    </p>
+  </section>
+
+  <section aria-labelledby="stats-h">
+    <h2 id="stats-h">The catalog at a glance</h2>
+    {
+      total === 0 ? (
+        <p class="card">
+          The first batch of libraries is being researched. Each entry is published only after its
+          evidence has been reviewed.
+        </p>
+      ) : (
+        <>
+          <p class="big">
+            <strong>{counts.ready}</strong> of <strong>{total}</strong> tracked libraries are{' '}
+            <em>ready</em>; <strong>{supporting}</strong> support PQC in some form.
+          </p>
+          <ul class="stats">
+            {STATUSES.filter((s) => counts[s] > 0).map((s) => (
+              <li class="card">
+                <a href={`/catalog?status=${encodeURIComponent(s)}`}>
+                  <span class="num">{counts[s]}</span>
+                  <StatusBadge status={s} />
+                </a>
+                <p class="muted small">{STATUS_INFO[s].description}</p>
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+  </section>
+
+  <section class="how">
+    <div class="card">
+      <h3>Evidence, not guesses</h3>
+      <p class="muted">
+        Every field cites release notes, docs, commits or maintainer posts, with a quote you can
+        check. No source means <em>unknown</em>.
+      </p>
+    </div>
+    <div class="card">
+      <h3>Follows the chain</h3>
+      <p class="muted">
+        A JWT library that calls the platform's crypto, or an HTTP client on top of OpenSSL: we show
+        who actually does the cryptography.
+      </p>
+    </div>
+    <div class="card">
+      <h3>Open data</h3>
+      <p class="muted">
+        Each library is a YAML file on GitHub. Corrections are pull requests. <a href="/about"
+          >Contribute</a
+        >.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding-block: 1.5rem 1rem;
+  }
+  .search {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.5rem 0 1rem;
+    max-width: 40rem;
+  }
+  .search input {
+    flex: 1;
+    min-width: 0;
+  }
+  .big {
+    font-size: 1.15rem;
+  }
+  .stats {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+  .stats a {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+  }
+  .stats .num {
+    font-size: 1.75rem;
+    font-weight: 750;
+    color: var(--text);
+  }
+  .stats p {
+    margin: 0.4rem 0 0;
+  }
+  .how {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+  }
+  .how h3 {
+    margin-top: 0.25rem;
+  }
+  .how p {
+    margin-bottom: 0.25rem;
+  }
+</style>
