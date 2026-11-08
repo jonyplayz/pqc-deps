@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, correctionUrl } from '../config';
+---
+
+<Base title="About and contribute" description="What PQC Deps is, who runs it, and how to contribute library data.">
+  <div class="prose">
+    <h1>About {SITE.name}</h1>
+    <p class="lede">
+      A free, open catalog that answers one question for developers and security teams: which of my
+      dependencies are quantum-vulnerable, and what do I upgrade to?
+    </p>
+    <p>
+      Governments and regulators are setting deadlines for migrating to post-quantum cryptography.
+      The facts about which libraries support it are scattered across changelogs, issue trackers,
+      mailing lists and blog posts. {SITE.name} collects them in one place, with a source for every
+      claim.
+    </p>
+    <p>
+      We focus on <strong>open-source libraries and packages</strong>, not vendor products, and on
+      checking your project's dependency files.
+    </p>
+
+    <h2>Contribute</h2>
+    <p>Each library is a YAML file in the <a href={SITE.repoUrl}>GitHub repository</a>.</p>
+    <h3>Report a mistake</h3>
+    <p>
+      Use the <em>Suggest a correction</em> link on any library page, or
+      <a href={correctionUrl()}>open a correction issue</a>. Please include a link to the source.
+    </p>
+    <h3>Add or update a library</h3>
+    <ol>
+      <li>Copy an existing file in <code>data/libraries/</code>. The file name must match its <code>id</code>.</li>
+      <li>
+        For every claim, add a source with the URL, a verbatim <code>quote</code> from that page, and
+        the date you read it. If you can't cite it, leave it <code>unknown</code>.
+      </li>
+      <li>Run <code>npm run validate</code> locally.</li>
+      <li>Open a pull request. A maintainer checks the sources before merging.</li>
+    </ol>
+    <p>
+      Maintainers of a listed library are especially welcome to correct their entry. A link to your
+      release notes or docs is all we need.
+    </p>
+
+    <h2>License</h2>
+    <p>
+      The data is licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>: reuse
+      it freely with attribution. The code is MIT.
+    </p>
+  </div>
+</Base>
