@@ -1,0 +1,435 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ecosystem": {
+      "type": "string",
+      "enum": [
+        "c-cpp",
+        "go",
+        "rust",
+        "jvm",
+        "python",
+        "javascript",
+        "dotnet",
+        "platform"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "homepage": {
+      "type": "string",
+      "format": "uri"
+    },
+    "repo": {
+      "type": "string",
+      "format": "uri"
+    },
+    "package_names": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "enum": [
+          "npm",
+          "pypi",
+          "go",
+          "maven",
+          "cargo",
+          "nuget"
+        ]
+      },
+      "additionalProperties": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "implicit_for": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "npm",
+          "pypi",
+          "go",
+          "maven",
+          "cargo",
+          "nuget"
+        ]
+      }
+    },
+    "delegates_to": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+          },
+          "condition": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "applicable_algorithms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "ml-kem",
+          "ml-dsa",
+          "slh-dsa",
+          "hybrid-tls",
+          "fn-dsa",
+          "hqc"
+        ]
+      }
+    },
+    "overall_status": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "available",
+        "partial",
+        "planned",
+        "no-plan",
+        "unknown",
+        "n/a"
+      ]
+    },
+    "algorithms": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "enum": [
+          "ml-kem",
+          "ml-dsa",
+          "slh-dsa",
+          "hybrid-tls",
+          "fn-dsa",
+          "hqc"
+        ]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "support": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "partial",
+              "no",
+              "unknown"
+            ]
+          },
+          "since_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "default_enabled": {
+            "type": "boolean"
+          },
+          "experimental": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "sources": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "release-notes",
+                    "changelog",
+                    "docs",
+                    "commit",
+                    "issue",
+                    "pull-request",
+                    "maintainer-post",
+                    "mailing-list",
+                    "blog",
+                    "certificate",
+                    "other"
+                  ]
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                },
+                "retrieved": {
+                  "type": "string",
+                  "format": "date",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                }
+              },
+              "required": [
+                "url",
+                "title",
+                "kind",
+                "quote",
+                "retrieved"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "support"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "roadmap": {
+      "type": "object",
+      "properties": {
+        "target_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "target_date": {
+          "type": "string",
+          "pattern": "^\\d{4}(-\\d{2}(-\\d{2})?)?$"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "confirmed",
+            "tentative",
+            "speculative"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "sources": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "release-notes",
+                  "changelog",
+                  "docs",
+                  "commit",
+                  "issue",
+                  "pull-request",
+                  "maintainer-post",
+                  "mailing-list",
+                  "blog",
+                  "certificate",
+                  "other"
+                ]
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "retrieved": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              }
+            },
+            "required": [
+              "url",
+              "title",
+              "kind",
+              "quote",
+              "retrieved"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "confidence",
+        "sources"
+      ],
+      "additionalProperties": false
+    },
+    "fips": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "validated",
+            "in-process",
+            "not-validated",
+            "unknown"
+          ]
+        },
+        "certificates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "algorithms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ml-kem",
+              "ml-dsa",
+              "slh-dsa",
+              "hybrid-tls",
+              "fn-dsa",
+              "hqc"
+            ]
+          }
+        },
+        "notes": {
+          "type": "string"
+        },
+        "sources": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "release-notes",
+                  "changelog",
+                  "docs",
+                  "commit",
+                  "issue",
+                  "pull-request",
+                  "maintainer-post",
+                  "mailing-list",
+                  "blog",
+                  "certificate",
+                  "other"
+                ]
+              },
+              "quote": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "retrieved": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+              }
+            },
+            "required": [
+              "url",
+              "title",
+              "kind",
+              "quote",
+              "retrieved"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "upgrade_notes": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "last_verified": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+    },
+    "pipeline": {
+      "type": "object",
+      "properties": {
+        "watch_urls": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "github": {
+          "type": "string",
+          "pattern": "^[\\w.-]+\\/[\\w.-]+$"
+        },
+        "changelog_path": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "ecosystem",
+    "overall_status",
+    "last_verified"
+  ],
+  "additionalProperties": false,
+  "$id": "https://pqc-ready.pages.dev/schema/library.schema.json",
+  "title": "PQC Ready library entry"
+}

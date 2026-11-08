@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+# FICTIONAL example entry: a language runtime that delegates to a C library,
+# flagged automatically for any npm manifest.
+id: example-runtime
+name: ExampleRuntime crypto
+ecosystem: platform
+description: The built-in crypto module of a fictional JavaScript runtime.
+homepage: https://example.com/runtime
+implicit_for: [npm]
+delegates_to:
+  - id: example-tls
+    condition: in official builds
+overall_status: planned
+algorithms:
+  ml-kem:
+    support: 'no'
+    sources:
+      - url: https://example.com/runtime/docs/crypto
+        title: ExampleRuntime crypto API
+        kind: docs
+        quote: 'Supported key types: rsa, ec, ed25519, x25519.'
+        retrieved: '2026-10-01'
+roadmap:
+  target_version: '30'
+  confidence: confirmed
+  sources:
+    - url: https://example.com/runtime/blog/v30-plans
+      title: What's coming in ExampleRuntime 30
+      kind: maintainer-post
+      quote: Version 30 will expose ML-KEM and ML-DSA through the crypto module.
+      retrieved: '2026-10-01'
+upgrade_notes: Nothing to upgrade yet. Watch the v30 release.
+last_verified: '2026-10-01'

@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+# FICTIONAL example entry: a library that delegates its crypto.
+id: example-jwt
+name: example-jwt
+ecosystem: javascript
+description: A fictional JWT library that signs and verifies via the runtime's crypto.
+repo: https://github.com/example/example-jwt
+package_names:
+  npm: [example-jwt]
+delegates_to:
+  - id: example-runtime
+applicable_algorithms: [ml-dsa, slh-dsa]
+overall_status: n/a
+notes: Signing algorithms are whatever the runtime crypto exposes; no PQC JWS algorithm identifiers yet.
+last_verified: '2026-10-01'
