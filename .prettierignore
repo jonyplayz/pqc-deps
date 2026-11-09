@@ -1,0 +1,7 @@
+# Generated or machine-written files
+data/
+proposals/
+package-lock.json
+**/dist/
+**/.astro/
+graphify-out/

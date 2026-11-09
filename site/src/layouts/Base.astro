@@ -12,7 +12,10 @@ interface Props {
 }
 const { title, description = SITE.description, jsonLd, noindex = false } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}: ${SITE.tagline}`;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+// Clean public path: build.format "file" makes pathname end in .html.
+const cleanPath =
+  Astro.url.pathname.replace(/\.html$/, '').replace(/(^|\/)index$/, '/') || '/';
+const canonical = new URL(cleanPath, Astro.site);
 const examples = usingExampleData();
 const nav = [
   { href: '/catalog', label: 'Catalog' },
@@ -20,7 +23,7 @@ const nav = [
   { href: '/methodology', label: 'Methodology' },
   { href: '/about', label: 'About' },
 ];
-const path = Astro.url.pathname.replace(/\/$/, '');
+const path = cleanPath.replace(/\/$/, '');
 ---
 
 <!doctype html>

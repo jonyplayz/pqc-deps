@@ -9,15 +9,15 @@ exchange, since which version, and what's planned. Every claim links to a source
 
 ## Repository layout
 
-| Path | What |
-| --- | --- |
-| `site/` | Astro static site: home, catalog, library pages, methodology, about, JSON API. |
-| `packages/core` | Zod schema, lint rules, YAML loader, manifest parsers and matching (`src/check/`). Shared by site, pipeline and future CLI. |
-| `data/libraries/*.yaml` | The catalog. One file per library. |
-| `data/examples/*.yaml` | Fictional entries for tests and local development. |
-| `data/schema/library.schema.json` | JSON Schema generated from the Zod schema (editor autocomplete). |
-| `pipeline/` | Evidence pipeline: fetch sources, ask an LLM for a cited proposal, verify quotes, open a PR. |
-| `proposals/` | Local pipeline output awaiting human review (git-ignored). |
+| Path                              | What                                                                                                                        |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `site/`                           | Astro static site: home, catalog, library pages, methodology, about, JSON API.                                              |
+| `packages/core`                   | Zod schema, lint rules, YAML loader, manifest parsers and matching (`src/check/`). Shared by site, pipeline and future CLI. |
+| `data/libraries/*.yaml`           | The catalog. One file per library.                                                                                          |
+| `data/examples/*.yaml`            | Fictional entries for tests and local development.                                                                          |
+| `data/schema/library.schema.json` | JSON Schema generated from the Zod schema (editor autocomplete).                                                            |
+| `pipeline/`                       | Evidence pipeline: fetch sources, ask an LLM for a cited proposal, verify quotes, open a PR.                                |
+| `proposals/`                      | Local pipeline output awaiting human review (git-ignored).                                                                  |
 
 ## Local development
 
@@ -89,13 +89,13 @@ never commits to `main`.
 cp .env.example .env   # then fill in a provider
 ```
 
-| Variable | Meaning |
-| --- | --- |
-| `LLM_PROVIDER` | `anthropic` (default) or `openai-compatible` |
-| `ANTHROPIC_API_KEY` | For Claude. Default model `claude-opus-5-5`; override with `LLM_MODEL`. |
+| Variable                                   | Meaning                                                                                       |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `LLM_PROVIDER`                             | `anthropic` (default) or `openai-compatible`                                                  |
+| `ANTHROPIC_API_KEY`                        | For Claude. Default model `claude-opus-5-5`; override with `LLM_MODEL`.                       |
 | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | For `openai-compatible` providers (Gemini, Groq, OpenRouter, Ollama…), handy for free testing |
-| `LLM_DELAY_MS` | Pause between libraries (free-tier rate limits) |
-| `GITHUB_TOKEN` | Optional locally (falls back to `gh auth token`) |
+| `LLM_DELAY_MS`                             | Pause between libraries (free-tier rate limits)                                               |
+| `GITHUB_TOKEN`                             | Optional locally (falls back to `gh auth token`)                                              |
 
 Weaker free models usually produce more `unknown` fields, because more of
 their quotes fail verification. They don't produce more wrong claims.
@@ -110,6 +110,41 @@ npm run pipeline -- --stale 90 --pr     # new branch + PR with a report per libr
 npm run pipeline -- --unknown           # everything still unknown
 npm run stale -- --days 90              # list entries due for re-verification
 ```
+
+## CI, deployment and scheduled refresh
+
+GitHub Actions (`.github/workflows/`):
+
+| Workflow         | When                           | What                                                                                                                                                                                                       |
+| ---------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`         | Every PR and push to `main`    | Validate data, check the JSON Schema and formatting, typecheck, test, build. For PRs, also verify repos and package names of changed library files. Then deploy: a preview for PRs, production for `main`. |
+| `refresh.yml`    | Mondays 04:17 UTC, or manually | Run the evidence pipeline and open a PR with proposed changes (never commits to `main`). Keep an issue listing entries not verified for 90 days.                                                           |
+| `dependabot.yml` | Weekly                         | Dependency and action updates                                                                                                                                                                              |
+
+### One-time setup (repository owner)
+
+1. **Let Actions open PRs**: Settings → Actions → General → Workflow permissions →
+   tick _Allow GitHub Actions to create and approve pull requests_.
+2. **Deploy to Cloudflare Pages** (free): create a Cloudflare account, then an
+   API token with the _Cloudflare Pages: Edit_ permission. Add repository
+   secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Until they exist,
+   the deploy job is skipped with a notice.
+3. **LLM for the weekly refresh**: add a secret `LLM_API_KEY` (free Gemini key)
+   and repository variables `LLM_PROVIDER=openai-compatible`,
+   `LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai`,
+   `LLM_MODEL=gemini-3.5-flash-lite`, `LLM_DELAY_MS=5000`. For Claude, set the
+   secret `ANTHROPIC_API_KEY` instead and leave `LLM_PROVIDER` unset.
+
+```bash
+gh secret set LLM_API_KEY            # paste the key when prompted
+gh variable set LLM_PROVIDER --body openai-compatible
+gh variable set LLM_BASE_URL --body https://generativelanguage.googleapis.com/v1beta/openai
+gh variable set LLM_MODEL --body gemini-3.5-flash-lite
+gh variable set LLM_DELAY_MS --body 5000
+```
+
+Note: PRs opened by the workflow's built-in token don't trigger CI on their
+own. Close and reopen the PR (or push a commit to it) to run the checks.
 
 ## Licenses
 

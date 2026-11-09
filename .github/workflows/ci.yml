@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Validate, test and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      - name: Validate catalog data (schema + lint rules)
+        run: npm run validate
+      - name: JSON Schema is up to date
+        run: npm run schema:json -- --check
+      - name: Formatting
+        run: npm run format:check
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test
+      - name: Build site
+        run: npm run build
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: site
+          path: site/dist
+          retention-days: 7
+
+  identity:
+    name: Check repos and package names of changed entries
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Find changed library files
+        id: changed
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          ids=$(git diff --name-only --diff-filter=AM "$BASE" HEAD -- 'data/libraries/*.yaml' \
+            | sed -E 's#data/libraries/(.*)\.yaml#\1#' | tr '\n' ' ')
+          echo "ids=$ids" >> "$GITHUB_OUTPUT"
+          echo "Changed entries: ${ids:-none}"
+      - uses: actions/setup-node@v7
+        if: steps.changed.outputs.ids != ''
+        with:
+          node-version: 24
+          cache: npm
+      - if: steps.changed.outputs.ids != ''
+        run: npm ci
+      - name: Verify identities
+        if: steps.changed.outputs.ids != ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          IDS: ${{ steps.changed.outputs.ids }}
+        run: npm run identity -- $IDS
+
+  deploy:
+    name: Deploy to Cloudflare Pages
+    needs: check
+    # Same-repo PRs get a preview; pushes to main deploy production.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    env:
+      CF_CONFIGURED: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+    steps:
+      - name: Cloudflare not configured
+        if: env.CF_CONFIGURED != 'true'
+        run: echo "::notice::Skipping deploy. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets to enable it (see README)."
+      - uses: actions/download-artifact@v8
+        if: env.CF_CONFIGURED == 'true'
+        with:
+          name: site
+          path: site/dist
+      - name: Ensure the Pages project exists
+        if: env.CF_CONFIGURED == 'true'
+        uses: cloudflare/wrangler-action@v4
+        continue-on-error: true
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create pqc-deps --production-branch=main
+      - name: Deploy
+        id: deploy
+        if: env.CF_CONFIGURED == 'true'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site/dist --project-name=pqc-deps --branch=${{ github.head_ref || github.ref_name }}
+      - name: Summary
+        if: env.CF_CONFIGURED == 'true'
+        env:
+          URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: echo "Deployed to $URL" >> "$GITHUB_STEP_SUMMARY"
