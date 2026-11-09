@@ -115,11 +115,11 @@ npm run stale -- --days 90              # list entries due for re-verification
 
 GitHub Actions (`.github/workflows/`):
 
-| Workflow         | When                           | What                                                                                                                                                                                                       |
-| ---------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ci.yml`         | Every PR and push to `main`    | Validate data, check the JSON Schema and formatting, typecheck, test, build. For PRs, also verify repos and package names of changed library files. Then deploy: a preview for PRs, production for `main`. |
-| `refresh.yml`    | Mondays 04:17 UTC, or manually | Run the evidence pipeline and open a PR with proposed changes (never commits to `main`). Keep an issue listing entries not verified for 90 days.                                                           |
-| `dependabot.yml` | Weekly                         | Dependency and action updates                                                                                                                                                                              |
+| Workflow         | When                                                         | What                                                                                                                                                                                                              |
+| ---------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`         | Every PR and push to `main`, daily at 04:47 UTC, or manually | Validate data, check the JSON Schema and formatting, typecheck, test, build. For PRs, also verify repos and package names of changed library files. Then deploy: a preview for PRs, production otherwise.         |
+| `refresh.yml`    | Daily at 04:17 UTC, or manually (all or chosen libraries)    | Run the evidence pipeline and open a PR with proposed changes (never commits to `main`). Scheduled runs skip while the previous refresh PR is still open. Keep an issue listing entries not verified for 90 days. |
+| `dependabot.yml` | Weekly                                                       | Dependency and action updates                                                                                                                                                                                     |
 
 ### One-time setup (repository owner)
 

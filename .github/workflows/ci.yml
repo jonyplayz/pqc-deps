@@ -4,6 +4,11 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Rebuild and redeploy the site daily (stale-entry warnings are computed at
+  # build time) and whenever someone clicks "Run workflow".
+  schedule:
+    - cron: '47 4 * * *' # every day, 04:47 UTC (after the evidence refresh)
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -77,8 +82,9 @@ jobs:
   deploy:
     name: Deploy to Cloudflare Pages
     needs: check
-    # Same-repo PRs get a preview; pushes to main deploy production.
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # Same-repo PRs get a preview; pushes to main, the daily schedule and
+    # manual runs on main deploy production.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read

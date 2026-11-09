@@ -1,11 +1,13 @@
 name: Evidence refresh
 
-# Weekly: re-run the evidence pipeline and open a PR with proposed changes
+# Daily: re-run the evidence pipeline and open a PR with proposed changes
 # (never commits to main), and keep an issue listing entries past their
-# verification age. Can also be started by hand for specific libraries.
+# verification age. Can also be started by hand, for all or chosen libraries.
+# A scheduled run is skipped while the previous refresh PR is still open, so
+# unreviewed proposals don't pile up; manual runs always go ahead.
 on:
   schedule:
-    - cron: '17 4 * * 1' # Mondays 04:17 UTC
+    - cron: '17 4 * * *' # every day, 04:17 UTC
   workflow_dispatch:
     inputs:
       libraries:
@@ -37,15 +39,25 @@ jobs:
       GITHUB_TOKEN: ${{ github.token }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Check an LLM is configured
+      - name: Decide whether to run
         id: llm
+        env:
+          EVENT: ${{ github.event_name }}
+          REPO: ${{ github.repository }}
         run: |
-          if [ -n "$LLM_API_KEY" ] || [ -n "$ANTHROPIC_API_KEY" ] || [ "$LLM_PROVIDER" = "openai-compatible" ]; then
-            echo "ok=true" >> "$GITHUB_OUTPUT"
-          else
+          if [ -z "$LLM_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ "$LLM_PROVIDER" != "openai-compatible" ]; then
             echo "::warning::No LLM key configured (secrets LLM_API_KEY or ANTHROPIC_API_KEY). Skipping the pipeline; see README."
-            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
+          if [ "$EVENT" = "schedule" ]; then
+            open=$(gh pr list --repo "$REPO" --state open --json number,headRefName \
+              --jq '[.[] | select(.headRefName | startswith("pipeline/refresh-")) | .number] | join(", ")')
+            if [ -n "$open" ]; then
+              echo "::notice::Refresh PR #$open is still open; skipping today's scheduled run. Merge or close it, or start a run by hand."
+              echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
         if: steps.llm.outputs.ok == 'true'
         with:
