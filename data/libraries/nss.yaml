@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: nss
+name: NSS (Network Security Services)
+ecosystem: c-cpp
+description: Mozilla's crypto and TLS libraries, used by Firefox.
+homepage: https://firefox-source-docs.mozilla.org/security/nss/index.html
+repo: https://github.com/mozilla/nss
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08
+pipeline:
+  watch_urls:
+    - https://firefox-source-docs.mozilla.org/security/nss/releases/index.html

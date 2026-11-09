@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: nodejs-crypto
+name: Node.js crypto and tls
+ecosystem: javascript
+description: Node.js's built-in crypto, tls and WebCrypto.
+homepage: https://nodejs.org/api/crypto.html
+repo: https://github.com/nodejs/node
+implicit_for:
+  - npm
+delegates_to:
+  - id: openssl
+    condition: OpenSSL bundled in official builds
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: v24.7.0
+    sources:
+      - url: https://nodejs.org/api/crypto.html
+        title: Crypto | Node.js v26.13.0 Documentation
+        kind: docs
+        quote: |-
+          v24.7.0
+          Add support for ML-KEM keys.
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: yes
+    since_version: v24.6.0
+    sources:
+      - url: https://nodejs.org/api/crypto.html
+        title: Crypto | Node.js v26.13.0 Documentation
+        kind: docs
+        quote: |-
+          v24.6.0
+          Add support for ML-DSA keys.
+        retrieved: 2026-11-09
+  slh-dsa:
+    support: yes
+    since_version: v24.8.0
+    sources:
+      - url: https://nodejs.org/api/crypto.html
+        title: Crypto | Node.js v26.13.0 Documentation
+        kind: docs
+        quote: |-
+          v24.8.0
+          Add support for SLH-DSA keys.
+        retrieved: 2026-11-09
+upgrade_notes: "ML-DSA: Node.js crypto and tls v24.6.0 or later. ML-KEM: Node.js crypto and tls v24.7.0 or later. SLH-DSA: Node.js crypto and tls v24.8.0 or later."
+last_verified: 2026-11-09
+pipeline:
+  watch_urls:
+    - https://nodejs.org/api/crypto.html

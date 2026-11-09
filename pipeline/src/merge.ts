@@ -32,6 +32,61 @@ export function deriveStatus(lib: Library): Status {
   return lib.overall_status === 'n/a' ? 'n/a' : 'unknown';
 }
 
+/**
+ * Upgrade guidance built only from verified claims. The model's own wording is
+ * not used: in the first real run it invented version numbers there.
+ */
+export function upgradeNotes(lib: Library): string | undefined {
+  const label: Record<string, string> = {
+    'ml-kem': 'ML-KEM',
+    'ml-dsa': 'ML-DSA',
+    'slh-dsa': 'SLH-DSA',
+    'hybrid-tls': 'hybrid TLS key exchange',
+    'fn-dsa': 'FN-DSA',
+    hqc: 'HQC',
+  };
+  const list = (xs: string[]) =>
+    xs.length <= 1 ? (xs[0] ?? '') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`;
+  const entries = applicableAlgorithms(lib).flatMap((a) => {
+    const s = lib.algorithms[a];
+    return s ? [{ a, s }] : [];
+  });
+  const yes = entries.filter((e) => e.s.support === 'yes');
+  const sentences: string[] = [];
+
+  const byVersion = new Map<string, string[]>();
+  for (const { a, s } of yes)
+    if (s.since_version)
+      byVersion.set(s.since_version, [...(byVersion.get(s.since_version) ?? []), label[a]!]);
+  const versions = [...byVersion.keys()].sort((x, y) =>
+    x.localeCompare(y, undefined, { numeric: true }),
+  );
+  for (const v of versions)
+    sentences.push(`${list(byVersion.get(v)!)}: ${lib.name} ${v} or later.`);
+  const undated = yes.filter((e) => !e.s.since_version).map((e) => label[e.a]!);
+  if (undated.length)
+    sentences.push(
+      `${list(undated)}: supported in current releases; the sources don't state the first version.`,
+    );
+
+  const defaults = yes.filter((e) => e.s.default_enabled === true).map((e) => label[e.a]!);
+  const optIn = yes.filter((e) => e.s.default_enabled === false).map((e) => label[e.a]!);
+  if (defaults.length) sentences.push(`On by default: ${list(defaults)}.`);
+  if (optIn.length) sentences.push(`Opt-in (must be enabled): ${list(optIn)}.`);
+
+  const partial = entries.filter((e) => e.s.support === 'partial').map((e) => label[e.a]!);
+  if (partial.length)
+    sentences.push(
+      `Partial or experimental: ${list(partial)}; check the notes before relying on it.`,
+    );
+
+  if (!sentences.length && lib.roadmap) {
+    const t = [lib.roadmap.target_version, lib.roadmap.target_date].filter(Boolean).join(', ');
+    sentences.push(`No support yet; a plan exists${t ? ` (target: ${t})` : ''}.`);
+  }
+  return sentences.length ? sentences.join(' ') : undefined;
+}
+
 const show = (v: unknown) =>
   v === undefined ? '–' : typeof v === 'object' ? JSON.stringify(v) : String(v);
 
@@ -66,10 +121,11 @@ export function mergeProposal(
     algorithms,
     ...(roadmap ? { roadmap } : {}),
     ...(fips ? { fips } : {}),
-    ...(v.upgrade_notes ? { upgrade_notes: v.upgrade_notes } : {}),
     last_verified: today,
   });
   if (!roadmap) delete draft.roadmap;
+  const notes = upgradeNotes(draft);
+  if (notes) draft.upgrade_notes = notes;
 
   // n/a is a structural fact about delegation, not something release notes decide.
   if (

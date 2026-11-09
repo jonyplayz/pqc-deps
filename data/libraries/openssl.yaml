@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: openssl
+name: OpenSSL
+ecosystem: c-cpp
+description: General-purpose cryptography and TLS toolkit.
+homepage: https://www.openssl.org
+repo: https://github.com/openssl/openssl
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: ready
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 3.5.0
+    experimental: false
+    sources:
+      - url: https://github.com/openssl/openssl/blob/HEAD/CHANGES.md
+        title: openssl/openssl CHANGES.md
+        kind: changelog
+        quote: "* ML-KEM as specified in FIPS 203."
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: yes
+    since_version: 3.5.0
+    default_enabled: true
+    experimental: false
+    sources:
+      - url: https://github.com/openssl/openssl/blob/HEAD/CHANGES.md
+        title: openssl/openssl CHANGES.md
+        kind: changelog
+        quote: "* Add ML-DSA as specified in FIPS 204."
+        retrieved: 2026-11-09
+      - url: https://github.com/openssl/openssl/blob/HEAD/CHANGES.md
+        title: openssl/openssl CHANGES.md
+        kind: changelog
+        quote: |-
+          * The TLS Signature algorithms defaults now include all three ML-DSA variants as
+             first algorithms.
+        retrieved: 2026-11-09
+  slh-dsa:
+    support: yes
+    since_version: 3.5.0
+    experimental: false
+    sources:
+      - url: https://github.com/openssl/openssl/blob/HEAD/CHANGES.md
+        title: openssl/openssl CHANGES.md
+        kind: changelog
+        quote: "* Add SLH-DSA as specified in FIPS 205."
+        retrieved: 2026-11-09
+  hybrid-tls:
+    support: yes
+    since_version: 3.5.0
+    default_enabled: true
+    experimental: false
+    sources:
+      - url: https://github.com/openssl/openssl/blob/HEAD/CHANGES.md
+        title: openssl/openssl CHANGES.md
+        kind: changelog
+        quote: |-
+          Including also the X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024
+             TLS hybrid key post-quantum/classical key agreement schemes.
+        retrieved: 2026-11-09
+      - url: https://github.com/openssl/openssl/blob/HEAD/CHANGES.md
+        title: openssl/openssl CHANGES.md
+        kind: changelog
+        quote: |-
+          * The default TLS group list setting is now set to:
+             `?*X25519MLKEM768 / ?*X25519:?secp256r1 / ?X448:?secp384r1:?secp521r1 / ?ffdhe2048:?ffdhe3072`
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM, ML-DSA, SLH-DSA and hybrid TLS key exchange: OpenSSL 3.5.0 or later. On by default: ML-DSA and hybrid TLS key exchange."
+last_verified: 2026-11-09

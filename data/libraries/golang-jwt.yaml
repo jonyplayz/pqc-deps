@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: golang-jwt
+name: golang-jwt
+ecosystem: go
+description: JSON Web Tokens for Go.
+repo: https://github.com/golang-jwt/jwt
+package_names:
+  go:
+    - github.com/golang-jwt/jwt
+delegates_to:
+  - id: go-crypto
+applicable_algorithms:
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

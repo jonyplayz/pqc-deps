@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: urllib3
+name: urllib3
+ecosystem: python
+description: HTTP client for Python.
+homepage: https://urllib3.readthedocs.io
+repo: https://github.com/urllib3/urllib3
+package_names:
+  pypi:
+    - urllib3
+delegates_to:
+  - id: python-ssl
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+last_verified: 2026-11-08

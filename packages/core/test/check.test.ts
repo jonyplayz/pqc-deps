@@ -211,6 +211,19 @@ describe('checkManifest', () => {
     expect(f.note).toMatch(/golang\.org\/x\/crypto\/ssh/);
   });
 
+  it('reports both a Go module entry and package entries inside it', () => {
+    const idx = indexCatalog([
+      ...catalog,
+      L({ id: 'x-crypto', ecosystem: 'go', package_names: { go: ['golang.org/x/crypto'] } }),
+    ]);
+    const gomod = 'module m\n\nrequire golang.org/x/crypto v0.29.0\n';
+    const r = checkManifest(parseManifest(gomod, { filename: 'go.mod' }), idx);
+    expect(r.findings.map((f) => [f.library.id, f.matchedBy]).sort()).toEqual([
+      ['x-crypto', 'package'],
+      ['x-ssh', 'module'],
+    ]);
+  });
+
   it('splits unmatched dependencies into possibly-crypto and the rest', () => {
     const r = run(
       JSON.stringify({ dependencies: { 'node-forge': '1', lodash: '4' } }),

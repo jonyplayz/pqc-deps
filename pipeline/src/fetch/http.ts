@@ -31,9 +31,39 @@ export class HttpError extends Error {
   }
 }
 
-export async function fetchText(
+/** Temporary failures worth retrying: network errors, timeouts, 429 and 5xx. */
+export function isTransient(e: unknown): boolean {
+  if (e instanceof HttpError) return e.status === 429 || e.status >= 500;
+  const status = (e as { status?: number }).status;
+  if (typeof status === 'number') return status === 429 || status >= 500;
+  return e instanceof TypeError || (e as Error)?.name === 'TimeoutError';
+}
+
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  delaysMs: number[] = [2_000, 8_000],
+): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      const delay = delaysMs[attempt];
+      if (delay === undefined || !isTransient(e)) throw e;
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+}
+
+export function fetchText(
   url: string,
   init: { headers?: Record<string, string>; timeoutMs?: number } = {},
+): Promise<{ text: string; contentType: string }> {
+  return withRetry(() => fetchOnce(url, init));
+}
+
+async function fetchOnce(
+  url: string,
+  init: { headers?: Record<string, string>; timeoutMs?: number },
 ): Promise<{ text: string; contentType: string }> {
   const res = await fetch(url, {
     headers: { 'User-Agent': USER_AGENT, ...init.headers },

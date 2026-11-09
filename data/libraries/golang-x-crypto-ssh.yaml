@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: golang-x-crypto-ssh
+name: golang.org/x/crypto/ssh
+ecosystem: go
+description: SSH client and server package for Go.
+homepage: https://pkg.go.dev/golang.org/x/crypto/ssh
+repo: https://github.com/golang/crypto
+package_names:
+  go:
+    - golang.org/x/crypto/ssh
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    sources:
+      - url: https://pkg.go.dev/golang.org/x/crypto/ssh
+        title: ssh package - golang.org/x/crypto/ssh - Go Packages
+        kind: docs
+        quote: KeyExchangeMLKEM768X25519 = "mlkem768x25519-sha256"
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: yes
+    sources:
+      - url: https://pkg.go.dev/golang.org/x/crypto/ssh
+        title: ssh package - golang.org/x/crypto/ssh - Go Packages
+        kind: docs
+        quote: KeyAlgoMLDSA44 = "ssh-mldsa-44"
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-09
+pipeline:
+  watch_urls:
+    - https://pkg.go.dev/golang.org/x/crypto/ssh
+  github: golang/go

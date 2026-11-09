@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: rustcrypto-ml-dsa
+name: RustCrypto ml-dsa
+ecosystem: rust
+description: Pure Rust ML-DSA implementation from RustCrypto.
+repo: https://github.com/RustCrypto/signatures
+package_names:
+  cargo:
+    - ml-dsa
+applicable_algorithms:
+  - ml-dsa
+overall_status: available
+algorithms:
+  ml-dsa:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://docs.rs/ml-dsa
+        title: ml_dsa - Rust
+        kind: docs
+        quote: Pure Rust implementation of the Module-Lattice-Based Digital Signature Standard (ML-DSA) as described in the FIPS 204 (final).
+        retrieved: 2026-11-09
+      - url: https://docs.rs/ml-dsa
+        title: ml_dsa - Rust
+        kind: docs
+        quote: |-
+          Three parameter sets (i.e. security levels) are supported:
+
+          - ML-DSA-44 (NIST Category 2)
+
+          - ML-DSA-65 (NIST Category 3)
+
+          - ML-DSA-87 (NIST Category 5)
+        retrieved: 2026-11-09
+upgrade_notes: "ML-DSA: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-09
+pipeline:
+  watch_urls:
+    - https://docs.rs/ml-dsa

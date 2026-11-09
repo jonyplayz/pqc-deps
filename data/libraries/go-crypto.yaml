@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: go-crypto
+name: Go standard library crypto
+ecosystem: go
+description: Go's built-in crypto and crypto/tls packages.
+homepage: https://pkg.go.dev/crypto
+repo: https://github.com/golang/go
+implicit_for:
+  - go
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    sources:
+      - url: https://pkg.go.dev/crypto/tls
+        title: tls package - crypto/tls - Go Packages
+        kind: docs
+        quote: ML-KEM-768 (0x0041)
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: yes
+    sources:
+      - url: https://pkg.go.dev/crypto/tls
+        title: tls package - crypto/tls - Go Packages
+        kind: docs
+        quote: MLDSA44 SignatureScheme = 0x0904
+        retrieved: 2026-11-09
+      - url: https://github.com/golang/go/pull/82302
+        title: "PR #82302: crypto/internal/fips140/mldsa: compute cs1 and cs2 lazily when signing"
+        kind: pull-request
+        quote: Sign/ML-DSA-44   266.4µ ± 0%   234.4µ ± 1%  -12.00% (p=0.000 n=20)
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-09
+pipeline:
+  watch_urls:
+    - https://pkg.go.dev/crypto/tls
+    - https://go.dev/doc/devel/release

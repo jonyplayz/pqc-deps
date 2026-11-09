@@ -34,6 +34,16 @@ const KIND_PRIORITY: Record<string, number> = {
   other: 10,
 };
 
+/** A line that starts a changelog/release section, e.g. "### Changes between 3.4 and 3.5.0" or "v1.2.0 (2026-01-01)". */
+export const HEADING_PATTERN =
+  /^\s*#{1,6}\s+\S|^\s*[*-]?\s*(changes between|version|release|noteworthy changes)\b.*\d+\.\d+|^\s*\*?\s*v?\d+\.\d+(\.\d+)*\s*(\(|\[|-|–|:|$)/i;
+
+/** Index of the nearest section heading at or above line i, if any. */
+export function headingAbove(lines: string[], i: number): number | undefined {
+  for (let j = i; j >= 0; j--) if (HEADING_PATTERN.test(lines[j]!)) return j;
+  return undefined;
+}
+
 export function excerptDoc(
   text: string,
   context = 4,
@@ -47,6 +57,9 @@ export function excerptDoc(
     hits++;
     for (let j = Math.max(0, i - context); j <= Math.min(lines.length - 1, i + context); j++)
       keep.add(j);
+    // Keep the section heading above the hit: in changelogs it carries the version.
+    const h = headingAbove(lines, i);
+    if (h !== undefined) keep.add(h);
   });
   if (!hits) return { excerpt: '', hits: 0 };
   // Always keep the first lines: they carry the release name / version / title.

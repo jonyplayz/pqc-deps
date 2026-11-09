@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: openssh
+name: OpenSSH
+ecosystem: c-cpp
+description: SSH client and server.
+homepage: https://www.openssh.com
+repo: https://github.com/openssh/openssh-portable
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: partial
+algorithms:
+  ml-kem:
+    support: yes
+    default_enabled: true
+    experimental: false
+    sources:
+      - url: https://www.openssh.com/releasenotes.html
+        title: "OpenSSH: Release Notes"
+        kind: release-notes
+        quote: This algorithm "mlkem768x25519-sha256" is available by default.
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: partial
+    default_enabled: false
+    experimental: true
+    sources:
+      - url: https://www.openssh.com/releasenotes.html
+        title: "OpenSSH: Release Notes"
+        kind: release-notes
+        quote: "All: add experimental support for a composite post-quantum signature scheme that combines ML-DSA 44 and Ed25519 as specified in draft-miller-sshm-mldsa44-ed25519-composite-sigs."
+        retrieved: 2026-11-09
+      - url: https://www.openssh.com/releasenotes.html
+        title: "OpenSSH: Release Notes"
+        kind: release-notes
+        quote: This scheme is not enabled by default. To use it, you'll need to add it to HostKeyAlgorithms, PubkeyAcceptedAlgorithms, etc.
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM: supported in current releases; the sources don't state the first version. On by default: ML-KEM. Partial or experimental: ML-DSA; check the notes before relying on it."
+last_verified: 2026-11-09
+pipeline:
+  watch_urls:
+    - https://www.openssh.com/releasenotes.html

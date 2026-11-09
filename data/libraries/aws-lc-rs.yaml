@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: aws-lc-rs
+name: aws-lc-rs
+ecosystem: rust
+description: Rust bindings to AWS-LC with a ring-compatible API.
+repo: https://github.com/aws/aws-lc-rs
+package_names:
+  cargo:
+    - aws-lc-rs
+delegates_to:
+  - id: aws-lc
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 1.12.0
+    experimental: false
+    sources:
+      - url: https://github.com/aws/aws-lc-rs/releases/tag/v1.12.0
+        title: aws-lc-rs v1.12.0
+        kind: release-notes
+        quote: "The APIs for ***ML-KEM***, ***kbkdf*** and ***sskdf*** are now stable — @justsmth in #628"
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: yes
+    since_version: 1.18.0
+    experimental: false
+    sources:
+      - url: https://github.com/aws/aws-lc-rs/releases/tag/v1.18.0
+        title: aws-lc-rs v1.18.0
+        kind: release-notes
+        quote: The ML-DSA signature APIs are now stable 🎉 by @justsmth in https://github.com/aws/aws-lc-rs/pull/1188 and https://github.com/aws/aws-lc-rs/pull/1189
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM: aws-lc-rs 1.12.0 or later. ML-DSA: aws-lc-rs 1.18.0 or later."
+last_verified: 2026-11-09

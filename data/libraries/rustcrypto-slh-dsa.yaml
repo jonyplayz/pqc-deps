@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: rustcrypto-slh-dsa
+name: RustCrypto slh-dsa
+ecosystem: rust
+description: Pure Rust SLH-DSA implementation from RustCrypto.
+repo: https://github.com/RustCrypto/signatures
+package_names:
+  cargo:
+    - slh-dsa
+applicable_algorithms:
+  - slh-dsa
+overall_status: available
+algorithms:
+  slh-dsa:
+    support: yes
+    sources:
+      - url: https://docs.rs/slh-dsa
+        title: slh_dsa - Rust
+        kind: docs
+        quote: slh-dsa 0.1.0
+        retrieved: 2026-11-09
+      - url: https://docs.rs/slh-dsa
+        title: slh_dsa - Rust
+        kind: docs
+        quote: Pure Rust implementation of the SLH-DSA (aka SPHINCS+) signature scheme.
+        retrieved: 2026-11-09
+      - url: https://docs.rs/slh-dsa
+        title: slh_dsa - Rust
+        kind: docs
+        quote: Implemented based on the FIPS-205 Standard.
+        retrieved: 2026-11-09
+upgrade_notes: "SLH-DSA: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-09
+pipeline:
+  watch_urls:
+    - https://docs.rs/slh-dsa

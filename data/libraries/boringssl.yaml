@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: boringssl
+name: BoringSSL
+ecosystem: c-cpp
+description: Google's fork of OpenSSL, used in Chrome and Android.
+homepage: https://boringssl.googlesource.com/boringssl
+repo: https://github.com/google/boringssl
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

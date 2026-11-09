@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: requests
+name: Requests
+ecosystem: python
+description: HTTP library for Python.
+homepage: https://requests.readthedocs.io
+repo: https://github.com/psf/requests
+package_names:
+  pypi:
+    - requests
+delegates_to:
+  - id: urllib3
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+last_verified: 2026-11-08

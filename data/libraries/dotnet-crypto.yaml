@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: dotnet-crypto
+name: .NET cryptography
+ecosystem: dotnet
+description: System.Security.Cryptography and SslStream in .NET.
+homepage: https://learn.microsoft.com/dotnet/standard/security/cryptography-model
+repo: https://github.com/dotnet/runtime
+implicit_for:
+  - nuget
+delegates_to:
+  - id: openssl
+    condition: on Linux
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: partial
+algorithms:
+  ml-kem:
+    support: partial
+    sources:
+      - url: https://github.com/dotnet/runtime/pull/133046
+        title: "PR #133046: KEM support for EnvelopedCms"
+        kind: pull-request
+        quote: This implements ML-KEM and Composite ML-KEM API surface for EnvelopedCms.
+        retrieved: 2026-11-09
+      - url: https://github.com/dotnet/runtime/pull/134531
+        title: "PR #134531: HPKE: Managed ML-KEM and Hybrid ML-KEM"
+        kind: pull-request
+        quote: This implements ML-KEM and Hybrid ML-KEM drafts, per IETF https://datatracker.ietf.org/doc/draft-ietf-hpke-pq/.
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: partial
+    sources:
+      - url: https://github.com/dotnet/runtime/releases/tag/v10.0.10
+        title: .NET 10.0.10
+        kind: release-notes
+        quote: "* [release/10.0] Fix blob type in CopyWithPrivateKey for ML-DSA by @github-actions[bot] in https://github.com/dotnet/runtime/pull/129865"
+        retrieved: 2026-11-09
+      - url: https://github.com/dotnet/runtime/pull/135062
+        title: "PR #135062: Disable PreHash tests on AZL4 and fix external-mu on AZL4"
+        kind: pull-request
+        quote: 2. SymCrypt, thus SCOSSL, does not support "raw" ML-DSA which .NET uses for PreHash signing. Disable the PreHash tests on Azure Linux.
+        retrieved: 2026-11-09
+upgrade_notes: "Partial or experimental: ML-KEM and ML-DSA; check the notes before relying on it."
+last_verified: 2026-11-09

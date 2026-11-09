@@ -4,6 +4,7 @@
  * Used to try the pipeline on free tiers. Claude is always called through the
  * official SDK in anthropic.ts, never through this adapter.
  */
+import { withRetry } from '../fetch/http';
 import type { LlmClient, LlmRequest } from './types';
 
 export function openAiCompatibleClient(opts: {
@@ -49,13 +50,16 @@ export function openAiCompatibleClient(opts: {
         },
       ];
       const base = { model: opts.model, messages, temperature: 0 };
-      try {
-        return await call({ ...base, response_format: { type: 'json_object' } });
-      } catch (e) {
-        // Some providers reject response_format; retry once without it.
-        if ((e as { status?: number }).status === 400) return call(base);
-        throw e;
-      }
+      // Free tiers often answer 429/503 under load: back off and retry.
+      return withRetry(async () => {
+        try {
+          return await call({ ...base, response_format: { type: 'json_object' } });
+        } catch (e) {
+          // Some providers reject response_format; retry once without it.
+          if ((e as { status?: number }).status === 400) return call(base);
+          throw e;
+        }
+      }, [10_000, 30_000, 60_000]);
     },
   };
 }

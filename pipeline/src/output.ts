@@ -103,7 +103,7 @@ export function reportMarkdown(r: RunResult, existing: Library): string {
     if (r.library.upgrade_notes)
       lines.push(
         '',
-        `**Upgrade notes (model-written, check wording):** ${r.library.upgrade_notes}`,
+        `**Upgrade notes (generated from the verified claims):** ${r.library.upgrade_notes}`,
       );
     lines.push('');
   }

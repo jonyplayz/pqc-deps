@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: jsonwebtoken
+name: jsonwebtoken
+ecosystem: javascript
+description: JSON Web Token implementation for Node.js.
+repo: https://github.com/auth0/node-jsonwebtoken
+package_names:
+  npm:
+    - jsonwebtoken
+delegates_to:
+  - id: nodejs-crypto
+applicable_algorithms:
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08

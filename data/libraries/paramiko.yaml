@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: paramiko
+name: Paramiko
+ecosystem: python
+description: SSHv2 protocol implementation for Python.
+homepage: https://www.paramiko.org
+repo: https://github.com/paramiko/paramiko
+package_names:
+  pypi:
+    - paramiko
+delegates_to:
+  - id: python-cryptography
+    condition: for primitives
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    sources:
+      - url: https://www.paramiko.org/changelog.html
+        title: Changelog — Paramiko documentation
+        kind: release-notes
+        quote: "[Feature]: Added support for the mlkem768x25519-sha256 post-quantum"
+        retrieved: 2026-11-09
+      - url: https://www.paramiko.org/changelog.html
+        title: Changelog — Paramiko documentation
+        kind: release-notes
+        quote: The new method is enabled automatically when the installed cryptography library exposes ML-KEM
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-09
+pipeline:
+  watch_urls:
+    - https://www.paramiko.org/changelog.html

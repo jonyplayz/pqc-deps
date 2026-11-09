@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: rustls
+name: rustls
+ecosystem: rust
+description: TLS library written in Rust.
+repo: https://github.com/rustls/rustls
+package_names:
+  cargo:
+    - rustls
+delegates_to:
+  - id: aws-lc-rs
+    condition: with the aws-lc-rs crypto provider
+  - id: ring
+    condition: with the ring crypto provider
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - hybrid-tls
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    sources:
+      - url: https://github.com/rustls/rustls/releases/tag/v/0.23.37
+        title: 0.23.37
+        kind: release-notes
+        quote: Adds support for ML-KEM-1024 key exchange.
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: yes
+    since_version: 0.23.44
+    default_enabled: true
+    sources:
+      - url: https://github.com/rustls/rustls/releases/tag/v/0.23.44
+        title: 0.23.44
+        kind: release-notes
+        quote: Support for post-quantum secure ML-DSA certificates is now enabled by default in the aws-lc-rs crypto provider.
+        retrieved: 2026-11-09
+  hybrid-tls:
+    support: yes
+    since_version: 0.23.22
+    sources:
+      - url: https://github.com/rustls/rustls/releases/tag/v/0.23.22
+        title: 0.23.22
+        kind: release-notes
+        quote: Support for post-quantum-secure key exchange using X25519MLKEM768 when using the `aws-lc-rs` provider.
+        retrieved: 2026-11-09
+upgrade_notes: "hybrid TLS key exchange: rustls 0.23.22 or later. ML-DSA: rustls 0.23.44 or later. ML-KEM: supported in current releases; the sources don't state the first version. On by default: ML-DSA."
+last_verified: 2026-11-09

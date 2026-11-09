@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: bouncycastle-csharp
+name: Bouncy Castle (C#)
+ecosystem: dotnet
+description: Cryptography library for .NET.
+homepage: https://www.bouncycastle.org
+repo: https://github.com/bcgit/bc-csharp
+package_names:
+  nuget:
+    - BouncyCastle.Cryptography
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: partial
+algorithms:
+  ml-kem:
+    support: partial
+    sources:
+      - url: https://www.bouncycastle.org/download/bouncy-castle-c/
+        title: Download Bouncy Castle C# .NET - Bouncycastle
+        kind: docs
+        quote: "- TLS: Hybrid ECDHE-MLKEM key shares in TLS 1.3 per draft-ietf-tls-ecdhe-mlkem-00."
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: partial
+    sources:
+      - url: https://www.bouncycastle.org/download/bouncy-castle-c/
+        title: Download Bouncy Castle C# .NET - Bouncycastle
+        kind: docs
+        quote: "- TLS: ML-DSA support in TLS 1.3 per draft-ietf-tls-mldsa-00."
+        retrieved: 2026-11-09
+  slh-dsa:
+    support: partial
+    sources:
+      - url: https://www.bouncycastle.org/download/bouncy-castle-c/
+        title: Download Bouncy Castle C# .NET - Bouncycastle
+        kind: docs
+        quote: "- TLS: SLH-DSA support in TLS 1.3 per draft-reddy-tls-slhdsa-01."
+        retrieved: 2026-11-09
+  hybrid-tls:
+    support: partial
+    sources:
+      - url: https://www.bouncycastle.org/download/bouncy-castle-c/
+        title: Download Bouncy Castle C# .NET - Bouncycastle
+        kind: docs
+        quote: "- TLS: Hybrid ECDHE-MLKEM key shares in TLS 1.3 per draft-ietf-tls-ecdhe-mlkem-00."
+        retrieved: 2026-11-09
+  hqc:
+    support: partial
+    sources:
+      - url: https://www.bouncycastle.org/download/bouncy-castle-c/
+        title: Download Bouncy Castle C# .NET - Bouncycastle
+        kind: docs
+        quote: "- HQC: Update to v5."
+        retrieved: 2026-11-09
+upgrade_notes: "Partial or experimental: ML-KEM, ML-DSA, SLH-DSA and hybrid TLS key exchange; check the notes before relying on it."
+last_verified: 2026-11-09
+pipeline:
+  watch_urls:
+    - https://www.bouncycastle.org/download/bouncy-castle-c/

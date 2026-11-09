@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: curl
+name: curl / libcurl
+ecosystem: c-cpp
+description: Command-line tool and library for transferring data with URLs; uses a pluggable TLS backend.
+homepage: https://curl.se
+repo: https://github.com/curl/curl
+delegates_to:
+  - id: openssl
+    condition: when built with the OpenSSL backend
+  - id: wolfssl
+    condition: when built with the wolfSSL backend
+  - id: gnutls
+    condition: when built with the GnuTLS backend
+applicable_algorithms:
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-08
