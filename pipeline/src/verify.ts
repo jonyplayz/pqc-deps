@@ -223,6 +223,20 @@ export function verifyProposal(
       });
       continue;
     }
+    // If every quote calls it experimental, it isn't stable support.
+    let support = c.support;
+    let experimental = c.experimental;
+    if (ev.every((e) => /\bexperimental\b/i.test(e.quote))) {
+      if (support === 'yes') {
+        dropped.push({
+          field: `algorithms.${a}.support`,
+          claim: 'yes',
+          reason: 'every quote says experimental; recorded as partial',
+        });
+        support = 'partial';
+      }
+      experimental = true;
+    }
     let since = c.since_version ?? undefined;
     if (since && !versionMentioned(since, ev, docs)) {
       dropped.push({
@@ -242,10 +256,10 @@ export function verifyProposal(
       defaultOn = null;
     }
     algorithms[a] = {
-      support: c.support,
+      support,
       ...(since ? { since_version: since } : {}),
       ...(defaultOn !== null ? { default_enabled: defaultOn } : {}),
-      ...(c.experimental !== null ? { experimental: c.experimental } : {}),
+      ...(experimental !== null ? { experimental } : {}),
       // The model's free-text notes are not verified, so they go to the reviewer, not the data.
       sources: toSources(ev, docs, today),
     };

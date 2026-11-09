@@ -725,3 +725,51 @@ describe('third-run fixes', () => {
     expect(r.reviewerNotes).toContain('ml-kem (model note, unverified): ML-KEM-1004 is supported');
   });
 });
+
+describe('final-review rule', () => {
+  it('a "yes" whose every quote says experimental becomes partial + experimental', async () => {
+    const docs: FetchedDoc[] = [
+      {
+        url: 'https://example.com/NEWS',
+        title: 'NEWS',
+        kind: 'release-notes',
+        text: '* Version 3.8.8\n** Experimental support for X25519MLKEM768 key exchange in TLS 1.3\n** Support for ML-KEM-1024 key encapsulation',
+      },
+    ];
+    const p: Proposal = {
+      ...fakeProposal(),
+      algorithms: {
+        'ml-kem': claim({
+          support: 'yes',
+          evidence: [
+            { doc: 'D1', quote: 'Experimental support for X25519MLKEM768 key exchange in TLS 1.3' },
+            { doc: 'D1', quote: 'Support for ML-KEM-1024 key encapsulation' },
+          ],
+        }),
+        'ml-dsa': claim(),
+        'slh-dsa': claim(),
+        'hybrid-tls': claim({
+          support: 'yes',
+          evidence: [
+            { doc: 'D1', quote: 'Experimental support for X25519MLKEM768 key exchange in TLS 1.3' },
+          ],
+        }),
+        'fn-dsa': claim(),
+        hqc: claim(),
+      },
+      roadmap: null,
+      fips: null,
+      overall_status: 'available',
+    };
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence: async () => ({ docs, warnings: [] }),
+      llm: fakeLlm(JSON.stringify(p)),
+      today: TODAY,
+    });
+    expect(r.library!.algorithms['hybrid-tls']).toMatchObject({
+      support: 'partial',
+      experimental: true,
+    });
+    expect(r.library!.algorithms['ml-kem']).toMatchObject({ support: 'yes' }); // one quote isn't experimental
+  });
+});
