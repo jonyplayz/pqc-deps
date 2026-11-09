@@ -141,9 +141,9 @@ npm run stale -- --days 90              # list entries due for re-verification
 
 Cloudflare Pages Functions (`site/functions`, logic in `site/server`) add:
 
-- **Admins** (behind Cloudflare Access): `/admin` with the request queue,
+- **Admins** (sign in with GitHub; repo maintainers only): `/admin` with the request queue,
   _Refresh now_ for any library, _Add library_, and recent runs and proposal PRs.
-  Library pages also show _Refresh now_ when you're logged in.
+  Library pages also show _Refresh now_ when you're signed in.
 - **Visitors**: _Request a re-check_ on library pages and a _Request a library_
   form at `/request`. Both are protected by Turnstile, deduplicated and capped
   per day. They become GitHub issues that an admin approves or rejects.

@@ -43,38 +43,49 @@ Cloudflare dashboard → **Turnstile** → Add widget.
 | `TURNSTILE_SECRET`   | secret key                               | **secret** |
 | `PUBLIC_DAILY_CAP`   | optional, default `30` requests per 24 h | text       |
 
-## 3. Cloudflare Access (admin login)
+## 3. "Sign in with GitHub" (admin login)
 
-Cloudflare dashboard → **Zero Trust** (free plan, up to 50 users). The first
-time, choose a team name; your team domain becomes
-`<team>.cloudflareaccess.com`.
+Admins sign in with their GitHub account. Anyone with **write, maintain or
+admin** access to the `pqc-deps` repo is an admin; add your co-founder as a
+collaborator to give them access, remove them to take it away. This is checked
+again on every admin action.
 
-Access → Applications → **Add an application → Self-hosted**:
+**A. Create a GitHub OAuth app**: GitHub → Settings → Developer settings →
+**OAuth Apps** → **New OAuth App**
+(https://github.com/settings/applications/new):
 
-- Application name: `PQC Deps admin`.
-- Destinations (add both):
-  - Domain `pqc-deps.pages.dev`, path `admin`
-  - Domain `pqc-deps.pages.dev`, path `api/admin/*`
-- Policy: **Allow**, Include → **Emails** → your email and your co-founder's.
-- Login method: **One-time PIN** (email code) is enough; GitHub login is optional.
+- Application name: `PQC Deps admin`
+- Homepage URL: `https://pqc-deps.pages.dev`
+- Authorization callback URL: `https://pqc-deps.pages.dev/api/auth/callback`
+- Leave "Enable Device Flow" off, then **Register application**.
+- On the next page, copy the **Client ID**, click **Generate a new client
+  secret** and copy the secret.
 
-After saving, open the application and copy its **Application Audience (AUD)
-Tag**.
+**B. Make a session secret**: any random string of 32+ characters, for example:
 
-| Name                 | Value                                      | Type |
-| -------------------- | ------------------------------------------ | ---- |
-| `ACCESS_TEAM_DOMAIN` | `<team>.cloudflareaccess.com`              | text |
-| `ACCESS_AUD`         | the AUD tag                                | text |
-| `ADMIN_EMAILS`       | optional extra allow-list, comma separated | text |
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
-The site checks the Access login token itself too, so admin features stay off
-anywhere Access isn't in front (for example on preview URLs).
+**C. Cloudflare variables**:
+
+| Name                         | Value                                         | Type       |
+| ---------------------------- | --------------------------------------------- | ---------- |
+| `GITHUB_OAUTH_CLIENT_ID`     | the Client ID                                 | text       |
+| `GITHUB_OAUTH_CLIENT_SECRET` | the client secret                             | **secret** |
+| `SESSION_SECRET`             | the random string                             | **secret** |
+| `ADMIN_GITHUB_USERS`         | optional: extra admin logins, comma separated | text       |
+
+The site requests **no GitHub permissions** from admins (only who they are),
+doesn't store their GitHub token, and keeps them signed in for 12 hours with a
+signed, HttpOnly cookie. Sign-in only works on `pqc-deps.pages.dev`, the
+callback URL registered above; on preview URLs admin features stay off.
 
 ## 4. Check it works
 
-1. Open `https://pqc-deps.pages.dev/admin`: Access asks for your email and sends a
-   code; then you see the requests queue, Refresh, Add library and activity.
-2. Open any library page while logged in: it shows **Refresh now**.
+1. Open `https://pqc-deps.pages.dev/admin` and click **Sign in with GitHub**.
+   After approving, you see the requests queue, Refresh, Add library and activity.
+2. Open any library page while signed in: it shows **Refresh now**.
 3. In a private window, open a library page: it shows **Request a re-check** with
    the Turnstile check. Submitting creates an issue labelled `public-request`
    that appears in the admin queue.
@@ -86,5 +97,6 @@ cp site/.dev.vars.example site/.dev.vars   # Turnstile test keys included
 npm run dev:functions                       # http://localhost:8788
 ```
 
-Admin login can't run locally (Access only exists on the real site); add a
-`GITHUB_TOKEN` to `site/.dev.vars` to test GitHub calls.
+Add a `GITHUB_TOKEN` to `site/.dev.vars` to test GitHub calls. To test sign-in
+locally, create a second OAuth app whose callback URL is
+`http://localhost:8788/api/auth/callback` and put its ID and secret there.
