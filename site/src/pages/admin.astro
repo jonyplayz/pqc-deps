@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import AdminApp from '../components/actions/AdminApp.tsx';
+---
+
+<Base title="Admin" noindex>
+  <h1>Admin</h1>
+  <p class="lede">
+    Review visitor requests, refresh libraries and add new ones. Every change arrives as a pull
+    request for review before it's published.
+  </p>
+  <AdminApp client:load />
+  <noscript><p class="notice">The admin page needs JavaScript.</p></noscript>
+</Base>

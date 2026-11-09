@@ -213,3 +213,91 @@ th {
   border-radius: var(--radius);
   background: var(--surface);
 }
+
+/* ---- request / admin actions ---- */
+.act {
+  margin-top: 0.75rem;
+}
+.act-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  max-width: 46rem;
+}
+.act-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.75rem 1rem;
+}
+.act-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.act-field small {
+  font-weight: 400;
+  color: var(--muted);
+}
+.act-form textarea,
+.act-form input,
+.act-form select {
+  width: 100%;
+}
+.act-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.act-muted {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.act-ok,
+.act-err {
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.act-ok {
+  background: var(--st-ready-bg);
+  color: var(--st-ready);
+}
+.act-err {
+  background: var(--st-no-plan-bg);
+  color: var(--st-no-plan);
+}
+.act-err-inline {
+  color: var(--st-no-plan);
+  font-size: 0.875rem;
+}
+.act-small {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+}
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.admin {
+  display: grid;
+  gap: 1rem;
+}
+.admin h2 {
+  margin-top: 0.25rem;
+}
+.admin-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+.admin-list pre {
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+  background: var(--surface-2);
+  padding: 0.5rem;
+  border-radius: 6px;
+}
