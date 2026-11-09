@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import LibraryForm from '../components/actions/LibraryForm.tsx';
+---
+
+<Base
+  title="Request a library"
+  description="Ask PQC Deps to track an open-source library's post-quantum cryptography support."
+>
+  <div class="prose">
+    <h1>Request a library</h1>
+    <p class="lede">
+      Missing a library you depend on? Tell us about it. A maintainer reviews each request; once
+      approved, we check that the repository and packages exist, gather evidence about its
+      post-quantum support, and review it before it appears in the catalog.
+    </p>
+    <p class="muted small">
+      Only the library name, ecosystem and repository are required. We don't ask for, or store,
+      any personal information. Requests are published as public GitHub issues.
+    </p>
+  </div>
+  <LibraryForm client:visible mode="public" />
+  <noscript><p class="notice">This form needs JavaScript.</p></noscript>
+</Base>

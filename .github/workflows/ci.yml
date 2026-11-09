@@ -95,6 +95,9 @@ jobs:
       - name: Cloudflare not configured
         if: env.CF_CONFIGURED != 'true'
         run: echo "::notice::Skipping deploy. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets to enable it (see README)."
+      # The Pages Functions (site/functions + site/server) are bundled at deploy time.
+      - uses: actions/checkout@v7
+        if: env.CF_CONFIGURED == 'true'
       - uses: actions/download-artifact@v8
         if: env.CF_CONFIGURED == 'true'
         with:
@@ -115,7 +118,9 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site/dist --project-name=pqc-deps --branch=${{ github.head_ref || github.ref_name }}
+          # Run from site/ so wrangler picks up site/functions.
+          workingDirectory: site
+          command: pages deploy dist --project-name=pqc-deps --branch=${{ github.head_ref || github.ref_name }}
       - name: Summary
         if: env.CF_CONFIGURED == 'true'
         env:

@@ -28,7 +28,7 @@ const supported = (l: (typeof libs)[number]) =>
   <h1>Library catalog</h1>
   <p class="lede">
     {libs.length} libraries. Filter by ecosystem, status or algorithm; click a library for versions,
-    roadmap and sources.
+    roadmap and sources. Missing one? <a href="/request">Request a library</a>.
   </p>
 
   <form class="filters" id="filters" role="search" onsubmit="return false">
@@ -122,7 +122,7 @@ const supported = (l: (typeof libs)[number]) =>
         }
       </tbody>
     </table>
-    <p id="empty" class="empty" hidden>No libraries match these filters.</p>
+    <p id="empty" class="empty" hidden>No libraries match these filters. <a href="/request">Request a library</a>?</p>
   </div>
   <p class="muted small legend">
     ✓ supported · ◐ partial or experimental · ✕ not supported · ? unknown · – not applicable

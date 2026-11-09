@@ -1,4 +1,5 @@
 name: Evidence refresh
+run-name: "Evidence refresh${{ inputs.libraries && format(': {0}', inputs.libraries) || '' }}"
 
 # Daily: re-run the evidence pipeline and open a PR with proposed changes
 # (never commits to main), and keep an issue listing entries past their

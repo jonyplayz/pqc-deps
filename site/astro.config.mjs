@@ -11,5 +11,5 @@ export default defineConfig({
   // matches every internal link and canonical URL.
   trailingSlash: 'never',
   build: { format: 'file' },
-  integrations: [preact(), sitemap()],
+  integrations: [preact(), sitemap({ filter: (page) => !page.includes('/admin') })],
 });

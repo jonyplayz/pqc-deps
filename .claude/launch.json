@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:examples"],
       "port": 4321
+    },
+    {
+      "name": "site-functions",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:functions", "-w", "@pqc-deps/site"],
+      "port": 8788
     }
   ]
 }
