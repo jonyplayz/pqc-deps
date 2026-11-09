@@ -1,4 +1,5 @@
 name: Add library
+run-name: 'Add library: ${{ inputs.name || github.event.issue.title }}'
 
 # Adds a library to the catalog as a pull request (never commits to main):
 # validate → verify repo/packages exist → gather evidence → open PR.
