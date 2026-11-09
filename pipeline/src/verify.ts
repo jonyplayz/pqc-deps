@@ -238,7 +238,11 @@ export function verifyProposal(
       experimental = true;
     }
     let since = c.since_version ?? undefined;
-    if (since && !versionMentioned(since, ev, docs)) {
+    // The first *stable* version: when some quotes are about an experimental
+    // precursor, the version must come from the others.
+    const stableEv = ev.filter((e) => !/\bexperimental\b/i.test(e.quote));
+    const versionEv = stableEv.length ? stableEv : ev;
+    if (since && !versionMentioned(since, versionEv, docs)) {
       dropped.push({
         field: `algorithms.${a}.since_version`,
         claim: since,

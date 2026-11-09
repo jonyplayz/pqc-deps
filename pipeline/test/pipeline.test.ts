@@ -773,3 +773,61 @@ describe('final-review rule', () => {
     expect(r.library!.algorithms['ml-kem']).toMatchObject({ support: 'yes' }); // one quote isn't experimental
   });
 });
+
+describe('since-version from stable evidence', () => {
+  it('ignores the version of an experimental precursor when stable evidence exists', async () => {
+    const docs: FetchedDoc[] = [
+      {
+        url: 'https://example.com/news',
+        title: 'Release Notes',
+        kind: 'release-notes',
+        text: [
+          'Version 3.7.0, 2025-02-04',
+          '- In TLS enable the hybrid x25519/ML-KEM-768 post quantum secure key exchange by default.',
+          'Version 3.2.0, 2023-10-09',
+          '- Add support for (experimental!) post-quantum secure key exchange in TLS 1.3',
+        ].join('\n'),
+      },
+    ];
+    const ev = [
+      {
+        doc: 'D1',
+        quote: 'Add support for (experimental!) post-quantum secure key exchange in TLS 1.3',
+      },
+      {
+        doc: 'D1',
+        quote:
+          'In TLS enable the hybrid x25519/ML-KEM-768 post quantum secure key exchange by default.',
+      },
+    ];
+    const run = (since: string) =>
+      proposeForLibrary(lib(), {
+        fetchEvidence: async () => ({ docs, warnings: [] }),
+        llm: fakeLlm(
+          JSON.stringify({
+            ...fakeProposal(),
+            algorithms: {
+              ...fakeProposal().algorithms,
+              'ml-kem': claim(),
+              'ml-dsa': claim(),
+              'slh-dsa': claim(),
+              'hybrid-tls': claim({
+                support: 'yes',
+                since_version: since,
+                default_enabled: true,
+                evidence: ev,
+              }),
+            },
+            roadmap: null,
+            fips: null,
+          }),
+        ),
+        today: TODAY,
+      });
+    expect((await run('3.2.0')).library!.algorithms['hybrid-tls']!.since_version).toBeUndefined();
+    expect((await run('3.7.0')).library!.algorithms['hybrid-tls']).toMatchObject({
+      since_version: '3.7.0',
+      default_enabled: true,
+    });
+  });
+});
