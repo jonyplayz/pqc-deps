@@ -19,6 +19,7 @@
     "packages/*/test",
     "vitest.config.ts",
     "pipeline/src",
-    "pipeline/test"
+    "pipeline/test",
+    "site/test"
   ]
 }
