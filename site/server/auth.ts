@@ -54,22 +54,60 @@ export async function sessionSecret(env: Env): Promise<string> {
   return [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** Is this GitHub user an admin of the site? */
+/**
+ * Is this GitHub user an admin of the site? `problem` is set when GitHub
+ * couldn't answer (e.g. the site token lacks a permission), so callers can
+ * report a configuration issue instead of "not a maintainer".
+ */
+export async function checkAdmin(
+  login: string,
+  env: Env,
+  fetchImpl: typeof fetch = fetch,
+): Promise<{ admin: boolean; problem?: string }> {
+  if (allowList(env).includes(login.toLowerCase())) return { admin: true };
+  let gh: GitHub;
+  try {
+    gh = GitHub.fromEnv(env, fetchImpl);
+  } catch (e) {
+    return { admin: false, problem: (e as Error).message };
+  }
+  try {
+    const r = await gh.request<{ permission: string }>(
+      'GET',
+      `/repos/{repo}/collaborators/${encodeURIComponent(login)}/permission`,
+    );
+    return { admin: ['admin', 'maintain', 'write'].includes(r.permission) };
+  } catch (e) {
+    // Fall back to ownership, which only needs read access to the repo.
+    try {
+      const repo = await gh.request<{ owner: { login: string } }>('GET', '/repos/{repo}');
+      if (repo.owner.login.toLowerCase() === login.toLowerCase()) return { admin: true };
+      return {
+        admin: false,
+        problem: `Could not check collaborator access (${(e as Error).message}). Give the site's GITHUB_TOKEN read access to the repository's collaborators, or list admins in ADMIN_GITHUB_USERS.`,
+      };
+    } catch (e2) {
+      return {
+        admin: false,
+        problem: `Could not reach the repository (${(e2 as Error).message}). Check the site's GITHUB_TOKEN and GITHUB_REPO.`,
+      };
+    }
+  }
+}
+
 export async function isAdmin(
   login: string,
   env: Env,
   fetchImpl: typeof fetch = fetch,
 ): Promise<boolean> {
-  if (allowList(env).includes(login.toLowerCase())) return true;
-  try {
-    const r = await GitHub.fromEnv(env, fetchImpl).request<{ permission: string }>(
-      'GET',
-      `/repos/{repo}/collaborators/${encodeURIComponent(login)}/permission`,
-    );
-    return ['admin', 'maintain', 'write'].includes(r.permission);
-  } catch {
-    return false;
-  }
+  return (await checkAdmin(login, env, fetchImpl)).admin;
+}
+
+async function assertAdmin(login: string, env: Env, fetchImpl: typeof fetch): Promise<void> {
+  const r = await checkAdmin(login, env, fetchImpl);
+  if (r.admin) return;
+  if (r.problem) throw new HttpError(503, r.problem);
+  throw new HttpError(403, `@${login} is not a maintainer of this project.`);
 }
 
 /** Returns the admin's GitHub login, or throws 401/403. */
@@ -83,9 +121,7 @@ export async function requireAdmin(
   if (!secret) throw new HttpError(503, 'Admin login is not configured.');
   const session = await verifySession(readCookie(request, SESSION_COOKIE), secret, now);
   if (!session) throw new HttpError(401, 'Not signed in.');
-  if (!(await isAdmin(session.login, env, fetchImpl))) {
-    throw new HttpError(403, `@${session.login} is not a maintainer of this project.`);
-  }
+  await assertAdmin(session.login, env, fetchImpl);
   return session.login;
 }
 
@@ -153,9 +189,7 @@ export async function finishLogin(
   if (!userRes.ok || !login) throw new HttpError(401, 'Could not read your GitHub account.');
   // The user's GitHub token is not stored anywhere; only the login goes in the session.
 
-  if (!(await isAdmin(login, env, fetchImpl))) {
-    throw new HttpError(403, `@${login} is not a maintainer of this project.`);
-  }
+  await assertAdmin(login, env, fetchImpl);
   const session = await signSession(
     { login, exp: Math.floor(now / 1000) + SESSION_SECONDS },
     await sessionSecret(env),

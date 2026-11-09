@@ -159,7 +159,16 @@ describe('Sign in with GitHub', () => {
   const now = Date.UTC(2026, 10, 9);
 
   /** Fake github.com OAuth + API. `permission` is what the repo reports for the user. */
-  function fakeGitHub(opts: { login?: string; permission?: string; tokenOk?: boolean } = {}) {
+  function fakeGitHub(
+    opts: {
+      login?: string;
+      permission?: string;
+      tokenOk?: boolean;
+      /** HTTP status for the collaborator-permission endpoint (e.g. 403 when the token can't read it). */
+      permissionStatus?: number;
+      repoStatus?: number;
+    } = {},
+  ) {
     const calls: string[] = [];
     const f: typeof fetch = async (input, init) => {
       const url = new URL(String(input));
@@ -182,7 +191,12 @@ describe('Sign in with GitHub', () => {
       if (url.pathname === '/user')
         return new Response(JSON.stringify({ login: opts.login ?? 'jonyplayz' }));
       if (url.pathname.endsWith('/permission')) {
+        if (opts.permissionStatus) return new Response('{}', { status: opts.permissionStatus });
         return new Response(JSON.stringify({ permission: opts.permission ?? 'admin' }));
+      }
+      if (url.pathname === '/repos/jonyplayz/pqc-deps') {
+        if (opts.repoStatus) return new Response('{}', { status: opts.repoStatus });
+        return new Response(JSON.stringify({ owner: { login: 'jonyplayz' } }));
       }
       return new Response('{}', { status: 404 });
     };
@@ -587,5 +601,61 @@ describe('admin actions', () => {
       'Evidence refresh: openssl',
     ]);
     expect(r.proposals.map((p: any) => p.number)).toEqual([7]);
+  });
+});
+
+describe('maintainer check fallbacks (found in the live test)', () => {
+  const now = Date.UTC(2026, 10, 9);
+  const fake = (permissionStatus?: number, repoStatus?: number) => {
+    const f: typeof fetch = async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.endsWith('/permission')) {
+        return permissionStatus
+          ? new Response('{}', { status: permissionStatus })
+          : new Response(JSON.stringify({ permission: 'read' }));
+      }
+      if (url.pathname === '/repos/jonyplayz/pqc-deps') {
+        return repoStatus
+          ? new Response('{}', { status: repoStatus })
+          : new Response(JSON.stringify({ owner: { login: 'jonyplayz' } }));
+      }
+      return new Response('{}', { status: 404 });
+    };
+    return f;
+  };
+  const sessionReq = async (login: string) => {
+    const token = await signSession({ login, exp: now / 1000 + 600 }, env().SESSION_SECRET!);
+    return new Request(`${ORIGIN}/api/admin/whoami`, {
+      headers: { Cookie: `${SESSION_COOKIE}=${encodeURIComponent(token)}` },
+    });
+  };
+
+  it('the repo owner is an admin even when the token cannot read collaborator permissions', async () => {
+    expect(await requireAdmin(await sessionReq('jonyplayz'), env(), fake(403), now)).toBe(
+      'jonyplayz',
+    );
+  });
+
+  it('others get a configuration error (503) naming the problem, not "not a maintainer"', async () => {
+    await expect(
+      requireAdmin(await sessionReq('cofounder'), env(), fake(403), now),
+    ).rejects.toMatchObject({
+      status: 503,
+      message: expect.stringMatching(
+        /Could not check collaborator access \(GitHub returned 403\.\)/,
+      ),
+    });
+    await expect(
+      requireAdmin(await sessionReq('cofounder'), env(), fake(401, 401), now),
+    ).rejects.toMatchObject({
+      status: 503,
+      message: expect.stringMatching(/Check the site's GITHUB_TOKEN/),
+    });
+  });
+
+  it('a readable "read" permission still means not a maintainer (403)', async () => {
+    await expect(
+      requireAdmin(await sessionReq('stranger'), env(), fake(), now),
+    ).rejects.toMatchObject({ status: 403 });
   });
 });
