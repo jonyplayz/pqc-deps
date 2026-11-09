@@ -27,7 +27,8 @@
     "pipeline": "npm run -s propose -w @pqc-deps/pipeline --",
     "stale": "npm run -s stale -w @pqc-deps/pipeline --",
     "identity": "npm run -s identity -w @pqc-deps/pipeline --",
-    "add-library": "npm run -s add-library -w @pqc-deps/pipeline --"
+    "add-library": "npm run -s add-library -w @pqc-deps/pipeline --",
+    "dev:functions": "npm run build && npm run dev:functions -w @pqc-deps/site"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

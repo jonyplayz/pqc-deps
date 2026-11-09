@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "dev:functions": "wrangler pages dev dist --port 8788"
   },
   "dependencies": {
     "@astrojs/preact": "^6.1.2",

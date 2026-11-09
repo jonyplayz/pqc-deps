@@ -1,0 +1,10 @@
+# Copy to site/.dev.vars for `npm run dev:functions` (git-ignored).
+# These Turnstile keys are Cloudflare's public test keys: the check always passes.
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+GITHUB_REPO=jonyplayz/pqc-deps
+# A fine-grained token to test GitHub calls locally (leave empty to skip):
+GITHUB_TOKEN=
+# Admin login can't be tested locally (Cloudflare Access only runs on the real site).
+ACCESS_TEAM_DOMAIN=
+ACCESS_AUD=

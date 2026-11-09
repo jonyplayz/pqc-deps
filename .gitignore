@@ -13,3 +13,7 @@ graphify-out/
 proposals/*
 !proposals/.gitkeep
 !proposals/README.md
+
+# Local secrets for Pages Functions / wrangler
+.dev.vars
+.wrangler/

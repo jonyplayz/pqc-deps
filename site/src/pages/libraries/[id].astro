@@ -236,11 +236,11 @@ const desc = `${lib.name} post-quantum status: ${status.label}. ML-KEM, ML-DSA, 
 
   <section class="fix card">
     <p>
-      Out of date? Ask us to re-check {lib.name} against its latest releases, or
-      <a href={correctionUrl(lib.id)}>suggest a correction</a> /
+      Out of date? Ask us to re-check {lib.name} against its latest releases, or{' '}
+      <a href={correctionUrl(lib.id)}>suggest a correction</a> or{' '}
       <a href={editUrl(lib.id)}>edit the data file</a> on GitHub.
     </p>
-    <LibraryActions client:visible id={lib.id} name={lib.name} />
+    <LibraryActions client:idle id={lib.id} name={lib.name} />
   </section>
   <p class="muted small">
     Machine-readable: <a href={`/api/libraries/${lib.id}.json`}>/api/libraries/{lib.id}.json</a> · Data from {SITE.name}, CC BY 4.0.
