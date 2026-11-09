@@ -1,0 +1,102 @@
+name: Add library
+
+# Adds a library to the catalog as a pull request (never commits to main):
+# validate → verify repo/packages exist → gather evidence → open PR.
+# Started by hand (or by the website admin page), or when a maintainer adds
+# the "approved" label to a "Request a library" issue.
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: Library name
+        required: true
+      ecosystem:
+        description: Ecosystem
+        required: true
+        type: choice
+        options: [c-cpp, go, rust, jvm, python, javascript, dotnet, platform]
+      repo:
+        description: Source repository URL (https)
+        required: true
+      packages:
+        description: 'Packages as registry:name, space separated (e.g. npm:jose pypi:cryptography)'
+        required: false
+      homepage:
+        description: Homepage URL (optional)
+        required: false
+      description:
+        description: Short description (optional)
+        required: false
+      applicable:
+        description: 'Applicable algorithms (e.g. ml-kem ml-dsa); empty = all four main ones'
+        required: false
+      delegates:
+        description: Catalog ids it delegates crypto to (optional)
+        required: false
+      watch_urls:
+        description: Pages to watch for evidence, space separated (optional)
+        required: false
+      id:
+        description: Catalog id (optional; derived from the name)
+        required: false
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: add-library
+  cancel-in-progress: false
+
+jobs:
+  add:
+    # Issues: only when a maintainer applies "approved" to a library request.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.label.name == 'approved' &&
+       contains(github.event.issue.labels.*.name, 'new-library'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'anthropic' }}
+      LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+      LLM_MODEL: ${{ vars.LLM_MODEL }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      # All user-provided values reach the script through environment
+      # variables and are validated there; none are interpolated into shell.
+      - name: Add the library and open a PR
+        env:
+          ISSUE: ${{ github.event.issue.number }}
+          ADD_NAME: ${{ inputs.name }}
+          ADD_ECOSYSTEM: ${{ inputs.ecosystem }}
+          ADD_REPO: ${{ inputs.repo }}
+          ADD_PACKAGES: ${{ inputs.packages }}
+          ADD_HOMEPAGE: ${{ inputs.homepage }}
+          ADD_DESCRIPTION: ${{ inputs.description }}
+          ADD_APPLICABLE: ${{ inputs.applicable }}
+          ADD_DELEGATES: ${{ inputs.delegates }}
+          ADD_WATCH_URLS: ${{ inputs.watch_urls }}
+          ADD_ID: ${{ inputs.id }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "issues" ]; then
+            npm run add-library -- --from-issue "$ISSUE" --pipeline --pr
+          else
+            npm run add-library -- --from-env --pipeline --pr
+          fi

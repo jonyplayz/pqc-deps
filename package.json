@@ -26,7 +26,8 @@
     "build:examples": "cross-env PQC_DATA_DIR=data/examples npm run build -w @pqc-deps/site",
     "pipeline": "npm run -s propose -w @pqc-deps/pipeline --",
     "stale": "npm run -s stale -w @pqc-deps/pipeline --",
-    "identity": "npm run -s identity -w @pqc-deps/pipeline --"
+    "identity": "npm run -s identity -w @pqc-deps/pipeline --",
+    "add-library": "npm run -s add-library -w @pqc-deps/pipeline --"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

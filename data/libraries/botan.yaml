@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: botan
+name: Botan
+ecosystem: c-cpp
+description: C++ cryptography library with TLS.
+homepage: https://botan.randombit.net
+repo: https://github.com/randombit/botan
+overall_status: ready
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 3.6.0
+    sources:
+      - url: https://botan.randombit.net/news.html
+        title: Release Notes — Botan
+        kind: release-notes
+        quote: "Add support for FIPS 203 ML-KEM, the NIST standardized version of Kyber (GH #3893)"
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: yes
+    since_version: 3.6.0
+    sources:
+      - url: https://botan.randombit.net/news.html
+        title: Release Notes — Botan
+        kind: release-notes
+        quote: "Add support for FIPS 204 ML-DSA, the NIST standardized version of Dilithium (GH #4270)"
+        retrieved: 2026-11-09
+  slh-dsa:
+    support: yes
+    since_version: 3.6.0
+    sources:
+      - url: https://botan.randombit.net/news.html
+        title: Release Notes — Botan
+        kind: release-notes
+        quote: "Add support for FIPS 205 SLH-DSA, the NIST standardized version of SPHINCS+ (GH #4291)"
+        retrieved: 2026-11-09
+  hybrid-tls:
+    support: yes
+    since_version: 3.7.0
+    default_enabled: true
+    sources:
+      - url: https://botan.randombit.net/news.html
+        title: Release Notes — Botan
+        kind: release-notes
+        quote: "In TLS enable the hybrid x25519/ML-KEM-768 post quantum secure key exchange by default for clients and servers. (GH #4305)"
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM, ML-DSA and SLH-DSA: Botan 3.6.0 or later. hybrid TLS key exchange: Botan 3.7.0 or later. On by default: hybrid TLS key exchange."
+last_verified: 2026-11-09
+pipeline:
+  watch_urls:
+    - https://botan.randombit.net/news.html
