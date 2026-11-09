@@ -9,15 +9,15 @@ exchange, since which version, and what's planned. Every claim links to a source
 
 ## Repository layout
 
-| Path | What |
-| --- | --- |
-| `site/` | Astro static site: home, catalog, library pages, methodology, about, JSON API. |
-| `packages/core` | Zod schema, lint rules, YAML loader, manifest parsers and matching (`src/check/`). Shared by site, pipeline and future CLI. |
-| `data/libraries/*.yaml` | The catalog. One file per library. |
-| `data/examples/*.yaml` | Fictional entries for tests and local development. |
-| `data/schema/library.schema.json` | JSON Schema generated from the Zod schema (editor autocomplete). |
-| `pipeline/` | Evidence pipeline: fetch sources, ask an LLM for a cited proposal, verify quotes, open a PR. |
-| `proposals/` | Local pipeline output awaiting human review (git-ignored). |
+| Path                              | What                                                                                                                        |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `site/`                           | Astro static site: home, catalog, library pages, methodology, about, JSON API.                                              |
+| `packages/core`                   | Zod schema, lint rules, YAML loader, manifest parsers and matching (`src/check/`). Shared by site, pipeline and future CLI. |
+| `data/libraries/*.yaml`           | The catalog. One file per library.                                                                                          |
+| `data/examples/*.yaml`            | Fictional entries for tests and local development.                                                                          |
+| `data/schema/library.schema.json` | JSON Schema generated from the Zod schema (editor autocomplete).                                                            |
+| `pipeline/`                       | Evidence pipeline: fetch sources, ask an LLM for a cited proposal, verify quotes, open a PR.                                |
+| `proposals/`                      | Local pipeline output awaiting human review (git-ignored).                                                                  |
 
 ## Local development
 
@@ -89,13 +89,13 @@ never commits to `main`.
 cp .env.example .env   # then fill in a provider
 ```
 
-| Variable | Meaning |
-| --- | --- |
-| `LLM_PROVIDER` | `anthropic` (default) or `openai-compatible` |
-| `ANTHROPIC_API_KEY` | For Claude. Default model `claude-opus-5-5`; override with `LLM_MODEL`. |
+| Variable                                   | Meaning                                                                                       |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `LLM_PROVIDER`                             | `anthropic` (default) or `openai-compatible`                                                  |
+| `ANTHROPIC_API_KEY`                        | For Claude. Default model `claude-opus-5-5`; override with `LLM_MODEL`.                       |
 | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | For `openai-compatible` providers (Gemini, Groq, OpenRouter, Ollama…), handy for free testing |
-| `LLM_DELAY_MS` | Pause between libraries (free-tier rate limits) |
-| `GITHUB_TOKEN` | Optional locally (falls back to `gh auth token`) |
+| `LLM_DELAY_MS`                             | Pause between libraries (free-tier rate limits)                                               |
+| `GITHUB_TOKEN`                             | Optional locally (falls back to `gh auth token`)                                              |
 
 Weaker free models usually produce more `unknown` fields, because more of
 their quotes fail verification. They don't produce more wrong claims.
