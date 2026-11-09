@@ -56,7 +56,33 @@ future CLI and GitHub Action can reuse it. Useful library fields:
 - `separate_versioning`: registries whose package versions don't follow the
   library's versions (e.g. a `-sys` binding crate), so no version comparison
 
-## Adding or editing a library
+## Adding a library
+
+All three ways validate the request, check that the repository, pages and
+packages really exist, gather evidence with the pipeline (when an LLM is
+configured), and end in a pull request for review.
+
+- **Command line**:
+
+  ```bash
+  npm run add-library -- --name Botan --ecosystem c-cpp \
+    --repo https://github.com/randombit/botan \
+    --homepage https://botan.randombit.net \
+    --watch https://botan.randombit.net/news.html \
+    --packages "pypi:example npm:example" --pipeline
+  ```
+
+  This writes `data/libraries/<id>.yaml` for you to review and commit. Add
+  `--pr` to open a pull request instead. Other options: `--description`,
+  `--applicable ml-kem,ml-dsa`, `--delegates openssl`, `--id`.
+
+- **GitHub Actions**: Actions → _Add library_ → _Run workflow_, then fill in
+  the form.
+- **Public request**: anyone can open a _Request a library_ issue. When a
+  maintainer adds the `approved` label, the _Add library_ workflow runs and
+  opens a PR that closes the issue (or comments on what needs fixing).
+
+## Editing a library by hand
 
 1. Create `data/libraries/<id>.yaml` (the file name must equal `id`). Start the
    file with `# yaml-language-server: $schema=../schema/library.schema.json`
