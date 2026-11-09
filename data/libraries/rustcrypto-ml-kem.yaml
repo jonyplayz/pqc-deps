@@ -9,9 +9,26 @@ package_names:
     - ml-kem
 applicable_algorithms:
   - ml-kem
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-08
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://docs.rs/ml-kem
+        title: ml_kem - Rust
+        kind: docs
+        quote: |-
+          Pure Rust implementation of the Module-Lattice-Based Key-Encapsulation Mechanism Standard
+          (formerly known as Kyber) as described in FIPS 203 (final).
+        retrieved: 2026-11-09
+      - url: https://docs.rs/ml-kem
+        title: ml_kem - Rust
+        kind: docs
+        quote: ml-kem-0.3.4
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-09
 pipeline:
   watch_urls:
     - https://docs.rs/ml-kem

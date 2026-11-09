@@ -15,9 +15,23 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-08
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    sources:
+      - url: https://www.paramiko.org/changelog.html
+        title: Changelog — Paramiko documentation
+        kind: release-notes
+        quote: "[Feature]: Added support for the mlkem768x25519-sha256 post-quantum"
+        retrieved: 2026-11-09
+      - url: https://www.paramiko.org/changelog.html
+        title: Changelog — Paramiko documentation
+        kind: release-notes
+        quote: The new method is enabled automatically when the installed cryptography library exposes ML-KEM
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-09
 pipeline:
   watch_urls:
     - https://www.paramiko.org/changelog.html

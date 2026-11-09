@@ -15,9 +15,38 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-08
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 48.0.0
+    sources:
+      - url: https://cryptography.io/en/latest/changelog/
+        title: Changelog — Cryptography 51.0.0-dev1 documentation
+        kind: release-notes
+        quote: Added new ML-KEM key encapsulation module with support for ML-KEM key encapsulation with AWS-LC and BoringSSL.
+        retrieved: 2026-11-09
+      - url: https://cryptography.io/en/latest/changelog/
+        title: Changelog — Cryptography 51.0.0-dev1 documentation
+        kind: release-notes
+        quote: Added support for ML-KEM key encapsulation and ML-DSA signing when using OpenSSL 3.5.0 or later, in addition to the existing AWS-LC and BoringSSL support. This means post-quantum algorithms are now available to users of our wheels.
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: yes
+    since_version: 48.0.0
+    sources:
+      - url: https://cryptography.io/en/latest/changelog/
+        title: Changelog — Cryptography 51.0.0-dev1 documentation
+        kind: release-notes
+        quote: Added new ML-DSA signing module with support for ML-DSA signing and verification with AWS-LC and BoringSSL.
+        retrieved: 2026-11-09
+      - url: https://cryptography.io/en/latest/changelog/
+        title: Changelog — Cryptography 51.0.0-dev1 documentation
+        kind: release-notes
+        quote: Added support for ML-KEM key encapsulation and ML-DSA signing when using OpenSSL 3.5.0 or later, in addition to the existing AWS-LC and BoringSSL support. This means post-quantum algorithms are now available to users of our wheels.
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM and ML-DSA: cryptography (pyca) 48.0.0 or later."
+last_verified: 2026-11-09
 pipeline:
   watch_urls:
     - https://cryptography.io/en/latest/changelog/

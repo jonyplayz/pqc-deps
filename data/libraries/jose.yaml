@@ -14,6 +14,22 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-08
+overall_status: partial
+algorithms:
+  ml-dsa:
+    support: yes
+    since_version: 6.1.0
+    experimental: false
+    sources:
+      - url: https://github.com/panva/jose/releases/tag/v6.1.0
+        title: v6.1.0
+        kind: release-notes
+        quote: support for the ML-DSA PQC Algorithm Identifiers
+        retrieved: 2026-11-09
+      - url: https://github.com/panva/jose/pull/816
+        title: "PR #816: feat: AKP JWK and ML-DSA support"
+        kind: pull-request
+        quote: Available in Node.js >= 24.7.0
+        retrieved: 2026-11-09
+upgrade_notes: "ML-DSA: jose (panva) 6.1.0 or later."
+last_verified: 2026-11-09

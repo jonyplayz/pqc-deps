@@ -9,6 +9,16 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-08
+overall_status: partial
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 1.0.22
+    sources:
+      - url: https://github.com/jedisct1/libsodium/releases/tag/1.0.22-RELEASE
+        title: 1.0.22
+        kind: release-notes
+        quote: ML-KEM768, the NIST-standardized lattice-based KEM, is accessible through the `crypto_kem_mlkem768_*()` functions.
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM: libsodium 1.0.22 or later."
+last_verified: 2026-11-09

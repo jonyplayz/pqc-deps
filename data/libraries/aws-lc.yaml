@@ -9,6 +9,37 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
   - hybrid-tls
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-08
+overall_status: ready
+algorithms:
+  ml-kem:
+    support: yes
+    sources:
+      - url: https://github.com/aws/aws-lc/releases/tag/v1.72.0
+        title: v1.72.0
+        kind: release-notes
+        quote: "fipsmodule/ml-kem: Import mlkem-native v1.1.0 by @hanno-becker in https://github.com/aws/aws-lc/pull/3090"
+        retrieved: 2026-11-09
+      - url: https://github.com/aws/aws-lc/releases/tag/v5.9.0
+        title: v5.9.0
+        kind: release-notes
+        quote: Add ML-KEM support to HPKE (draft-ietf-hpke-pq-05) by @jakemas in https://github.com/aws/aws-lc/pull/3277
+        retrieved: 2026-11-09
+  ml-dsa:
+    support: yes
+    sources:
+      - url: https://github.com/aws/aws-lc/releases/tag/v5.0.0
+        title: v5.0.0
+        kind: release-notes
+        quote: ML-DSA support as a TLS 1.3 signature scheme by @dkostic in https://github.com/aws/aws-lc/pull/3251
+        retrieved: 2026-11-09
+  hybrid-tls:
+    support: yes
+    default_enabled: true
+    sources:
+      - url: https://github.com/aws/aws-lc/releases/tag/AWS-LC-FIPS-3.6.0
+        title: AWS-LC-FIPS-3.6.0
+        kind: release-notes
+        quote: "[Cherry-pick 2024] Enable Hybrid PQ KeyShares by default (#2531) by @WillChilds-Klein in https://github.com/aws/aws-lc/pull/3394"
+        retrieved: 2026-11-09
+upgrade_notes: "ML-KEM, ML-DSA and hybrid TLS key exchange: supported in current releases; the sources don't state the first version. On by default: hybrid TLS key exchange."
+last_verified: 2026-11-09
