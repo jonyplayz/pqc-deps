@@ -9,4 +9,4 @@ GITHUB_TOKEN=
 # http://localhost:8788/api/auth/callback to work locally (optional):
 GITHUB_OAUTH_CLIENT_ID=
 GITHUB_OAUTH_CLIENT_SECRET=
-SESSION_SECRET=local-development-secret-at-least-32-characters
+# SESSION_SECRET is optional: derived from the client secret when unset.

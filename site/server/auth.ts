@@ -26,9 +26,32 @@ const allowList = (env: Env) =>
     .filter(Boolean);
 
 function requireOAuthConfig(env: Env) {
-  if (!env.GITHUB_OAUTH_CLIENT_ID || !env.GITHUB_OAUTH_CLIENT_SECRET || !env.SESSION_SECRET) {
+  if (!env.GITHUB_OAUTH_CLIENT_ID || !env.GITHUB_OAUTH_CLIENT_SECRET) {
     throw new HttpError(503, 'Admin login is not configured.');
   }
+}
+
+/**
+ * The key that signs session cookies: SESSION_SECRET if set, otherwise derived
+ * from the OAuth client secret (HMAC with a fixed label), so only one secret
+ * has to be configured. Rotating the client secret signs everyone out.
+ */
+export async function sessionSecret(env: Env): Promise<string> {
+  if (env.SESSION_SECRET) return env.SESSION_SECRET;
+  if (!env.GITHUB_OAUTH_CLIENT_SECRET) return '';
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(env.GITHUB_OAUTH_CLIENT_SECRET),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const mac = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode('pqc-deps admin session v1'),
+  );
+  return [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 /** Is this GitHub user an admin of the site? */
@@ -56,8 +79,9 @@ export async function requireAdmin(
   fetchImpl: typeof fetch = fetch,
   now = Date.now(),
 ): Promise<string> {
-  if (!env.SESSION_SECRET) throw new HttpError(503, 'Admin login is not configured.');
-  const session = await verifySession(readCookie(request, SESSION_COOKIE), env.SESSION_SECRET, now);
+  const secret = await sessionSecret(env);
+  if (!secret) throw new HttpError(503, 'Admin login is not configured.');
+  const session = await verifySession(readCookie(request, SESSION_COOKIE), secret, now);
   if (!session) throw new HttpError(401, 'Not signed in.');
   if (!(await isAdmin(session.login, env, fetchImpl))) {
     throw new HttpError(403, `@${session.login} is not a maintainer of this project.`);
@@ -134,7 +158,7 @@ export async function finishLogin(
   }
   const session = await signSession(
     { login, exp: Math.floor(now / 1000) + SESSION_SECONDS },
-    env.SESSION_SECRET,
+    await sessionSecret(env),
   );
   const headers = new Headers({ Location: safeReturnPath(back), 'Cache-Control': 'no-store' });
   headers.append('Set-Cookie', cookie(SESSION_COOKIE, session, SESSION_SECONDS));

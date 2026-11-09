@@ -16,8 +16,8 @@ export interface Env {
   /** GitHub OAuth app for "Sign in with GitHub" on /admin. */
   GITHUB_OAUTH_CLIENT_ID: string;
   GITHUB_OAUTH_CLIENT_SECRET: string;
-  /** Random string (32+ characters) used to sign admin session cookies. */
-  SESSION_SECRET: string;
+  /** Optional: key for admin session cookies (32+ chars). Derived from the OAuth secret if unset. */
+  SESSION_SECRET?: string;
   /** Optional: GitHub logins that are admins even without repo write access, comma separated. */
   ADMIN_GITHUB_USERS?: string;
 

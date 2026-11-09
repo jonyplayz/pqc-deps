@@ -61,20 +61,14 @@ again on every admin action.
 - On the next page, copy the **Client ID**, click **Generate a new client
   secret** and copy the secret.
 
-**B. Make a session secret**: any random string of 32+ characters, for example:
+**B. Cloudflare variables**:
 
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-**C. Cloudflare variables**:
-
-| Name                         | Value                                         | Type       |
-| ---------------------------- | --------------------------------------------- | ---------- |
-| `GITHUB_OAUTH_CLIENT_ID`     | the Client ID                                 | text       |
-| `GITHUB_OAUTH_CLIENT_SECRET` | the client secret                             | **secret** |
-| `SESSION_SECRET`             | the random string                             | **secret** |
-| `ADMIN_GITHUB_USERS`         | optional: extra admin logins, comma separated | text       |
+| Name                         | Value                                                                                              | Type       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------- | ---------- |
+| `GITHUB_OAUTH_CLIENT_ID`     | the Client ID                                                                                      | text       |
+| `GITHUB_OAUTH_CLIENT_SECRET` | the client secret                                                                                  | **secret** |
+| `SESSION_SECRET`             | optional: own key for session cookies (32+ chars); by default it is derived from the client secret | **secret** |
+| `ADMIN_GITHUB_USERS`         | optional: extra admin logins, comma separated                                                      | text       |
 
 The site requests **no GitHub permissions** from admins (only who they are),
 doesn't store their GitHub token, and keeps them signed in for 12 hours with a

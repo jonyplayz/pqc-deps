@@ -257,10 +257,29 @@ describe('Sign in with GitHub', () => {
     expect(await isAdmin('nobody', env(), fakeGitHub({ permission: 'none' }).fetch)).toBe(false);
   });
 
+  it('works without SESSION_SECRET by deriving the key from the OAuth client secret', async () => {
+    const e = env({ SESSION_SECRET: undefined });
+    const gh = fakeGitHub();
+    const res = await finishLogin(callback('s1', 's1|/admin'), e, gh.fetch, now);
+    const session = res.headers
+      .get('Set-Cookie')!
+      .split(', ')
+      .find((c) => c.startsWith(`${SESSION_COOKIE}=`))!;
+    const token = decodeURIComponent(session.split(';')[0]!.slice(SESSION_COOKIE.length + 1));
+    const req = new Request(`${ORIGIN}/api/admin/whoami`, {
+      headers: { Cookie: `${SESSION_COOKIE}=${encodeURIComponent(token)}` },
+    });
+    expect(await requireAdmin(req, e, gh.fetch, now)).toBe('jonyplayz');
+    // A different client secret (e.g. after rotation) invalidates the session.
+    await expect(
+      requireAdmin(req, { ...e, GITHUB_OAUTH_CLIENT_SECRET: 'rotated-secret' }, gh.fetch, now),
+    ).rejects.toMatchObject({ status: 401 });
+  });
+
   it('re-checks access on every admin request, so removed maintainers lose access', async () => {
     const token = await signSession(
       { login: 'former', exp: now / 1000 + 600 },
-      env().SESSION_SECRET,
+      env().SESSION_SECRET!,
     );
     const req = new Request(`${ORIGIN}/api/admin/whoami`, {
       headers: { Cookie: `${SESSION_COOKIE}=${encodeURIComponent(token)}` },
@@ -275,7 +294,10 @@ describe('Sign in with GitHub', () => {
       startLogin(new Request(`${ORIGIN}/api/auth/login`), env({ GITHUB_OAUTH_CLIENT_ID: '' })),
     ).toThrow(HttpError);
     await expect(
-      requireAdmin(new Request(ORIGIN), env({ SESSION_SECRET: '' })),
+      requireAdmin(
+        new Request(ORIGIN),
+        env({ SESSION_SECRET: '', GITHUB_OAUTH_CLIENT_SECRET: '' }),
+      ),
     ).rejects.toMatchObject({ status: 503 });
     await expect(
       requireAdmin(new Request(ORIGIN), env(), fakeGitHub().fetch, now),
