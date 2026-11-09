@@ -3,25 +3,83 @@ description: Ask us to track a library that isn't in the catalog yet.
 title: '[Request] '
 labels: [data, new-library]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion! A maintainer reviews each request. Once it's
+        approved, a bot checks that the repository and packages exist, gathers
+        evidence about its post-quantum support, and opens a pull request.
   - type: input
     id: name
     attributes:
       label: Library name
+      placeholder: Botan
+    validations:
+      required: true
+  - type: dropdown
+    id: ecosystem
+    attributes:
+      label: Ecosystem
+      options:
+        - C / C++
+        - Go
+        - Rust
+        - Java / JVM
+        - Python
+        - JavaScript / Node
+        - .NET
+        - OS / platform
     validations:
       required: true
   - type: input
     id: repo
     attributes:
-      label: Repository or homepage URL
+      label: Source repository URL
+      description: Must start with https://
+      placeholder: https://github.com/randombit/botan
     validations:
       required: true
   - type: input
+    id: homepage
+    attributes:
+      label: Homepage
+      placeholder: https://botan.randombit.net
+  - type: input
+    id: description
+    attributes:
+      label: Short description
+      placeholder: C++ cryptography library
+  - type: textarea
     id: packages
     attributes:
       label: Package names
-      description: e.g. npm `jose`, PyPI `cryptography`, Maven `org.bouncycastle:bcprov-jdk18on`
-  - type: textarea
-    id: why
+      description: 'One per line as registry:name. Registries: npm, pypi, go, maven, cargo, nuget.'
+      placeholder: |
+        pypi:botan3
+        maven:org.bouncycastle:bcprov-jdk18on
+  - type: dropdown
+    id: applicable
     attributes:
-      label: Anything we should know?
-      description: Known PQC support, plans, or which library it delegates crypto to (with links if possible).
+      label: Applicable algorithms
+      description: Which ones make sense for this library? Leave empty if unsure.
+      multiple: true
+      options:
+        - ml-kem
+        - ml-dsa
+        - slh-dsa
+        - hybrid-tls
+  - type: input
+    id: delegates
+    attributes:
+      label: Delegates crypto to
+      description: Catalog ids of libraries that do the actual cryptography, if any (e.g. openssl).
+  - type: textarea
+    id: watch_urls
+    attributes:
+      label: Pages to watch for evidence
+      description: Release notes, changelog or docs pages (https), one per line. Optional.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: Known PQC support or plans, with links if possible.
