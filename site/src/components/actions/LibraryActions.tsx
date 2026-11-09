@@ -42,7 +42,7 @@ export default function LibraryActions({ id, name }: { id: string; name: string 
           </button>
           <span class="act-muted">
             {' '}
-            Logged in as {admin}. Re-checks {name} and proposes changes for review.
+            Signed in as @{admin}. Re-checks {name} and proposes changes for review.
           </span>
         </>
       ) : result?.ok ? null : !open ? (

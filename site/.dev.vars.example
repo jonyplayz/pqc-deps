@@ -5,6 +5,8 @@ TURNSTILE_SECRET=1x0000000000000000000000000000000AA
 GITHUB_REPO=jonyplayz/pqc-deps
 # A fine-grained token to test GitHub calls locally (leave empty to skip):
 GITHUB_TOKEN=
-# Admin login can't be tested locally (Cloudflare Access only runs on the real site).
-ACCESS_TEAM_DOMAIN=
-ACCESS_AUD=
+# "Sign in with GitHub" needs an OAuth app whose callback is
+# http://localhost:8788/api/auth/callback to work locally (optional):
+GITHUB_OAUTH_CLIENT_ID=
+GITHUB_OAUTH_CLIENT_SECRET=
+SESSION_SECRET=local-development-secret-at-least-32-characters

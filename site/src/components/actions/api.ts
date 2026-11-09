@@ -40,12 +40,12 @@ export async function getJson<T>(
 }
 
 /**
- * Is the visitor a logged-in admin? Admin APIs sit behind Cloudflare Access:
- * without a login the request is redirected (opaque) or refused.
+ * Is the visitor a signed-in maintainer? Without the admin session cookie the
+ * admin API answers 401, so ordinary visitors simply see the visitor buttons.
  */
 export async function whoAmI(): Promise<string | undefined> {
-  const r = await getJson<{ email: string }>('/api/admin/whoami');
-  return r.data?.email;
+  const r = await getJson<{ login: string }>('/api/admin/whoami');
+  return r.data?.login;
 }
 
 export const ECOSYSTEM_OPTIONS: Array<[string, string]> = [

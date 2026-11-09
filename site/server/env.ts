@@ -13,12 +13,13 @@ export interface Env {
   /** Fine-grained token for that repo: Actions RW, Issues RW, Pull requests R, Contents R. */
   GITHUB_TOKEN: string;
 
-  /** Cloudflare Access team domain, e.g. "pqc-deps.cloudflareaccess.com". */
-  ACCESS_TEAM_DOMAIN: string;
-  /** Application Audience (AUD) tag of the Access application protecting /admin. */
-  ACCESS_AUD: string;
-  /** Optional extra allow-list of admin emails, comma separated. */
-  ADMIN_EMAILS?: string;
+  /** GitHub OAuth app for "Sign in with GitHub" on /admin. */
+  GITHUB_OAUTH_CLIENT_ID: string;
+  GITHUB_OAUTH_CLIENT_SECRET: string;
+  /** Random string (32+ characters) used to sign admin session cookies. */
+  SESSION_SECRET: string;
+  /** Optional: GitHub logins that are admins even without repo write access, comma separated. */
+  ADMIN_GITHUB_USERS?: string;
 
   /** Cloudflare Turnstile keys for public request forms. */
   TURNSTILE_SITE_KEY: string;

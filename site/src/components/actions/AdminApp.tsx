@@ -26,8 +26,8 @@ interface Activity {
 const when = (iso: string) => new Date(iso).toLocaleString();
 
 export default function AdminApp() {
-  const [email, setEmail] = useState<string>();
-  const [authError, setAuthError] = useState<string>();
+  const [login, setLogin] = useState<string>();
+  const [auth, setAuth] = useState<{ status: number; error: string }>();
   const [requests, setRequests] = useState<Req[]>();
   const [activity, setActivity] = useState<Activity>();
   const [libs, setLibs] = useState<Array<{ id: string; name: string }>>([]);
@@ -43,9 +43,9 @@ export default function AdminApp() {
     getJson<Activity>('/api/admin/activity').then((r) => r.data && setActivity(r.data));
 
   useEffect(() => {
-    getJson<{ email: string }>('/api/admin/whoami').then((r) => {
-      if (!r.data) return setAuthError(r.error ?? 'Not logged in.');
-      setEmail(r.data.email);
+    getJson<{ login: string }>('/api/admin/whoami').then((r) => {
+      if (!r.data) return setAuth({ status: r.status, error: r.error ?? 'Not signed in.' });
+      setLogin(r.data.login);
       loadRequests();
       loadActivity();
       fetch('/api/catalog.json')
@@ -60,14 +60,38 @@ export default function AdminApp() {
     });
   }, []);
 
-  if (authError) {
+  const signOut = async () => {
+    await postJson('/api/auth/logout', {});
+    window.location.reload();
+  };
+
+  if (auth) {
+    // 401: not signed in. 403: signed in but not a maintainer. 503: login not set up.
     return (
-      <p class="act-err" role="alert">
-        {authError} This page is for maintainers; log in through Cloudflare Access.
-      </p>
+      <div class="card">
+        {auth.status === 401 ? (
+          <>
+            <p>This page is for the project's maintainers.</p>
+            <a class="btn btn-primary" href="/api/auth/login?return=/admin">
+              Sign in with GitHub
+            </a>
+          </>
+        ) : (
+          <>
+            <p class="act-err" role="alert">
+              {auth.error}
+            </p>
+            {auth.status === 403 && (
+              <button class="btn" onClick={signOut}>
+                Sign out
+              </button>
+            )}
+          </>
+        )}
+      </div>
     );
   }
-  if (!email) return <p class="act-muted">Checking your login…</p>;
+  if (!login) return <p class="act-muted">Checking your sign-in…</p>;
 
   const decide = async (r: Req, action: 'approve' | 'reject') => {
     let reason = '';
@@ -93,7 +117,12 @@ export default function AdminApp() {
 
   return (
     <div class="admin">
-      <p class="act-muted">Logged in as {email}.</p>
+      <p class="act-muted">
+        Signed in as @{login} ·{' '}
+        <button class="btn act-small" onClick={signOut}>
+          Sign out
+        </button>
+      </p>
       {msg && (
         <p class={msg.error ? 'act-err' : 'act-ok'} role="status">
           {msg.error ?? msg.message} {msg.runsUrl && <a href={msg.runsUrl}>Follow progress</a>}

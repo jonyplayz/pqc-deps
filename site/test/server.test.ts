@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { requireAdmin, resetAccessKeyCache } from '../server/access';
+import { describe, expect, it } from 'vitest';
+import { finishLogin, isAdmin, requireAdmin, startLogin } from '../server/auth';
+import { SESSION_COOKIE, safeReturnPath, signSession, verifySession } from '../server/session';
 import type { Env } from '../server/env';
 import { GitHub } from '../server/github';
 import {
@@ -27,8 +28,9 @@ function env(overrides: Partial<Env> = {}): Env {
     },
     GITHUB_REPO: 'jonyplayz/pqc-deps',
     GITHUB_TOKEN: 't',
-    ACCESS_TEAM_DOMAIN: 'team.cloudflareaccess.com',
-    ACCESS_AUD: 'aud-123',
+    GITHUB_OAUTH_CLIENT_ID: 'client-id',
+    GITHUB_OAUTH_CLIENT_SECRET: 'client-secret',
+    SESSION_SECRET: 'test-session-secret-0123456789abcdef',
     TURNSTILE_SITE_KEY: 'site',
     TURNSTILE_SECRET: 'secret',
     ...overrides,
@@ -118,102 +120,168 @@ const post = (path: string, body: unknown, headers: Record<string, string> = {})
 const status = async (p: Promise<Response>) => (await handle(() => p)).status;
 const bodyOf = async (p: Promise<Response>) => (await handle(() => p)).json() as Promise<any>;
 
-// ---------------------------------------------------------------- Access JWT
+// ---------------------------------------------------------------- admin login (GitHub OAuth)
 
-describe('requireAdmin (Cloudflare Access JWT)', () => {
-  let keys: CryptoKeyPair;
-  let jwk: JsonWebKey;
-  const b64url = (b: ArrayBuffer | Uint8Array) =>
-    Buffer.from(b instanceof Uint8Array ? b : new Uint8Array(b)).toString('base64url');
-  const sign = async (payload: object, kid = 'k1', alg = 'RS256') => {
-    const h = b64url(new TextEncoder().encode(JSON.stringify({ alg, kid })));
-    const p = b64url(new TextEncoder().encode(JSON.stringify(payload)));
-    const sig = await crypto.subtle.sign(
-      'RSASSA-PKCS1-v1_5',
-      keys.privateKey,
-      new TextEncoder().encode(`${h}.${p}`),
-    );
-    return `${h}.${p}.${b64url(sig)}`;
-  };
-  const certs: typeof fetch = async () =>
-    new Response(JSON.stringify({ keys: [{ ...jwk, kid: 'k1' }] }));
+describe('session cookies', () => {
+  const secret = 'test-session-secret-0123456789abcdef';
   const now = Date.UTC(2026, 10, 9);
-  const good = {
-    aud: ['aud-123'],
-    iss: 'https://team.cloudflareaccess.com',
-    exp: now / 1000 + 600,
-    email: 'Admin@Example.com',
-  };
-  const req = (token: string, how: 'header' | 'cookie' = 'header') =>
-    new Request(`${ORIGIN}/api/admin/whoami`, {
-      headers:
-        how === 'header'
-          ? { 'Cf-Access-Jwt-Assertion': token }
-          : { Cookie: `a=b; CF_Authorization=${token}` },
+
+  it('round-trips a signed session and rejects tampering or expiry', async () => {
+    const t = await signSession({ login: 'jonyplayz', exp: now / 1000 + 60 }, secret);
+    expect(await verifySession(t, secret, now)).toEqual({
+      login: 'jonyplayz',
+      exp: now / 1000 + 60,
     });
-
-  beforeEach(async () => {
-    resetAccessKeyCache();
-    keys = (await crypto.subtle.generateKey(
-      {
-        name: 'RSASSA-PKCS1-v1_5',
-        modulusLength: 2048,
-        publicExponent: new Uint8Array([1, 0, 1]),
-        hash: 'SHA-256',
-      },
-      true,
-      ['sign', 'verify'],
-    )) as CryptoKeyPair;
-    jwk = await crypto.subtle.exportKey('jwk', keys.publicKey);
+    const [payload, sig] = t.split('.');
+    const forged = `${Buffer.from(JSON.stringify({ login: 'attacker', exp: now / 1000 + 60 })).toString('base64url')}.${sig}`;
+    expect(await verifySession(forged, secret, now)).toBeUndefined();
+    expect(await verifySession(`${payload}.${sig}x`, secret, now)).toBeUndefined();
+    expect(await verifySession(t, 'another-secret-0123456789abcdefghij', now)).toBeUndefined();
+    expect(await verifySession(t, secret, now + 61_000)).toBeUndefined();
+    expect(await verifySession('garbage', secret, now)).toBeUndefined();
   });
 
-  it('accepts a valid token from the header or the cookie', async () => {
-    const t = await sign(good);
-    expect(await requireAdmin(req(t), env(), certs, now)).toBe('admin@example.com');
-    expect(await requireAdmin(req(t, 'cookie'), env(), certs, now)).toBe('admin@example.com');
-  });
-
-  it.each([
-    ['wrong audience', { ...good, aud: ['other'] }, 403],
-    ['wrong issuer', { ...good, iss: 'https://evil.cloudflareaccess.com' }, 403],
-    ['expired', { ...good, exp: now / 1000 - 1 }, 401],
-  ])('rejects %s', async (_n, payload, code) => {
-    const t = await sign(payload);
-    await expect(requireAdmin(req(t), env(), certs, now)).rejects.toMatchObject({ status: code });
-  });
-
-  it('rejects tampered, unsigned, unknown-key and missing tokens', async () => {
-    const t = await sign(good);
-    const [h, , s] = t.split('.');
-    const forged = `${h}.${b64url(new TextEncoder().encode(JSON.stringify({ ...good, email: 'x@evil.com' })))}.${s}`;
-    await expect(requireAdmin(req(forged), env(), certs, now)).rejects.toMatchObject({
-      status: 401,
-    });
-    await expect(
-      requireAdmin(req(await sign(good, 'k1', 'none')), env(), certs, now),
-    ).rejects.toMatchObject({ status: 401 });
-    await expect(
-      requireAdmin(req(await sign(good, 'other')), env(), certs, now),
-    ).rejects.toMatchObject({ status: 401 });
-    await expect(requireAdmin(new Request(ORIGIN), env(), certs, now)).rejects.toMatchObject({
-      status: 401,
-    });
-  });
-
-  it('fails closed when Access is not configured, and honours the email allow-list', async () => {
-    const t = await sign(good);
-    await expect(requireAdmin(req(t), env({ ACCESS_AUD: '' }), certs, now)).rejects.toMatchObject({
+  it('refuses a short or missing secret', async () => {
+    await expect(signSession({ login: 'x', exp: 1 }, 'short')).rejects.toMatchObject({
       status: 503,
     });
-    await expect(
-      requireAdmin(req(t), env({ ADMIN_EMAILS: 'someone@else.com' }), certs, now),
-    ).rejects.toMatchObject({ status: 403 });
-    expect(
-      await requireAdmin(req(t), env({ ADMIN_EMAILS: 'admin@example.com, x@y.z' }), certs, now),
-    ).toBe('admin@example.com');
+  });
+
+  it('only allows same-site return paths', () => {
+    expect(safeReturnPath('/libraries/openssl')).toBe('/libraries/openssl');
+    for (const bad of ['https://evil.com', '//evil.com', '/\\evil.com', '', null]) {
+      expect(safeReturnPath(bad)).toBe('/admin');
+    }
   });
 });
 
+describe('Sign in with GitHub', () => {
+  const now = Date.UTC(2026, 10, 9);
+
+  /** Fake github.com OAuth + API. `permission` is what the repo reports for the user. */
+  function fakeGitHub(opts: { login?: string; permission?: string; tokenOk?: boolean } = {}) {
+    const calls: string[] = [];
+    const f: typeof fetch = async (input, init) => {
+      const url = new URL(String(input));
+      calls.push(`${init?.method ?? 'GET'} ${url.host}${url.pathname}`);
+      if (url.pathname === '/login/oauth/access_token') {
+        const body = JSON.parse(String(init?.body));
+        expect(body).toMatchObject({
+          client_id: 'client-id',
+          client_secret: 'client-secret',
+          code: 'the-code',
+        });
+        return new Response(
+          JSON.stringify(
+            opts.tokenOk === false
+              ? { error: 'bad_verification_code' }
+              : { access_token: 'user-token' },
+          ),
+        );
+      }
+      if (url.pathname === '/user')
+        return new Response(JSON.stringify({ login: opts.login ?? 'jonyplayz' }));
+      if (url.pathname.endsWith('/permission')) {
+        return new Response(JSON.stringify({ permission: opts.permission ?? 'admin' }));
+      }
+      return new Response('{}', { status: 404 });
+    };
+    return { calls, fetch: f };
+  }
+
+  const callback = (state: string, cookieState: string, code = 'the-code') =>
+    new Request(`${ORIGIN}/api/auth/callback?code=${code}&state=${state}`, {
+      headers: { Cookie: `pqc_oauth_state=${encodeURIComponent(cookieState)}` },
+    });
+
+  it('starts login with a state cookie and no scopes', () => {
+    const res = startLogin(new Request(`${ORIGIN}/api/auth/login?return=/libraries/botan`), env());
+    expect(res.status).toBe(302);
+    const loc = new URL(res.headers.get('Location')!);
+    expect(loc.origin + loc.pathname).toBe('https://github.com/login/oauth/authorize');
+    expect(loc.searchParams.get('client_id')).toBe('client-id');
+    expect(loc.searchParams.get('redirect_uri')).toBe(`${ORIGIN}/api/auth/callback`);
+    expect(loc.searchParams.get('scope')).toBeNull();
+    const cookie = res.headers.get('Set-Cookie')!;
+    expect(cookie).toMatch(
+      /^pqc_oauth_state=.+; Path=\/; HttpOnly; Secure; SameSite=Lax; Max-Age=600$/,
+    );
+    expect(decodeURIComponent(cookie.split(';')[0]!.split('=')[1]!)).toBe(
+      `${loc.searchParams.get('state')}|/libraries/botan`,
+    );
+  });
+
+  it('signs in a maintainer and returns them to the page they came from', async () => {
+    const gh = fakeGitHub();
+    const res = await finishLogin(callback('s1', 's1|/libraries/botan'), env(), gh.fetch, now);
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('/libraries/botan');
+    const session = res.headers
+      .get('Set-Cookie')!
+      .split(', ')
+      .find((c) => c.startsWith(`${SESSION_COOKIE}=`))!;
+    expect(session).toMatch(/HttpOnly; Secure; SameSite=Lax; Max-Age=43200$/);
+    // The session cookie then authorizes admin requests.
+    const token = decodeURIComponent(session.split(';')[0]!.slice(SESSION_COOKIE.length + 1));
+    const admin = new Request(`${ORIGIN}/api/admin/whoami`, {
+      headers: { Cookie: `${SESSION_COOKIE}=${encodeURIComponent(token)}` },
+    });
+    expect(await requireAdmin(admin, env(), gh.fetch, now)).toBe('jonyplayz');
+    expect(gh.calls).toContain(
+      'GET api.github.com/repos/jonyplayz/pqc-deps/collaborators/jonyplayz/permission',
+    );
+  });
+
+  it('rejects a wrong or missing state (CSRF) and a failed code exchange', async () => {
+    const gh = fakeGitHub();
+    await expect(
+      finishLogin(callback('evil', 's1|/admin'), env(), gh.fetch, now),
+    ).rejects.toMatchObject({ status: 400 });
+    await expect(finishLogin(callback('s1', ''), env(), gh.fetch, now)).rejects.toMatchObject({
+      status: 400,
+    });
+    await expect(
+      finishLogin(callback('s1', 's1|/admin'), env(), fakeGitHub({ tokenOk: false }).fetch, now),
+    ).rejects.toMatchObject({ status: 401 });
+  });
+
+  it('refuses people without write access, unless allow-listed', async () => {
+    const reader = fakeGitHub({ login: 'stranger', permission: 'read' });
+    await expect(
+      finishLogin(callback('s1', 's1|/admin'), env(), reader.fetch, now),
+    ).rejects.toMatchObject({ status: 403 });
+    expect(
+      await isAdmin('stranger', env({ ADMIN_GITHUB_USERS: 'Stranger, other' }), reader.fetch),
+    ).toBe(true);
+    expect(await isAdmin('writer', env(), fakeGitHub({ permission: 'write' }).fetch)).toBe(true);
+    expect(await isAdmin('nobody', env(), fakeGitHub({ permission: 'none' }).fetch)).toBe(false);
+  });
+
+  it('re-checks access on every admin request, so removed maintainers lose access', async () => {
+    const token = await signSession(
+      { login: 'former', exp: now / 1000 + 600 },
+      env().SESSION_SECRET,
+    );
+    const req = new Request(`${ORIGIN}/api/admin/whoami`, {
+      headers: { Cookie: `${SESSION_COOKIE}=${encodeURIComponent(token)}` },
+    });
+    await expect(
+      requireAdmin(req, env(), fakeGitHub({ permission: 'read' }).fetch, now),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('fails closed when login is not configured or there is no cookie', async () => {
+    expect(() =>
+      startLogin(new Request(`${ORIGIN}/api/auth/login`), env({ GITHUB_OAUTH_CLIENT_ID: '' })),
+    ).toThrow(HttpError);
+    await expect(
+      requireAdmin(new Request(ORIGIN), env({ SESSION_SECRET: '' })),
+    ).rejects.toMatchObject({ status: 503 });
+    await expect(
+      requireAdmin(new Request(ORIGIN), env(), fakeGitHub().fetch, now),
+    ).rejects.toMatchObject({ status: 401 });
+  });
+});
 // ---------------------------------------------------------------- input guards
 
 describe('request guards', () => {
