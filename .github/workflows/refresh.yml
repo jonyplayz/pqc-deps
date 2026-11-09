@@ -1,0 +1,111 @@
+name: Evidence refresh
+
+# Weekly: re-run the evidence pipeline and open a PR with proposed changes
+# (never commits to main), and keep an issue listing entries past their
+# verification age. Can also be started by hand for specific libraries.
+on:
+  schedule:
+    - cron: '17 4 * * 1' # Mondays 04:17 UTC
+  workflow_dispatch:
+    inputs:
+      libraries:
+        description: 'Library ids separated by spaces (empty = all)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: evidence-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Propose updates
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'anthropic' }}
+      LLM_BASE_URL: ${{ vars.LLM_BASE_URL }}
+      LLM_MODEL: ${{ vars.LLM_MODEL }}
+      LLM_DELAY_MS: ${{ vars.LLM_DELAY_MS }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check an LLM is configured
+        id: llm
+        run: |
+          if [ -n "$LLM_API_KEY" ] || [ -n "$ANTHROPIC_API_KEY" ] || [ "$LLM_PROVIDER" = "openai-compatible" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::No LLM key configured (secrets LLM_API_KEY or ANTHROPIC_API_KEY). Skipping the pipeline; see README."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v7
+        if: steps.llm.outputs.ok == 'true'
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        if: steps.llm.outputs.ok == 'true'
+        with:
+          node-version: 24
+          cache: npm
+      - if: steps.llm.outputs.ok == 'true'
+        run: npm ci
+      - name: Configure git
+        if: steps.llm.outputs.ok == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Run the pipeline and open a PR
+        if: steps.llm.outputs.ok == 'true'
+        env:
+          LIBS: ${{ inputs.libraries }}
+        run: |
+          if [ -n "$LIBS" ]; then
+            # Only lowercase ids, digits, dashes and spaces are accepted.
+            if ! printf '%s' "$LIBS" | grep -Eq '^[a-z0-9 -]+$'; then
+              echo "::error::Invalid library ids: $LIBS"; exit 1
+            fi
+            npm run pipeline -- $LIBS --pr
+          else
+            npm run pipeline -- --all --pr
+          fi
+      - uses: actions/upload-artifact@v7
+        if: always() && steps.llm.outputs.ok == 'true'
+        with:
+          name: evidence-reports
+          path: proposals/*.md
+          retention-days: 30
+
+  stale:
+    name: Stale entries issue
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Open or update the issue
+        run: |
+          npm run -s stale -- --days 90 --markdown > stale.md
+          number=$(gh issue list --label stale-data --state open --json number --jq '.[0].number')
+          if [ -s stale.md ]; then
+            gh label create stale-data --color FBCA04 --description "Catalog entries due for re-verification" 2>/dev/null || true
+            if [ -n "$number" ]; then
+              gh issue edit "$number" --body-file stale.md
+            else
+              gh issue create --title "Catalog entries due for re-verification" --label stale-data --body-file stale.md
+            fi
+          elif [ -n "$number" ]; then
+            gh issue close "$number" --comment "All entries were verified within the last 90 days."
+          fi

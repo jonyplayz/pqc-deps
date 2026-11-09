@@ -111,6 +111,41 @@ npm run pipeline -- --unknown           # everything still unknown
 npm run stale -- --days 90              # list entries due for re-verification
 ```
 
+## CI, deployment and scheduled refresh
+
+GitHub Actions (`.github/workflows/`):
+
+| Workflow         | When                           | What                                                                                                                                                                                                       |
+| ---------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`         | Every PR and push to `main`    | Validate data, check the JSON Schema and formatting, typecheck, test, build. For PRs, also verify repos and package names of changed library files. Then deploy: a preview for PRs, production for `main`. |
+| `refresh.yml`    | Mondays 04:17 UTC, or manually | Run the evidence pipeline and open a PR with proposed changes (never commits to `main`). Keep an issue listing entries not verified for 90 days.                                                           |
+| `dependabot.yml` | Weekly                         | Dependency and action updates                                                                                                                                                                              |
+
+### One-time setup (repository owner)
+
+1. **Let Actions open PRs**: Settings → Actions → General → Workflow permissions →
+   tick _Allow GitHub Actions to create and approve pull requests_.
+2. **Deploy to Cloudflare Pages** (free): create a Cloudflare account, then an
+   API token with the _Cloudflare Pages: Edit_ permission. Add repository
+   secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Until they exist,
+   the deploy job is skipped with a notice.
+3. **LLM for the weekly refresh**: add a secret `LLM_API_KEY` (free Gemini key)
+   and repository variables `LLM_PROVIDER=openai-compatible`,
+   `LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai`,
+   `LLM_MODEL=gemini-3.5-flash-lite`, `LLM_DELAY_MS=5000`. For Claude, set the
+   secret `ANTHROPIC_API_KEY` instead and leave `LLM_PROVIDER` unset.
+
+```bash
+gh secret set LLM_API_KEY            # paste the key when prompted
+gh variable set LLM_PROVIDER --body openai-compatible
+gh variable set LLM_BASE_URL --body https://generativelanguage.googleapis.com/v1beta/openai
+gh variable set LLM_MODEL --body gemini-3.5-flash-lite
+gh variable set LLM_DELAY_MS --body 5000
+```
+
+Note: PRs opened by the workflow's built-in token don't trigger CI on their
+own. Close and reopen the PR (or push a commit to it) to run the checks.
+
 ## Licenses
 
 Code: MIT (`LICENSE`). Data in `data/`: CC BY 4.0 (`data/LICENSE.md`).
