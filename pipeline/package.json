@@ -8,7 +8,8 @@
   "scripts": {
     "propose": "tsx src/cli.ts",
     "stale": "tsx src/stale.ts",
-    "identity": "tsx src/identity.ts"
+    "identity": "tsx src/identity.ts",
+    "add-library": "tsx src/add-library/cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
