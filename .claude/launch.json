@@ -4,30 +4,19 @@
     {
       "name": "site",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev"
-      ],
+      "runtimeArgs": ["run", "dev"],
       "port": 4321
     },
     {
       "name": "site-examples",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev:examples"
-      ],
+      "runtimeArgs": ["run", "dev:examples"],
       "port": 4321
     },
     {
       "name": "site-functions",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev:functions",
-        "-w",
-        "@pqc-deps/site"
-      ],
+      "runtimeArgs": ["run", "dev:functions", "-w", "@pqc-deps/site"],
       "port": 8788
     }
   ]
