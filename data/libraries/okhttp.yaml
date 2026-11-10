@@ -14,4 +14,14 @@ applicable_algorithms:
   - hybrid-tls
 overall_status: unknown
 algorithms: {}
-last_verified: 2026-11-08
+roadmap:
+  confidence: tentative
+  summary: "An open pull request (PR #9517) and issue (#9497) propose adding named groups (supported_groups) to ConnectionSpec for post-quantum TLS key exchange."
+  sources:
+    - url: https://github.com/lysine-dev/okhttp/pull/9517
+      title: "PR #9517: Add named groups (supported_groups) to ConnectionSpec for post-quantum key exchange"
+      kind: pull-request
+      quote: "Pull request #9517: Add named groups (supported_groups) to ConnectionSpec for post-quantum key exchange"
+      retrieved: 2026-11-10
+upgrade_notes: No support yet; a plan exists.
+last_verified: 2026-11-10
