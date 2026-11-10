@@ -20,7 +20,12 @@ algorithms:
         title: "OpenSSH: Release Notes"
         kind: release-notes
         quote: This algorithm "mlkem768x25519-sha256" is available by default.
-        retrieved: 2026-11-09
+        retrieved: 2026-11-10
+      - url: https://www.openssh.com/releasenotes.html
+        title: "OpenSSH: Release Notes"
+        kind: release-notes
+        quote: "ssh(1): the hybrid post-quantum algorithm mlkem768x25519-sha256 is now used by default for key agreement."
+        retrieved: 2026-11-10
   ml-dsa:
     support: partial
     default_enabled: false
@@ -30,14 +35,14 @@ algorithms:
         title: "OpenSSH: Release Notes"
         kind: release-notes
         quote: "All: add experimental support for a composite post-quantum signature scheme that combines ML-DSA 44 and Ed25519 as specified in draft-miller-sshm-mldsa44-ed25519-composite-sigs."
-        retrieved: 2026-11-09
+        retrieved: 2026-11-10
       - url: https://www.openssh.com/releasenotes.html
         title: "OpenSSH: Release Notes"
         kind: release-notes
         quote: This scheme is not enabled by default. To use it, you'll need to add it to HostKeyAlgorithms, PubkeyAcceptedAlgorithms, etc.
-        retrieved: 2026-11-09
+        retrieved: 2026-11-10
 upgrade_notes: "ML-KEM: supported in current releases; the sources don't state the first version. On by default: ML-KEM. Partial or experimental: ML-DSA; check the notes before relying on it."
-last_verified: 2026-11-09
+last_verified: 2026-11-10
 pipeline:
   watch_urls:
     - https://www.openssh.com/releasenotes.html
