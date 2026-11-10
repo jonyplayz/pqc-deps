@@ -25,11 +25,6 @@ algorithms:
         title: v6.1.0
         kind: release-notes
         quote: support for the ML-DSA PQC Algorithm Identifiers
-        retrieved: 2026-11-09
-      - url: https://github.com/panva/jose/pull/816
-        title: "PR #816: feat: AKP JWK and ML-DSA support"
-        kind: pull-request
-        quote: Available in Node.js >= 24.7.0
-        retrieved: 2026-11-09
+        retrieved: 2026-11-10
 upgrade_notes: "ML-DSA: jose (panva) 6.1.0 or later."
-last_verified: 2026-11-09
+last_verified: 2026-11-10
