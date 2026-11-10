@@ -19,6 +19,11 @@ algorithms:
         title: 1.0.22
         kind: release-notes
         quote: ML-KEM768, the NIST-standardized lattice-based KEM, is accessible through the `crypto_kem_mlkem768_*()` functions.
-        retrieved: 2026-11-09
+        retrieved: 2026-11-10
+      - url: https://github.com/jedisct1/libsodium/releases/tag/1.0.22-RELEASE
+        title: 1.0.22
+        kind: release-notes
+        quote: X-Wing, a hybrid KEM combining ML-KEM768 with X25519 for protection against both classical and quantum adversaries, is available through the `crypto_kem_*()` functions.
+        retrieved: 2026-11-10
 upgrade_notes: "ML-KEM: libsodium 1.0.22 or later."
-last_verified: 2026-11-09
+last_verified: 2026-11-10
