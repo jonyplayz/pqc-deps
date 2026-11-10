@@ -14,43 +14,42 @@ overall_status: available
 algorithms:
   ml-kem:
     support: yes
-    since_version: 3.8.8
     sources:
       - url: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         title: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         kind: release-notes
         quote: "** libgnutls: Experimental support for X25519MLKEM768 and SecP256r1MLKEM768 key exchange in TLS 1.3"
-        retrieved: 2026-11-09
+        retrieved: 2026-11-10
       - url: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         title: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         kind: release-notes
         quote: "** libgnutls: Support for ML-KEM-1024 key encapsulation mechanism"
-        retrieved: 2026-11-09
+        retrieved: 2026-11-10
   ml-dsa:
     support: yes
     sources:
       - url: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         title: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         kind: release-notes
-        quote: "** libgnutls: ML-DSA signatures can now be used in TLS"
-        retrieved: 2026-11-09
+        quote: "** libgnutls: Experimental support for ML-DSA signature algorithm"
+        retrieved: 2026-11-10
       - url: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         title: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         kind: release-notes
-        quote: "** libgnutls: All variants of ML-DSA private key formats are supported"
-        retrieved: 2026-11-09
+        quote: "** libgnutls: ML-DSA signatures can now be used in TLS"
+        retrieved: 2026-11-10
   hybrid-tls:
     support: partial
     since_version: 3.8.8
+    experimental: true
     sources:
       - url: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         title: https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
         kind: release-notes
         quote: "** libgnutls: Experimental support for X25519MLKEM768 and SecP256r1MLKEM768 key exchange in TLS 1.3"
-        retrieved: 2026-11-09
-    experimental: true
-upgrade_notes: "ML-KEM: GnuTLS 3.8.8 or later. ML-DSA: supported in current releases; the sources don't state the first version. Partial or experimental: hybrid TLS key exchange; check the notes before relying on it."
-last_verified: 2026-11-09
+        retrieved: 2026-11-10
+upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version. Partial or experimental: hybrid TLS key exchange; check the notes before relying on it."
+last_verified: 2026-11-10
 pipeline:
   watch_urls:
     - https://gitlab.com/gnutls/gnutls/-/raw/master/NEWS
