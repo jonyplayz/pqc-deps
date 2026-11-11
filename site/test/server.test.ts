@@ -659,3 +659,27 @@ describe('maintainer check fallbacks (found in the live test)', () => {
     ).rejects.toMatchObject({ status: 403 });
   });
 });
+
+describe('Workers-safe fetch (found in the live test)', () => {
+  it('never calls the global fetch with the GitHub client as `this`', async () => {
+    const original = globalThis.fetch;
+    // Mimic Cloudflare Workers: fetch throws "Illegal invocation" unless called unbound.
+    const strict = function (this: unknown, input: RequestInfo | URL) {
+      if (this !== undefined && this !== globalThis) {
+        throw new TypeError('Illegal invocation: function called with incorrect `this` reference.');
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify({ owner: { login: 'jonyplayz' } }), { status: 200 }),
+      );
+    } as typeof fetch;
+    globalThis.fetch = strict;
+    try {
+      const gh = new GitHub('jonyplayz/pqc-deps', 't');
+      await expect(gh.request('GET', '/repos/{repo}')).resolves.toEqual({
+        owner: { login: 'jonyplayz' },
+      });
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+});
