@@ -87,6 +87,34 @@ export function upgradeNotes(lib: Library): string | undefined {
   return sentences.length ? sentences.join(' ') : undefined;
 }
 
+/** Copy each locked path from `existing` into `draft` (absence included). */
+export function applyLocks(draft: Library, existing: Library, paths: string[]): void {
+  for (const path of paths) {
+    const [top, alg, field] = path.split('.') as [string, string | undefined, string | undefined];
+    if (top === 'overall_status') draft.overall_status = existing.overall_status;
+    else if (top === 'roadmap' || top === 'fips') {
+      const prev = existing[top];
+      if (prev === undefined) delete draft[top];
+      else (draft as Record<string, unknown>)[top] = prev;
+    } else if (top === 'algorithms' && alg) {
+      const a = alg as keyof Library['algorithms'];
+      const prev = existing.algorithms[a];
+      if (!field) {
+        if (prev) draft.algorithms[a] = prev;
+        else delete draft.algorithms[a];
+        continue;
+      }
+      const cur = draft.algorithms[a];
+      if (!cur || (field === 'support' && !prev)) continue;
+      const f = field as 'support' | 'since_version' | 'default_enabled' | 'experimental';
+      const next: Record<string, unknown> = { ...cur };
+      if (prev && prev[f] !== undefined) next[f] = prev[f];
+      else delete next[f];
+      draft.algorithms[a] = next as typeof cur;
+    }
+  }
+}
+
 const show = (v: unknown) =>
   v === undefined ? '–' : typeof v === 'object' ? JSON.stringify(v) : String(v);
 
@@ -100,8 +128,22 @@ export function mergeProposal(
   const algorithms: Library['algorithms'] = {};
 
   for (const a of ALGORITHMS) {
-    const next = v.algorithms[a];
+    let next = v.algorithms[a];
     const prev = existing.algorithms[a];
+    // Same verdict but this run found fewer details: keep the verified details
+    // already on file (e.g. a since-version from an older changelog section).
+    if (next && prev && next.support === prev.support) {
+      if (!next.since_version && prev.since_version) {
+        next = { ...next, since_version: prev.since_version };
+        kept.push(
+          `algorithms.${a}.since_version ${prev.since_version} (kept; not re-found this run)`,
+        );
+      }
+      if (next.default_enabled === undefined && prev.default_enabled !== undefined) {
+        next = { ...next, default_enabled: prev.default_enabled };
+        kept.push(`algorithms.${a}.default_enabled (kept; not re-found this run)`);
+      }
+    }
     if (next) algorithms[a] = next;
     else if (prev && prev.support !== 'unknown') {
       algorithms[a] = prev;
@@ -152,6 +194,26 @@ export function mergeProposal(
       `Model said overall_status "${draft.overall_status}", which contradicts the verified data (${statusErrors[0]!.message}); using "${derived}".`,
     );
     draft.overall_status = derived;
+  }
+
+  // Reviewer locks win over anything this run proposed.
+  const locks = existing.pipeline?.locked ?? [];
+  if (locks.length) {
+    applyLocks(
+      draft,
+      existing,
+      locks.map((l) => l.path),
+    );
+    for (const l of locks) kept.push(`${l.path} (locked by reviewer: ${l.reason})`);
+    const fresh = upgradeNotes(draft);
+    if (fresh) draft.upgrade_notes = fresh;
+    else delete draft.upgrade_notes;
+    const lockErrors = lintLibrary(draft, today).filter((i) => i.severity === 'error');
+    if (lockErrors.length) {
+      warnings.push(
+        `Locked values now contradict the data (${lockErrors.map((i) => `${i.path}: ${i.message}`).join('; ')}); review the locks.`,
+      );
+    }
   }
 
   const changes: FieldChange[] = [];

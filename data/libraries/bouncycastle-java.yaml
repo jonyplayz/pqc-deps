@@ -24,3 +24,6 @@ pipeline:
   watch_urls:
     - https://www.bouncycastle.org/releasenotes.html
     - https://www.bouncycastle.org/download/bouncy-castle-java/
+  locked:
+    - path: algorithms.hqc
+      reason: the only evidence is a 1.86 hardening note, which shows neither support nor a first version

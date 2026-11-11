@@ -48,6 +48,9 @@ interface GhIssue {
   closed_at: string | null;
   pull_request?: { merged_at: string | null };
   labels: Array<{ name: string } | string>;
+  user?: { login: string } | null;
+  /** OWNER, MEMBER, COLLABORATOR, CONTRIBUTOR, NONE… */
+  author_association?: string;
 }
 
 export async function fetchGithub(
@@ -103,7 +106,7 @@ export async function fetchGithub(
           url: i.html_url,
           title: `${isPr ? 'PR' : 'Issue'} #${i.number}: ${i.title}`,
           kind: isPr ? 'pull-request' : 'issue',
-          text: `${isPr ? 'Pull request' : 'Issue'} #${i.number}: ${i.title}\nState: ${state}${labels ? `\nLabels: ${labels}` : ''}\n\n${i.body ?? ''}`,
+          text: `${isPr ? 'Pull request' : 'Issue'} #${i.number}: ${i.title}\nState: ${state}${labels ? `\nLabels: ${labels}` : ''}\nAuthor: ${i.user?.login ?? 'unknown'} (${i.author_association ?? 'NONE'})\n\n${i.body ?? ''}`,
           date: i.updated_at.slice(0, 10),
         });
       }

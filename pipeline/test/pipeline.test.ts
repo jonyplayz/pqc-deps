@@ -48,7 +48,10 @@ describe('fetch helpers', () => {
     expect(githubRepo(lib({ repo: 'https://gitlab.com/x/y' }))).toBeUndefined();
     expect(
       githubRepo(
-        lib({ repo: 'https://gitlab.com/x/y', pipeline: { watch_urls: [], github: 'a/b' } }),
+        lib({
+          repo: 'https://gitlab.com/x/y',
+          pipeline: { watch_urls: [], github: 'a/b', locked: [] },
+        }),
       ),
     ).toBe('a/b');
   });
@@ -144,17 +147,20 @@ describe('prompt + schema', () => {
     expect(s.properties.algorithms.properties['ml-kem'].additionalProperties).toBe(false);
   });
   it('omits pipeline config and lists documents', () => {
-    const p = buildUserPrompt(lib({ pipeline: { watch_urls: ['https://secret.example'] } }), [
-      {
-        id: 'D1',
-        url: 'https://x',
-        title: 'T "q"',
-        kind: 'docs',
-        text: '',
-        excerpt: 'ML-KEM',
-        hits: 1,
-      },
-    ]);
+    const p = buildUserPrompt(
+      lib({ pipeline: { watch_urls: ['https://secret.example'], locked: [] } }),
+      [
+        {
+          id: 'D1',
+          url: 'https://x',
+          title: 'T "q"',
+          kind: 'docs',
+          text: '',
+          excerpt: 'ML-KEM',
+          hits: 1,
+        },
+      ],
+    );
     expect(p).not.toContain('secret.example');
     expect(p).toContain(`<document id="D1" kind="docs" title="T 'q'"`);
   });
@@ -203,7 +209,7 @@ const DOCS: FetchedDoc[] = [
     title: 'Issue #42: ML-DSA support',
     kind: 'issue',
     date: '2026-05-01',
-    text: 'Issue #42: ML-DSA support\nState: open\n\nMaintainer: we plan to ship ML-DSA in 3.7, targeted for 2027-03.',
+    text: 'Issue #42: ML-DSA support\nState: open\nAuthor: demo-maintainer (MEMBER)\n\nMaintainer: we plan to ship ML-DSA in 3.7, targeted for 2027-03.',
   },
   {
     url: 'https://example.com/unrelated',
@@ -829,5 +835,155 @@ describe('since-version from stable evidence', () => {
       since_version: '3.7.0',
       default_enabled: true,
     });
+  });
+});
+
+describe('review locks and stricter rules (from reviewing evidence PR #10)', () => {
+  const src = (quote: string, url = 'https://example.com/notes') => ({
+    url,
+    title: 't',
+    kind: 'release-notes' as const,
+    quote,
+    retrieved: TODAY,
+  });
+  const run = (docs: FetchedDoc[], p: Proposal, existing = lib()) =>
+    proposeForLibrary(existing, {
+      fetchEvidence: async () => ({ docs, warnings: [] }),
+      llm: fakeLlm(JSON.stringify(p)),
+      today: TODAY,
+    });
+  const base = (): Proposal => ({
+    ...fakeProposal(),
+    algorithms: {
+      'ml-kem': claim(),
+      'ml-dsa': claim(),
+      'slh-dsa': claim(),
+      'hybrid-tls': claim(),
+      'fn-dsa': claim(),
+      hqc: claim(),
+    },
+    roadmap: null,
+    fips: null,
+    overall_status: 'unknown',
+  });
+
+  it('a bare "Release X" heading or a bug-fix line cannot set since_version', async () => {
+    const docs: FetchedDoc[] = [
+      {
+        url: 'https://example.com/download',
+        title: 'Download',
+        kind: 'docs',
+        text: 'Release 2.7.0\n- TLS: ML-DSA support in TLS 1.3 per draft-ietf-tls-mldsa-00.\nRelease 10.0.10\n- Fix blob type in CopyWithPrivateKey for ML-DSA',
+      },
+    ];
+    const p = base();
+    p.algorithms['ml-dsa'] = claim({
+      support: 'yes',
+      since_version: '2.7.0',
+      evidence: [
+        { doc: 'D1', quote: 'TLS: ML-DSA support in TLS 1.3 per draft-ietf-tls-mldsa-00.' },
+        { doc: 'D1', quote: 'Release 2.7.0' },
+      ],
+    });
+    // The heading above the ML-DSA line is "Release 2.7.0" too, so make that line
+    // the only one naming ML-DSA under a *different* heading for a clean check:
+    const r1 = await run(docs, p);
+    expect(r1.library!.algorithms['ml-dsa']!.since_version).toBe('2.7.0'); // heading above an ML-DSA line: allowed
+    const p2 = base();
+    p2.algorithms['ml-dsa'] = claim({
+      support: 'yes',
+      since_version: '10.0.10',
+      evidence: [{ doc: 'D1', quote: 'Fix blob type in CopyWithPrivateKey for ML-DSA' }],
+    });
+    const r2 = await run(docs, p2);
+    expect(r2.library!.algorithms['ml-dsa']!.since_version).toBeUndefined(); // a fix isn't first support
+  });
+
+  it('roadmaps from issues need a project member as author', async () => {
+    const issue = (assoc: string): FetchedDoc => ({
+      url: 'https://github.com/demo/demo-tls/issues/9',
+      title: 'Issue #9',
+      kind: 'issue',
+      text: `Issue #9\nState: open\nAuthor: someone (${assoc})\n\nML-KEM is first on the 4.0 roadmap.`,
+    });
+    const p = base();
+    p.roadmap = {
+      target_version: '4.0',
+      target_date: null,
+      confidence: 'tentative',
+      summary: 'ML-KEM in 4.0',
+      evidence: [{ doc: 'D1', quote: 'ML-KEM is first on the 4.0 roadmap.' }],
+    };
+    expect((await run([issue('CONTRIBUTOR')], p)).library?.roadmap).toBeUndefined();
+    expect((await run([issue('MEMBER')], p)).library!.roadmap).toMatchObject({
+      target_version: '4.0',
+    });
+  });
+
+  it('keeps an existing since_version the model did not re-find', async () => {
+    const docs: FetchedDoc[] = [
+      {
+        url: 'https://example.com/news',
+        title: 'NEWS',
+        kind: 'release-notes',
+        text: 'Support for ML-KEM-1024 key encapsulation mechanism',
+      },
+    ];
+    const existing = lib({
+      overall_status: 'available',
+      algorithms: {
+        'ml-kem': { support: 'yes', since_version: '3.8.8', sources: [src('ML-KEM in 3.8.8')] },
+      },
+    });
+    const p = base();
+    p.overall_status = 'available';
+    p.algorithms['ml-kem'] = claim({
+      support: 'yes',
+      evidence: [{ doc: 'D1', quote: 'Support for ML-KEM-1024 key encapsulation mechanism' }],
+    });
+    const r = await run(docs, p, existing);
+    expect(r.library!.algorithms['ml-kem']!.since_version).toBe('3.8.8');
+    expect(r.kept.join()).toMatch(/since_version 3\.8\.8 \(kept/);
+  });
+
+  it('reviewer locks win: a removed since_version stays removed, a status stays put', async () => {
+    const docs: FetchedDoc[] = [
+      {
+        url: 'https://example.com/r',
+        title: 'Demo 0.23.37',
+        kind: 'release-notes',
+        text: 'Release 0.23.37\nAdds support for ML-KEM-1024 key exchange.\nML-KEM is enabled by default.',
+      },
+    ];
+    const existing = lib({
+      overall_status: 'available',
+      algorithms: { 'ml-kem': { support: 'yes', sources: [src('old ML-KEM quote')] } },
+      pipeline: {
+        watch_urls: [],
+        locked: [
+          {
+            path: 'algorithms.ml-kem.since_version',
+            reason: '0.23.37 added ML-KEM-1024, not ML-KEM',
+          },
+          { path: 'overall_status', reason: 'default-on is a build option, not hybrid TLS' },
+        ],
+      },
+    });
+    const p = base();
+    p.overall_status = 'ready';
+    p.algorithms['ml-kem'] = claim({
+      support: 'yes',
+      since_version: '0.23.37',
+      default_enabled: true,
+      evidence: [
+        { doc: 'D1', quote: 'Adds support for ML-KEM-1024 key exchange.' },
+        { doc: 'D1', quote: 'ML-KEM is enabled by default.' },
+      ],
+    });
+    const r = await run(docs, p, existing);
+    expect(r.library!.algorithms['ml-kem']!.since_version).toBeUndefined();
+    expect(r.library!.overall_status).toBe('available');
+    expect(r.kept.join()).toMatch(/locked by reviewer: 0\.23\.37 added ML-KEM-1024/);
+    expect(r.changes.find((c) => c.field === 'overall_status')).toBeUndefined();
   });
 });
