@@ -3,11 +3,17 @@ import { HttpError } from './http';
 import type { Env } from './env';
 
 export class GitHub {
+  private readonly fetchImpl: typeof fetch;
+
   constructor(
     private readonly repo: string,
     private readonly token: string,
-    private readonly fetchImpl: typeof fetch = fetch,
-  ) {}
+    fetchImpl?: typeof fetch,
+  ) {
+    // Never call the global fetch as a method (`this.fetchImpl(...)` with
+    // fetch itself): Cloudflare Workers throws "Illegal invocation". Wrap it.
+    this.fetchImpl = fetchImpl ?? ((input, init) => fetch(input, init));
+  }
 
   static fromEnv(env: Env, fetchImpl?: typeof fetch): GitHub {
     if (!env.GITHUB_REPO || !env.GITHUB_TOKEN) {
