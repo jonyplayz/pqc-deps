@@ -33,7 +33,7 @@ export async function checkPackage(registry: Registry, name: string): Promise<Ch
   const what = `${registry} package ${name}`;
   switch (registry) {
     case 'npm': {
-      const r = await exists(`https://registry.npmjs.org/${name.replace('/', '%2F')}`);
+      const r = await exists(`https://registry.npmjs.org/${name.replace(/\//g, '%2F')}`);
       return { what, ok: r.ok, ...(r.detail ? { detail: r.detail } : {}) };
     }
     case 'pypi': {

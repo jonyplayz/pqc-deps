@@ -17,7 +17,8 @@ export function detectFormat(text: string, filename?: string): ManifestFormat | 
     if (base === 'cargo.lock') return 'Cargo.lock';
   }
 
-  const t = text.trimStart();
+  // Sniffing only needs the start of the file; bounding it keeps every regex cheap.
+  const t = text.slice(0, 20_000).trimStart();
   if (t.startsWith('{')) {
     if (/"lockfileVersion"\s*:/.test(t)) return 'package-lock.json';
     return 'package.json';

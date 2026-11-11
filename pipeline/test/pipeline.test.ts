@@ -987,3 +987,11 @@ describe('review locks and stricter rules (from reviewing evidence PR #10)', () 
     expect(r.changes.find((c) => c.field === 'overall_status')).toBeUndefined();
   });
 });
+
+describe('htmlToText hardening (CodeQL)', () => {
+  it('leaves no tags or angle brackets behind, even from nested fragments', () => {
+    const out = htmlToText('<p>ML-KEM <<b>x</b>script>alert(1)<</b>/script> ok</p>');
+    expect(out).not.toMatch(/[<>]/);
+    expect(out).toContain('ML-KEM');
+  });
+});

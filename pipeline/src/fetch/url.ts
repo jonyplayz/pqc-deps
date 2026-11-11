@@ -9,7 +9,16 @@ export function guessKind(url: string): SourceKind {
   if (/release[-_]?notes|\/releases?\/|changelog|\/news/.test(u)) return 'release-notes';
   if (/mail|lists\.|pipermail|groups\.google|marc\.info/.test(u)) return 'mailing-list';
   if (/\/blog|\/posts?\//.test(u)) return 'blog';
-  if (/csrc\.nist\.gov\/projects\/cryptographic-module-validation/.test(u)) return 'certificate';
+  try {
+    const parsed = new URL(url);
+    if (
+      parsed.hostname === 'csrc.nist.gov' &&
+      parsed.pathname.startsWith('/projects/cryptographic-module-validation')
+    )
+      return 'certificate';
+  } catch {
+    /* not a URL: fall through */
+  }
   if (/\/issues?\//.test(u)) return 'issue';
   if (/\/pull\//.test(u)) return 'pull-request';
   return 'docs';

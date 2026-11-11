@@ -47,8 +47,14 @@ export function htmlToText(html: string): string {
       '\n',
     )
     .replace(/<(p|div|section|article|h[1-6]|tr|pre|blockquote|dd|dt)\b[^>]*>/gi, '\n')
-    .replace(/<\/t[dh]>/gi, ' | ')
-    .replace(/<[^>]+>/g, '');
+    .replace(/<\/t[dh]>/gi, ' | ');
+  // Strip remaining tags until nothing changes (nested fragments like "<<b>x>"
+  // can re-form a tag after one pass), then drop stray angle brackets.
+  for (let prev = ''; prev !== s;) {
+    prev = s;
+    s = s.replace(/<[^<>]*>/g, '');
+  }
+  s = s.replace(/[<>]/g, '');
   return decodeEntities(s)
     .split('\n')
     .map((l) => l.replace(/[ \t ]+/g, ' ').trim())
