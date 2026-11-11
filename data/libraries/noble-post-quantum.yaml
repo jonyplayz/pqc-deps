@@ -21,12 +21,7 @@ algorithms:
         title: 0.2.0
         kind: release-notes
         quote: Update to final FIPS 203, 204, 205 specifications. Remove support for non-FIPS kyber.
-        retrieved: 2026-11-09
-      - url: https://github.com/paulmillr/noble-post-quantum/releases/tag/0.7.1
-        title: 0.7.1
-        kind: release-notes
-        quote: Added `@noble/post-quantum/webcrypto.js`, an async noble-style wrapper around the experimental built-in WebCrypto implementations of ML-KEM-512, ML-KEM-768, ML-KEM-1024, and ML-KEM-768 + X25519.
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
   fn-dsa:
     support: partial
     since_version: 0.6.0
@@ -36,6 +31,6 @@ algorithms:
         title: 0.6.0
         kind: release-notes
         quote: Implement Falcon signatures. Prepare for future FN-DSA / FIPS-206.
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
 upgrade_notes: "ML-KEM: noble-post-quantum 0.2.0 or later."
-last_verified: 2026-11-09
+last_verified: 2026-11-11
