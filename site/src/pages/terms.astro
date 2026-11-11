@@ -1,0 +1,67 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config';
+const updated = '2026-11-11';
+---
+
+<Base title="Terms of use" description="Terms for using PQC Deps, its data and its API.">
+  <div class="prose">
+    <h1>Terms of use</h1>
+    <p class="muted">Last updated {updated}</p>
+
+    <h2>What this is</h2>
+    <p>
+      {SITE.name} is a free, community-maintained catalog of public information about post-quantum
+      cryptography support in open-source software. It's provided for information only.
+    </p>
+
+    <h2>Not security advice</h2>
+    <ul>
+      <li>
+        Entries summarize public sources and can be incomplete, out of date or wrong. Always check
+        the linked sources and the library's own documentation before relying on them.
+      </li>
+      <li>
+        A library supporting an algorithm doesn't mean your software uses it. You may still need to
+        upgrade, configure or call new APIs.
+      </li>
+      <li>
+        The dependency checker matches names and versions only. It doesn't analyze your code.
+      </li>
+    </ul>
+    <p>
+      The site, data and tools are provided <strong>"as is", without warranty of any kind</strong>,
+      and the maintainers aren't liable for decisions made using them.
+    </p>
+
+    <h2>Using the data and code</h2>
+    <ul>
+      <li>
+        Catalog data (including <code>/api/catalog.json</code>) is licensed
+        <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>: reuse it freely,
+        crediting {SITE.name} with a link.
+      </li>
+      <li>The source code is licensed MIT.</li>
+      <li>
+        Library names and trademarks belong to their owners. Listing a library doesn't imply any
+        affiliation or endorsement.
+      </li>
+    </ul>
+
+    <h2>Fair use of the site</h2>
+    <p>
+      Don't abuse the request forms (spam, automated submissions, offensive content) or try to
+      disrupt the service. We may remove requests and block abuse. Please cache the JSON API
+      rather than polling it heavily.
+    </p>
+
+    <h2>Corrections</h2>
+    <p>
+      Spotted a mistake? Use <em>Suggest a correction</em> on any library page or open an issue on
+      <a href={SITE.repoUrl}>GitHub</a>. Maintainers of listed libraries are especially welcome.
+    </p>
+
+    <h2>Changes</h2>
+    <p>These terms may change; the date above shows the latest version.</p>
+  </div>
+</Base>
