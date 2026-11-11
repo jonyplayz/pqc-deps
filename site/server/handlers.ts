@@ -199,6 +199,9 @@ export async function adminActivity({ gh }: Ctx): Promise<Response> {
     client.pulls(),
   ]);
   const runs = [...refresh, ...add]
+    // Every labelled issue triggers add-library.yml, which skips unless the
+    // label is "approved"; those skipped runs are noise here.
+    .filter((r) => r.conclusion !== 'skipped')
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
     .slice(0, 12)
     .map((r) => ({
