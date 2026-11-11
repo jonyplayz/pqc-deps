@@ -12,7 +12,9 @@ export class GitHub {
   ) {
     // Never call the global fetch as a method (`this.fetchImpl(...)` with
     // fetch itself): Cloudflare Workers throws "Illegal invocation". Wrap it.
-    this.fetchImpl = fetchImpl ?? ((input, init) => fetch(input, init));
+    // Callers may pass the global fetch explicitly, so always wrap.
+    const f = fetchImpl ?? fetch;
+    this.fetchImpl = (input, init) => f(input, init);
   }
 
   static fromEnv(env: Env, fetchImpl?: typeof fetch): GitHub {
