@@ -8,6 +8,7 @@ on:
   pull_request:
   schedule:
     - cron: '23 5 * * 1' # Mondays
+  workflow_dispatch:
 
 permissions:
   contents: read
