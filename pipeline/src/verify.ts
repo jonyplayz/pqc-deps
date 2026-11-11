@@ -115,6 +115,8 @@ function versionMentioned(
   const v = normalizeForMatch(version.replace(/^v/i, ''));
   const pattern = new RegExp(`(^|[^0-9.])v?${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^0-9])`);
   return evidence.some((e) => {
+    // A fix, hardening or speed-up in version X doesn't mean support started in X.
+    if (MAINTENANCE_PATTERN.test(e.quote)) return false;
     const d = docs.get(e.doc);
     const heading = d && sectionHeadingFor(d.text, e.quote);
     return (
@@ -124,6 +126,10 @@ function versionMentioned(
     );
   });
 }
+
+/** Release-note lines about maintenance, which can't show when support began. */
+const MAINTENANCE_PATTERN =
+  /\b(fix(es|ed)?|bug|regression|hardening|harden|side[- ]channel|performance|optimi[sz](e|ed|ation)|speed[- ]?up|faster|refactor(ed)?|rename[sd]?|backport(ed)?)\b/i;
 
 /** "On by default" needs a quote about defaults (OpenSSL's "default provider" is a module name, not a setting). */
 const DEFAULT_ON_PATTERN =
@@ -241,7 +247,11 @@ export function verifyProposal(
     // The first *stable* version: when some quotes are about an experimental
     // precursor, the version must come from the others.
     const stableEv = ev.filter((e) => !/\bexperimental\b/i.test(e.quote));
-    const versionEv = stableEv.length ? stableEv : ev;
+    // The version must come with a quote that names this algorithm (a bare
+    // "Release 2.7.0" heading on a downloads page is the current release).
+    const versionEv = (stableEv.length ? stableEv : ev).filter((e) =>
+      ALGORITHM_NAME_PATTERN[a]!.test(e.quote),
+    );
     if (since && !versionMentioned(since, versionEv, docs)) {
       dropped.push({
         field: `algorithms.${a}.since_version`,
@@ -271,7 +281,19 @@ export function verifyProposal(
 
   let roadmap: Library['roadmap'];
   if (proposal.roadmap) {
-    const ev = keepVerified('roadmap', proposal.roadmap.evidence);
+    // In issues and PRs, only the project's own members can state a plan.
+    const ev = keepVerified('roadmap', proposal.roadmap.evidence).filter((e) => {
+      const d = docs.get(e.doc)!;
+      if (d.kind !== 'issue' && d.kind !== 'pull-request') return true;
+      const ok = /^Author: .+ \((OWNER|MEMBER|COLLABORATOR)\)$/m.test(d.text);
+      if (!ok)
+        dropped.push({
+          field: 'roadmap',
+          claim: `${e.doc}: "${e.quote.slice(0, 120)}"`,
+          reason: 'written by someone outside the project, not a maintainer plan',
+        });
+      return ok;
+    });
     if (ev.length) {
       const r = proposal.roadmap;
       const date =

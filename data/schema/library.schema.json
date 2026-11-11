@@ -431,6 +431,28 @@
         },
         "changelog_path": {
           "type": "string"
+        },
+        "locked": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^(overall_status|roadmap|fips|algorithms\\.(ml-kem|ml-dsa|slh-dsa|hybrid-tls|fn-dsa|hqc)(\\.(support|since_version|default_enabled|experimental))?)$"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 3
+              }
+            },
+            "required": [
+              "path",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false

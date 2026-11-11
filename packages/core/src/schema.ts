@@ -145,6 +145,24 @@ export const LibrarySchema = z.strictObject({
         .optional(),
       /** Path of the changelog file in the repo, e.g. "CHANGES.md". */
       changelog_path: z.string().optional(),
+      /**
+       * Reviewer decisions the pipeline must not change, with the reason.
+       * Paths: "overall_status", "roadmap", "fips", "algorithms.<alg>" or
+       * "algorithms.<alg>.<field>" (e.g. "algorithms.ml-kem.since_version").
+       * A locked path keeps its current value, including being absent.
+       */
+      locked: z
+        .array(
+          z.strictObject({
+            path: z
+              .string()
+              .regex(
+                /^(overall_status|roadmap|fips|algorithms\.(ml-kem|ml-dsa|slh-dsa|hybrid-tls|fn-dsa|hqc)(\.(support|since_version|default_enabled|experimental))?)$/,
+              ),
+            reason: z.string().min(3),
+          }),
+        )
+        .default([]),
     })
     .optional(),
 });
