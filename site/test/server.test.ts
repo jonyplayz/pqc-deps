@@ -692,3 +692,46 @@ describe('Workers-safe fetch (found in the live test)', () => {
     }
   });
 });
+
+describe('activity list (found in the live test)', () => {
+  it('hides skipped workflow runs', async () => {
+    const run = (title: string, conclusion: string | null, created: string) => ({
+      id: 1,
+      name: 'x',
+      display_title: title,
+      status: 'completed',
+      conclusion,
+      html_url: 'u',
+      created_at: created,
+      event: 'issues',
+    });
+    const f: typeof fetch = async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.includes('/refresh.yml/runs')) {
+        return new Response(
+          JSON.stringify({
+            workflow_runs: [run('Evidence refresh: aws-lc-rs', 'success', '2026-11-11T13:11:06Z')],
+          }),
+        );
+      }
+      if (url.pathname.includes('/add-library.yml/runs')) {
+        return new Response(
+          JSON.stringify({
+            workflow_runs: [
+              run('Add library: [Re-check] aws-lc-rs', 'skipped', '2026-11-11T13:10:33Z'),
+            ],
+          }),
+        );
+      }
+      return new Response('[]');
+    };
+    const r = (await (
+      await adminActivity({
+        request: new Request(ORIGIN),
+        env: env(),
+        gh: () => new GitHub('jonyplayz/pqc-deps', 't', f),
+      })
+    ).json()) as any;
+    expect(r.runs.map((x: any) => x.title)).toEqual(['Evidence refresh: aws-lc-rs']);
+  });
+});

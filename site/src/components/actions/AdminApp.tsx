@@ -101,10 +101,14 @@ export default function AdminApp() {
       reason = answer;
     }
     setBusy(`req-${r.number}`);
-    setMsg(await postJson(`/api/admin/requests/${r.number}`, { action, reason }));
+    const result = await postJson(`/api/admin/requests/${r.number}`, { action, reason });
+    setMsg(result);
     setBusy(undefined);
-    loadRequests();
-    loadActivity();
+    // GitHub's issue list lags a few seconds after a change, so drop the
+    // decided request locally instead of trusting an immediate reload.
+    if (!result.error) setRequests((list) => list?.filter((x) => x.number !== r.number));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(loadActivity, 4000);
   };
 
   const refresh = async () => {
