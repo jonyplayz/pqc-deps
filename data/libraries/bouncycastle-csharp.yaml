@@ -21,8 +21,13 @@ algorithms:
       - url: https://www.bouncycastle.org/download/bouncy-castle-c/
         title: Download Bouncy Castle C# .NET - Bouncycastle
         kind: docs
+        quote: "- ML-KEM: Move public key validation into MLKemPublicKeyParameters."
+        retrieved: 2026-11-11
+      - url: https://www.bouncycastle.org/download/bouncy-castle-c/
+        title: Download Bouncy Castle C# .NET - Bouncycastle
+        kind: docs
         quote: "- TLS: Hybrid ECDHE-MLKEM key shares in TLS 1.3 per draft-ietf-tls-ecdhe-mlkem-00."
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
   ml-dsa:
     support: partial
     sources:
@@ -30,7 +35,12 @@ algorithms:
         title: Download Bouncy Castle C# .NET - Bouncycastle
         kind: docs
         quote: "- TLS: ML-DSA support in TLS 1.3 per draft-ietf-tls-mldsa-00."
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
+      - url: https://github.com/bcgit/bc-csharp/pull/679
+        title: "PR #679: docs: add XML documentation for ML-KEM and ML-DSA parameter gaps (Batch 9)"
+        kind: pull-request
+        quote: "- **`MLDsaParameterSet`** — class summary citing FIPS 204; per-constant summaries (NIST Category 2/3/5, modes 2/3/5); doc on `Name`, `ToString`."
+        retrieved: 2026-11-11
   slh-dsa:
     support: partial
     sources:
@@ -38,7 +48,12 @@ algorithms:
         title: Download Bouncy Castle C# .NET - Bouncycastle
         kind: docs
         quote: "- TLS: SLH-DSA support in TLS 1.3 per draft-reddy-tls-slhdsa-01."
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
+      - url: https://github.com/bcgit/bc-csharp/pull/678
+        title: "PR #678: docs: add XML documentation for SLH-DSA parameters (Batch 8)"
+        kind: pull-request
+        quote: Adds XML documentation to the SLH-DSA parameter classes under `crypto/src/crypto/parameters` — the stateless hash-based signature scheme standardised by NIST in FIPS 205.
+        retrieved: 2026-11-11
   hybrid-tls:
     support: partial
     sources:
@@ -46,17 +61,23 @@ algorithms:
         title: Download Bouncy Castle C# .NET - Bouncycastle
         kind: docs
         quote: "- TLS: Hybrid ECDHE-MLKEM key shares in TLS 1.3 per draft-ietf-tls-ecdhe-mlkem-00."
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
+      - url: https://www.bouncycastle.org/download/bouncy-castle-c/
+        title: Download Bouncy Castle C# .NET - Bouncycastle
+        kind: docs
+        quote: "- TLS: Add curveSM2MLKEM768 hybrid group per draft-yang-tls-hybrid-sm2-mlkem-03."
+        retrieved: 2026-11-11
   hqc:
     support: partial
+    since_version: 2.7.0
     sources:
       - url: https://www.bouncycastle.org/download/bouncy-castle-c/
         title: Download Bouncy Castle C# .NET - Bouncycastle
         kind: docs
         quote: "- HQC: Update to v5."
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
 upgrade_notes: "Partial or experimental: ML-KEM, ML-DSA, SLH-DSA and hybrid TLS key exchange; check the notes before relying on it."
-last_verified: 2026-11-09
+last_verified: 2026-11-11
 pipeline:
   watch_urls:
     - https://www.bouncycastle.org/download/bouncy-castle-c/
