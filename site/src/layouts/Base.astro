@@ -89,6 +89,13 @@ const path = cleanPath.replace(/\/$/, '');
           Code: MIT. Data: <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
           Not affiliated with any library listed. Not security advice.
         </p>
+        <nav class="footer-nav small" aria-label="Footer">
+          <a href="/request">Request a library</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href={`${SITE.repoUrl}/security/policy`}>Report a security issue</a>
+          <a href="/api/catalog.json">JSON API</a>
+        </nav>
       </div>
     </footer>
   </body>
@@ -172,5 +179,14 @@ const path = cleanPath.replace(/\/$/, '');
   }
   .site-footer p {
     margin: 0.25rem 0;
+  }
+  .footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin-top: 0.5rem;
+  }
+  .footer-nav a {
+    color: var(--muted);
   }
 </style>
