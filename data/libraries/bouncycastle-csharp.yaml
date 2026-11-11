@@ -69,7 +69,6 @@ algorithms:
         retrieved: 2026-11-11
   hqc:
     support: partial
-    since_version: 2.7.0
     sources:
       - url: https://www.bouncycastle.org/download/bouncy-castle-c/
         title: Download Bouncy Castle C# .NET - Bouncycastle
@@ -90,3 +89,5 @@ pipeline:
       reason: see ml-kem
     - path: algorithms.hybrid-tls.since_version
       reason: see ml-kem
+    - path: algorithms.hqc.since_version
+      reason: the downloads page lists the current release (2.7.0), not when support began

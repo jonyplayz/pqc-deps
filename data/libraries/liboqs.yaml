@@ -10,18 +10,11 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
 overall_status: unknown
-algorithms:
-  hybrid-tls:
-    support: partial
-    experimental: true
-    sources:
-      - url: https://github.com/open-quantum-safe/liboqs/releases/tag/0.16.0
-        title: liboqs version 0.16.0
-        kind: release-notes
-        quote: enabling liboqs-based quantum-safe and hybrid key authentication and exchange for TLS 1.3
-        retrieved: 2026-11-11
+algorithms: {}
 last_verified: 2026-11-11
 pipeline:
   watch_urls:
     - https://openquantumsafe.org/liboqs/
-  locked: []
+  locked:
+    - path: algorithms.hybrid-tls
+      reason: liboqs has no TLS; the quote is about other projects using liboqs for TLS
