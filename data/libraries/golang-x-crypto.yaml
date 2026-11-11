@@ -2,7 +2,7 @@
 id: golang-x-crypto
 name: golang.org/x/crypto
 ecosystem: go
-description: Supplementary Go cryptography packages.
+description: Supplementary Go cryptography packages maintained by the Go team.
 homepage: https://pkg.go.dev/golang.org/x/crypto
 repo: https://github.com/golang/crypto
 package_names:
@@ -12,9 +12,10 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
+overall_status: no-plan
 algorithms: {}
-last_verified: 2026-11-08
+notes: The module has no ML-KEM, ML-DSA or SLH-DSA package (as of v0.58.0). Go provides post-quantum algorithms in the standard library instead (see Go crypto), and SSH hybrid key exchange is tracked separately under golang.org/x/crypto/ssh.
+last_verified: 2026-11-11
 pipeline:
   github: golang/go
   watch_urls:

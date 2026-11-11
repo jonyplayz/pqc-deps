@@ -2,7 +2,7 @@
 id: mbedtls
 name: Mbed TLS
 ecosystem: c-cpp
-description: TLS and cryptography library for embedded systems.
+description: Small TLS and cryptography library for embedded systems; its crypto now lives in TF-PSA-Crypto.
 homepage: https://www.trustedfirmware.org/projects/mbed-tls/
 repo: https://github.com/Mbed-TLS/mbedtls
 applicable_algorithms:
@@ -10,6 +10,25 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
   - hybrid-tls
-overall_status: unknown
+overall_status: planned
 algorithms: {}
-last_verified: 2026-11-08
+roadmap:
+  confidence: tentative
+  summary: ML-DSA is in development (first at the driver layer, via mldsa-native); ML-KEM is listed under future work. The maintainers say the dates on the roadmap are rough estimates that have already slipped.
+  sources:
+    - url: https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
+      title: Mbed TLS roadmap
+      kind: docs
+      quote: Note that the quarter when a feature is expected to be completed is based on very rough estimates of the effort involved and therefore can change.
+      retrieved: 2026-11-11
+    - url: https://github.com/Mbed-TLS/mbedtls/issues/9803
+      title: "Any plans to support ML-DSA and ML-KEM? (comment by maintainer Gilles Peskine)"
+      kind: issue
+      quote: We're currently integrating [mldsa-native](https://github.com/pq-code-package/mldsa-native) and then we'll integrate [mlkem-native](https://github.com/pq-code-package/mlkem-native).
+      retrieved: 2026-11-11
+notes: Mbed TLS has LMS (a stateful hash-based signature) but no ML-KEM, ML-DSA or SLH-DSA in a release yet, including TF-PSA-Crypto 1.2.0.
+last_verified: 2026-11-11
+pipeline:
+  watch_urls:
+    - https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
+    - https://raw.githubusercontent.com/Mbed-TLS/TF-PSA-Crypto/development/ChangeLog

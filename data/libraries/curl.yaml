@@ -14,6 +14,7 @@ delegates_to:
     condition: when built with the GnuTLS backend
 applicable_algorithms:
   - hybrid-tls
-overall_status: unknown
+overall_status: n/a
 algorithms: {}
-last_verified: 2026-11-08
+notes: curl leaves TLS key exchange to the TLS backend it is built with; with a backend that enables hybrid ML-KEM by default (such as OpenSSL 3.5 or later), curl uses it too.
+last_verified: 2026-11-11
