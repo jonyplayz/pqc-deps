@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { finishLogin, isAdmin, requireAdmin, startLogin } from '../server/auth';
+import { checkAdmin, finishLogin, isAdmin, requireAdmin, startLogin } from '../server/auth';
 import { SESSION_COOKIE, safeReturnPath, signSession, verifySession } from '../server/session';
 import type { Env } from '../server/env';
 import { GitHub } from '../server/github';
@@ -674,10 +674,19 @@ describe('Workers-safe fetch (found in the live test)', () => {
     } as typeof fetch;
     globalThis.fetch = strict;
     try {
-      const gh = new GitHub('jonyplayz/pqc-deps', 't');
-      await expect(gh.request('GET', '/repos/{repo}')).resolves.toEqual({
-        owner: { login: 'jonyplayz' },
-      });
+      // Default fetch, and the global fetch passed in explicitly (as auth.ts does via
+      // default parameters). The second case is what still failed after the first fix.
+      for (const gh of [
+        new GitHub('jonyplayz/pqc-deps', 't'),
+        new GitHub('jonyplayz/pqc-deps', 't', globalThis.fetch),
+      ]) {
+        await expect(gh.request('GET', '/repos/{repo}')).resolves.toEqual({
+          owner: { login: 'jonyplayz' },
+        });
+      }
+      // And end to end through the admin check, which takes fetch as a default parameter.
+      const r = await checkAdmin('jonyplayz', env());
+      expect(r.problem).toBeUndefined();
     } finally {
       globalThis.fetch = original;
     }
