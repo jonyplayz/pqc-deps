@@ -18,17 +18,25 @@ algorithms:
       - url: https://docs.rs/ml-kem
         title: ml_kem - Rust
         kind: docs
-        quote: |-
-          Pure Rust implementation of the Module-Lattice-Based Key-Encapsulation Mechanism Standard
-          (formerly known as Kyber) as described in FIPS 203 (final).
-        retrieved: 2026-11-09
+        quote: Pure Rust implementation of the Module-Lattice-Based Key-Encapsulation Mechanism Standard (formerly known as Kyber) as described in FIPS 203 (final).
+        retrieved: 2026-11-11
       - url: https://docs.rs/ml-kem
         title: ml_kem - Rust
         kind: docs
-        quote: ml-kem-0.3.4
-        retrieved: 2026-11-09
+        quote: pub use ml_kem_512::MlKem512;
+        retrieved: 2026-11-11
+      - url: https://docs.rs/ml-kem
+        title: ml_kem - Rust
+        kind: docs
+        quote: pub use ml_kem_768::MlKem768;
+        retrieved: 2026-11-11
+      - url: https://docs.rs/ml-kem
+        title: ml_kem - Rust
+        kind: docs
+        quote: pub use ml_kem_1024::MlKem1024;
+        retrieved: 2026-11-11
 upgrade_notes: "ML-KEM: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-09
+last_verified: 2026-11-11
 pipeline:
   watch_urls:
     - https://docs.rs/ml-kem

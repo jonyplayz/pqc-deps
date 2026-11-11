@@ -21,8 +21,8 @@ algorithms:
       - url: https://github.com/wolfSSL/wolfssl/releases/tag/v5.9.1-stable
         title: wolfSSL Release 5.9.1 (April 8, 2026)
         kind: release-notes
-        quote: Enabled PQC algorithm ML-KEM (FIPS203) on by default. by @Frauschi (PR 9732)
-        retrieved: 2026-11-09
+        quote: Enabled PQC algorithm ML-KEM (FIPS203) on by default.
+        retrieved: 2026-11-11
   ml-dsa:
     support: yes
     experimental: false
@@ -31,18 +31,19 @@ algorithms:
         title: wolfSSL Release 5.9.2 (June 23, 2026)
         kind: release-notes
         quote: Renamed the post-quantum signature implementation from its pre-standardization name *Dilithium* to its NIST-standardized name **ML-DSA** (FIPS 204)
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
   slh-dsa:
     support: yes
+    since_version: 5.9.0
     experimental: false
     sources:
       - url: https://github.com/wolfSSL/wolfssl/releases/tag/v5.9.0-stable
         title: wolfSSL Release 5.9.0 (March 18, 2026)
         kind: release-notes
         quote: FIPS 205, SLH-DSA implementation by @SparkiDev (PR 9838).
-        retrieved: 2026-11-09
-upgrade_notes: "ML-KEM: wolfSSL 5.9.1 or later. ML-DSA and SLH-DSA: supported in current releases; the sources don't state the first version. On by default: ML-KEM."
-last_verified: 2026-11-09
+        retrieved: 2026-11-11
+upgrade_notes: "SLH-DSA: wolfSSL 5.9.0 or later. ML-KEM: wolfSSL 5.9.1 or later. ML-DSA: supported in current releases; the sources don't state the first version. On by default: ML-KEM."
+last_verified: 2026-11-11
 pipeline:
   watch_urls: []
   locked:
