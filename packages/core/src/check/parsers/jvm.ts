@@ -112,9 +112,41 @@ export function parsePomXml(text: string): ParsedManifest {
 const CONFIGS =
   'implementation|api|compileOnly|runtimeOnly|testImplementation|testRuntimeOnly|testCompileOnly|annotationProcessor|kapt|ksp|compile|testCompile|runtime|classpath|androidTestImplementation|debugImplementation|releaseImplementation|compileOnlyApi';
 
+/**
+ * Remove /* block *\/ and // line comments without regexes (no backtracking
+ * on huge or hostile input). A "//" right after ':' (as in https://) or inside
+ * a quoted string is kept.
+ */
+export function stripComments(text: string): string {
+  let out = '';
+  let quote: string | undefined;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]!;
+    if (quote) {
+      out += c;
+      if (c === '\\') {
+        out += text[i + 1] ?? '';
+        i++;
+      } else if (c === quote) quote = undefined;
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      quote = c;
+      out += c;
+    } else if (c === '/' && text[i + 1] === '*') {
+      const end = text.indexOf('*/', i + 2);
+      i = end === -1 ? text.length : end + 1;
+    } else if (c === '/' && text[i + 1] === '/' && text[i - 1] !== ':') {
+      const end = text.indexOf('\n', i);
+      i = end === -1 ? text.length : end - 1;
+    } else out += c;
+  }
+  return out;
+}
+
 export function parseBuildGradle(text: string): ParsedManifest {
   const warnings: string[] = [];
-  const src = text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:"'])\/\/.*$/gm, '$1');
+  const src = stripComments(text);
 
   // Simple variables: def x = '1.2', val x = "1.2", ext.x = '1.2', set("x", "1.2"), x = '1.2' inside ext {}
   const vars: Record<string, string> = {};
@@ -134,7 +166,7 @@ export function parseBuildGradle(text: string): ParsedManifest {
   const add = (config: string, group: string, artifact: string, rawVersion?: string) => {
     const version = resolve(rawVersion);
     const name = `${group}:${artifact}`;
-    const scope = /^test|androidTest/.test(config)
+    const scope = /^(test|androidTest)/.test(config)
       ? 'test'
       : /Only$|kapt|ksp|annotationProcessor/.test(config)
         ? config

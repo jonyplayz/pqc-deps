@@ -1,5 +1,5 @@
 import type { Library } from '@pqc-deps/core';
-import { fetchGithub } from './github';
+import { fetchGithub, githubRepo } from './github';
 import { fetchUrls } from './url';
 import type { FetchResult } from './types';
 
@@ -14,7 +14,7 @@ export async function fetchEvidence(lib: Library): Promise<FetchResult> {
     !gh.docs.length &&
     !urls.docs.length &&
     !lib.pipeline?.watch_urls?.length &&
-    !lib.repo?.includes('github.com')
+    !githubRepo(lib)
   ) {
     warnings.push('No evidence sources configured: add a GitHub repo or pipeline.watch_urls.');
   }

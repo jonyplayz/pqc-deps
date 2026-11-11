@@ -208,7 +208,7 @@ describe('checkManifest', () => {
     const r = run('module m\n\ngo 1.24\n\nrequire golang.org/x/crypto v0.29.0\n', 'go.mod');
     const f = find(r, 'x-ssh')!;
     expect(f).toMatchObject({ matchedBy: 'module', verdict: 'upgrade', upgradeTo: 'v0.30.0' });
-    expect(f.note).toMatch(/golang\.org\/x\/crypto\/ssh/);
+    expect(f.note).toContain('golang.org/x/crypto/ssh');
   });
 
   it('reports both a Go module entry and package entries inside it', () => {

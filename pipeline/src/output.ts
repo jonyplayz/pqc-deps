@@ -48,7 +48,7 @@ export function libraryToYaml(lib: Library): string {
   return `# yaml-language-server: $schema=../schema/library.schema.json\n${stringify(ordered, { lineWidth: 0 })}`;
 }
 
-const esc = (s: string) => s.replace(/\|/g, '\\|').replace(/\n/g, ' ');
+const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 
 /** Markdown report for human review (PR body / proposals/<id>.md). */
 export function reportMarkdown(r: RunResult, existing: Library): string {

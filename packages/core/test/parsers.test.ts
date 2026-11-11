@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { detectFormat } from '../src/check/detect';
 import { parseManifest } from '../src/check/parse';
 import { ManifestError } from '../src/check/types';
+import { compareVersions, lowerBound } from '../src/check/version';
 
 const byName = (m: ReturnType<typeof parseManifest>) =>
   Object.fromEntries(m.dependencies.map((d) => [d.name, d]));
@@ -338,5 +339,46 @@ describe('detectFormat', () => {
     expect(() => parseManifest('hello world, this is not a manifest!')).toThrow(
       /Couldn't recognise/,
     );
+  });
+});
+
+describe('hardening from CodeQL review', () => {
+  it('gradle: only test/androidTest configurations are test scope', () => {
+    const m = parseManifest(
+      `dependencies {
+    implementation 'com.example:lib-androidTest-helper:1.0'
+    androidTestImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
+}`,
+      { filename: 'build.gradle' },
+    );
+    const d = Object.fromEntries(m.dependencies.map((x) => [x.name, x]));
+    expect(d['com.example:lib-androidTest-helper']!.scope).toBeUndefined();
+    expect(d['junit:junit']!.scope).toBe('test');
+    expect(d['org.junit.jupiter:junit-jupiter']!.scope).toBe('test');
+  });
+
+  it('gradle: comment stripping keeps URLs and strings, handles unterminated comments', () => {
+    const m = parseManifest(
+      `repositories { maven { url "https://repo.example.com/maven" } } // trailing comment
+/* block comment implementation 'commented:out:1.0' */
+dependencies {
+    implementation "com.example:with-slashes:1.0" // note
+    // implementation 'also:commented:1.0'
+}
+/* unterminated`,
+      { filename: 'build.gradle' },
+    );
+    expect(m.dependencies.map((x) => x.name)).toEqual(['com.example:with-slashes']);
+  });
+
+  it('stays fast on huge or hostile input', () => {
+    const start = Date.now();
+    const long = '1' + '.1'.repeat(50_000) + '!';
+    expect(lowerBound(`>=${long}`)).toBeUndefined();
+    expect(compareVersions(long, '1.0')).toBeUndefined();
+    detectFormat('implementation' + ' '.repeat(200_000) + '(x'); // must just return quickly
+    parseManifest('dependencies {\n' + '/'.repeat(200_000) + '\n}', { filename: 'build.gradle' });
+    expect(Date.now() - start).toBeLessThan(2000);
   });
 });

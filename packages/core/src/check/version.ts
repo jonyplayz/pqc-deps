@@ -12,7 +12,12 @@ interface Parsed {
 
 const RELEASE_QUALIFIERS = /^(final|ga|release|r)$/i;
 
+/** Real versions and requirements are short; refuse giant strings before any regex runs. */
+const MAX_VERSION_LENGTH = 64;
+const MAX_SPEC_LENGTH = 256;
+
 function parse(v: string): Parsed | undefined {
+  if (v.length > MAX_VERSION_LENGTH) return undefined;
   const s = v
     .trim()
     .replace(/^[v=]+/i, '')
@@ -53,6 +58,7 @@ export function isVersion(v: string): boolean {
  * Undefined when there's no lower bound ("*", "<2", "latest").
  */
 export function lowerBound(spec: string): string | undefined {
+  if (spec.length > MAX_SPEC_LENGTH) return undefined;
   const s = spec.trim();
   if (!s || s === '*' || /^(latest|x)$/i.test(s)) return undefined;
 
