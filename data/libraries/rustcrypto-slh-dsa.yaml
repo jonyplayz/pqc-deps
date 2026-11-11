@@ -17,20 +17,15 @@ algorithms:
       - url: https://docs.rs/slh-dsa
         title: slh_dsa - Rust
         kind: docs
-        quote: slh-dsa 0.1.0
-        retrieved: 2026-11-09
-      - url: https://docs.rs/slh-dsa
-        title: slh_dsa - Rust
-        kind: docs
         quote: Pure Rust implementation of the SLH-DSA (aka SPHINCS+) signature scheme.
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
       - url: https://docs.rs/slh-dsa
         title: slh_dsa - Rust
         kind: docs
         quote: Implemented based on the FIPS-205 Standard.
-        retrieved: 2026-11-09
+        retrieved: 2026-11-11
 upgrade_notes: "SLH-DSA: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-09
+last_verified: 2026-11-11
 pipeline:
   watch_urls:
     - https://docs.rs/slh-dsa
