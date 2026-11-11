@@ -9,6 +9,7 @@
     "propose": "tsx src/cli.ts",
     "stale": "tsx src/stale.ts",
     "identity": "tsx src/identity.ts",
+    "check-quotes": "tsx src/check-quotes.ts",
     "add-library": "tsx src/add-library/cli.ts"
   },
   "dependencies": {
