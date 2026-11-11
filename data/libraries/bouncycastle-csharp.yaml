@@ -60,3 +60,12 @@ last_verified: 2026-11-09
 pipeline:
   watch_urls:
     - https://www.bouncycastle.org/download/bouncy-castle-c/
+  locked:
+    - path: algorithms.ml-kem.since_version
+      reason: the downloads page lists the current release (2.7.0), not when support began
+    - path: algorithms.ml-dsa.since_version
+      reason: see ml-kem
+    - path: algorithms.slh-dsa.since_version
+      reason: see ml-kem
+    - path: algorithms.hybrid-tls.since_version
+      reason: see ml-kem

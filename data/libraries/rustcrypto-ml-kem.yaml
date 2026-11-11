@@ -32,3 +32,6 @@ last_verified: 2026-11-09
 pipeline:
   watch_urls:
     - https://docs.rs/ml-kem
+  locked:
+    - path: algorithms.ml-kem.since_version
+      reason: docs.rs shows the current crate version, not the first one with ML-KEM

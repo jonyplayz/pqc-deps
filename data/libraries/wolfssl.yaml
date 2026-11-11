@@ -43,3 +43,8 @@ algorithms:
         retrieved: 2026-11-09
 upgrade_notes: "ML-KEM: wolfSSL 5.9.1 or later. ML-DSA and SLH-DSA: supported in current releases; the sources don't state the first version. On by default: ML-KEM."
 last_verified: 2026-11-09
+pipeline:
+  watch_urls: []
+  locked:
+    - path: overall_status
+      reason: ML-KEM on by default is a build option; hybrid TLS by default is not shown, so available, not ready

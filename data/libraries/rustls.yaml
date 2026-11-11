@@ -47,3 +47,8 @@ algorithms:
         retrieved: 2026-11-09
 upgrade_notes: "hybrid TLS key exchange: rustls 0.23.22 or later. ML-DSA: rustls 0.23.44 or later. ML-KEM: supported in current releases; the sources don't state the first version. On by default: ML-DSA."
 last_verified: 2026-11-09
+pipeline:
+  watch_urls: []
+  locked:
+    - path: algorithms.ml-kem.since_version
+      reason: 0.23.37 added ML-KEM-1024 key exchange, not ML-KEM as such
