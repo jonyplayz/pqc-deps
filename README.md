@@ -5,7 +5,18 @@ whether popular open-source crypto libraries support the NIST PQC standards
 (ML-KEM / FIPS 203, ML-DSA / FIPS 204, SLH-DSA / FIPS 205) and hybrid TLS key
 exchange, since which version, and what's planned. Every claim links to a source.
 
-> Status: early MVP, under construction. See milestones below.
+**Live site: https://pqc-deps.pages.dev**
+
+- **Catalog** of open-source crypto libraries with per-algorithm support,
+  versions, roadmaps and quoted sources
+- **Check my project**: paste a `package.json`, `go.mod`, `requirements.txt`,
+  `pom.xml`, `Cargo.toml` and more; parsed entirely in the browser
+- **Evidence pipeline** that drafts updates daily for human review
+- **Public JSON API**: [`/api/catalog.json`](https://pqc-deps.pages.dev/api/catalog.json)
+  (CC BY 4.0)
+
+Contributing: see [CONTRIBUTING.md](CONTRIBUTING.md). Security reports:
+[SECURITY.md](SECURITY.md).
 
 ## Repository layout
 
