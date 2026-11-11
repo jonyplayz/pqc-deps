@@ -667,6 +667,17 @@ describe('second-run rules', () => {
     expect(r.dropped.map((d) => d.reason)).toContain('no quote names ml-kem');
   });
 
+  it('identifiers with underscores still name the algorithm', async () => {
+    const p = base();
+    p.algorithms['ml-dsa'] = claim({
+      support: 'yes',
+      evidence: [{ doc: 'D1', quote: 'the default implementation behind SIG_ml_dsa_65' }],
+    });
+    const r = await run(p);
+    expect(r.dropped.map((d) => d.reason)).not.toContain('no quote names ml-dsa');
+    expect(r.library!.algorithms['ml-dsa']).toMatchObject({ support: 'yes' });
+  });
+
   it('"default implementation" is not "on by default"', async () => {
     const p = base();
     p.algorithms['ml-dsa'] = claim({

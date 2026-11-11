@@ -12,6 +12,7 @@ delegates_to:
     condition: on the JVM
 applicable_algorithms:
   - hybrid-tls
-overall_status: unknown
+overall_status: n/a
 algorithms: {}
-last_verified: 2026-11-08
+notes: OkHttp uses the platform's TLS implementation (the JDK's on the JVM, Conscrypt or the system's on Android), so post-quantum key exchange depends on that.
+last_verified: 2026-11-11

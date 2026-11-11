@@ -12,6 +12,7 @@ delegates_to:
 applicable_algorithms:
   - ml-dsa
   - slh-dsa
-overall_status: unknown
+overall_status: no-plan
 algorithms: {}
-last_verified: 2026-11-08
+notes: No ML-DSA or other post-quantum algorithm support, and no issue or pull request about it in the project's tracker. Post-quantum JWS needs the library to add new alg values even though Node.js crypto can do the signing; for ML-DSA tokens in JavaScript today, see jose.
+last_verified: 2026-11-11

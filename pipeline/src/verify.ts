@@ -137,12 +137,13 @@ const DEFAULT_ON_PATTERN =
 
 /** Each algorithm claim needs a quote that names that algorithm (or its pre-standard name). */
 const ALGORITHM_NAME_PATTERN: Record<string, RegExp> = {
-  'ml-kem': /ML-?KEM|Kyber|FIPS[ -]?203/i,
-  'ml-dsa': /ML-?DSA|Dilithium|FIPS[ -]?204/i,
-  'slh-dsa': /SLH-?DSA|SPHINCS|FIPS[ -]?205/i,
-  'hybrid-tls': /ML-?KEM|Kyber|hybrid|post[- ]?quantum|\bPQC?\b/i,
-  'fn-dsa': /FN-?DSA|Falcon|FIPS[ -]?206/i,
-  hqc: /\bHQC\b/i,
+  // Identifiers spell these with underscores too (SIG_ml_dsa_65, KEM_hqc_1).
+  'ml-kem': /ML[-_]?KEM|Kyber|FIPS[ -]?203/i,
+  'ml-dsa': /ML[-_]?DSA|Dilithium|FIPS[ -]?204/i,
+  'slh-dsa': /SLH[-_]?DSA|SPHINCS|FIPS[ -]?205/i,
+  'hybrid-tls': /ML[-_]?KEM|Kyber|hybrid|post[- ]?quantum|\bPQC?\b/i,
+  'fn-dsa': /FN[-_]?DSA|Falcon|FIPS[ -]?206/i,
+  hqc: /(?<![a-z])HQC(?![a-z])/i,
 };
 
 /** FIPS claims need a quote about validation, not just "FIPS provider". */

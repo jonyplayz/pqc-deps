@@ -2,7 +2,7 @@
 id: nss
 name: NSS (Network Security Services)
 ecosystem: c-cpp
-description: Mozilla's crypto and TLS libraries, used by Firefox.
+description: Mozilla's cryptography and TLS library, used by Firefox and many Linux distributions.
 homepage: https://firefox-source-docs.mozilla.org/security/nss/index.html
 repo: https://github.com/mozilla/nss
 applicable_algorithms:
@@ -10,9 +10,45 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
   - hybrid-tls
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-08
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: "3.105"
+    experimental: false
+    sources:
+      - url: https://firefox-source-docs.mozilla.org/security/nss/releases/nss_3_105.html
+        title: NSS 3.105 release notes
+        kind: release-notes
+        quote: Bug 1916524 - support for ML-KEM-768 in softoken and pk11wrap
+        retrieved: 2026-11-11
+  ml-dsa:
+    support: yes
+    since_version: "3.116"
+    experimental: false
+    sources:
+      - url: https://firefox-source-docs.mozilla.org/security/nss/releases/nss_3_116.html
+        title: NSS 3.116 release notes
+        kind: release-notes
+        quote: Bug 1983320 - Add support for ML-DSA keys and mechanisms in PKCS#11 interface
+        retrieved: 2026-11-11
+  hybrid-tls:
+    support: yes
+    since_version: "3.105"
+    experimental: false
+    sources:
+      - url: https://firefox-source-docs.mozilla.org/security/nss/releases/nss_3_105.html
+        title: NSS 3.105 release notes
+        kind: release-notes
+        quote: Bug 1916525 - libssl support for mlkem768x25519
+        retrieved: 2026-11-11
+      - url: https://firefox-source-docs.mozilla.org/security/nss/releases/nss_3_118.html
+        title: NSS 3.118 release notes
+        kind: release-notes
+        quote: Bug 1983313 - support secp256r1mlkem768
+        retrieved: 2026-11-11
+upgrade_notes: Use NSS 3.105 or later for ML-KEM and the X25519 + ML-KEM-768 hybrid TLS group, 3.116 or later for ML-DSA, and 3.118 or later for the secp256r1/secp384r1 hybrid groups. Applications choose which TLS groups to enable.
+last_verified: 2026-11-11
 pipeline:
   watch_urls:
     - https://firefox-source-docs.mozilla.org/security/nss/releases/index.html

@@ -145,6 +145,7 @@ npm run pipeline -- openssl             # write proposals/openssl.{yaml,md}
 npm run pipeline -- openssl --apply     # write into data/libraries/ (review with git diff)
 npm run pipeline -- --stale 90 --pr     # new branch + PR with a report per library
 npm run pipeline -- --unknown           # everything still unknown
+npm run check-quotes                    # re-fetch every source and confirm its quote is still there
 npm run stale -- --days 90              # list entries due for re-verification
 ```
 
@@ -184,14 +185,14 @@ GitHub Actions (`.github/workflows/`):
 3. **LLM for the weekly refresh**: add a secret `LLM_API_KEY` (free Gemini key)
    and repository variables `LLM_PROVIDER=openai-compatible`,
    `LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai`,
-   `LLM_MODEL=gemini-3.5-flash-lite`, `LLM_DELAY_MS=5000`. For Claude, set the
+   `LLM_MODEL=gemini-3.5-flash`, `LLM_DELAY_MS=5000`. For Claude, set the
    secret `ANTHROPIC_API_KEY` instead and leave `LLM_PROVIDER` unset.
 
 ```bash
 gh secret set LLM_API_KEY            # paste the key when prompted
 gh variable set LLM_PROVIDER --body openai-compatible
 gh variable set LLM_BASE_URL --body https://generativelanguage.googleapis.com/v1beta/openai
-gh variable set LLM_MODEL --body gemini-3.5-flash-lite
+gh variable set LLM_MODEL --body gemini-3.5-flash
 gh variable set LLM_DELAY_MS --body 5000
 ```
 

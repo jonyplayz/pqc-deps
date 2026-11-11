@@ -16,9 +16,23 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
+overall_status: planned
 algorithms: {}
-last_verified: 2026-11-08
+roadmap:
+  confidence: speculative
+  summary: The maintainer has an open work-in-progress pull request for ML-DSA; contributors have open pull requests for ML-DSA in JWS and ML-KEM in JWE. None is in a release yet (10.10 has no post-quantum algorithms).
+  sources:
+    - url: https://bitbucket.org/connect2id/nimbus-jose-jwt/pull-requests/135
+      title: "WIP: ML-DSA development (by maintainer Vladimir Dzhuvinov)"
+      kind: pull-request
+      quote: "WIP: ML-DSA development"
+      retrieved: 2026-11-11
+    - url: https://bitbucket.org/connect2id/nimbus-jose-jwt/pull-requests/128
+      title: ML-KEM support for JWEs
+      kind: pull-request
+      quote: ML-KEM support for JWEs
+      retrieved: 2026-11-11
+last_verified: 2026-11-11
 pipeline:
   watch_urls:
     - https://bitbucket.org/connect2id/nimbus-jose-jwt/raw/master/CHANGELOG.txt

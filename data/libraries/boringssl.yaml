@@ -10,6 +10,54 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
   - hybrid-tls
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-08
+overall_status: ready
+algorithms:
+  ml-kem:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://github.com/google/boringssl/blob/main/include/openssl/mlkem.h
+        title: include/openssl/mlkem.h
+        kind: other
+        quote: |-
+          // This implements the Module-Lattice-Based Key-Encapsulation Mechanism from
+          // https://csrc.nist.gov/pubs/fips/203/final
+        retrieved: 2026-11-11
+  ml-dsa:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://github.com/google/boringssl/blob/main/include/openssl/mldsa.h
+        title: include/openssl/mldsa.h
+        kind: other
+        quote: |-
+          // This implements the Module-Lattice-Based Digital Signature Standard from
+          // https://csrc.nist.gov/pubs/fips/204/final
+        retrieved: 2026-11-11
+  slh-dsa:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://github.com/google/boringssl/blob/main/include/openssl/slhdsa.h
+        title: include/openssl/slhdsa.h
+        kind: other
+        quote: "// SLH-DSA-SHA2-128s public key."
+        retrieved: 2026-11-11
+  hybrid-tls:
+    support: yes
+    default_enabled: true
+    experimental: false
+    sources:
+      - url: https://github.com/google/boringssl/blob/main/ssl/ssl_key_share.cc
+        title: ssl/ssl_key_share.cc
+        kind: other
+        quote: |-
+          static const uint16_t kDefaultSupportedGroupIds[] = {
+                SSL_GROUP_X25519_MLKEM768,
+        retrieved: 2026-11-11
+upgrade_notes: BoringSSL has no numbered releases. Current versions include ML-KEM, ML-DSA and SLH-DSA, and offer X25519MLKEM768 first in the default TLS groups.
+notes: BoringSSL is not intended for general use and makes no API or ABI stability guarantees, so it has no numbered releases to compare against.
+last_verified: 2026-11-11
+pipeline:
+  watch_urls:
+    - https://raw.githubusercontent.com/google/boringssl/main/ssl/ssl_key_share.cc

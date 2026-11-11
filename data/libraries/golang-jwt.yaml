@@ -2,7 +2,7 @@
 id: golang-jwt
 name: golang-jwt
 ecosystem: go
-description: JSON Web Tokens for Go.
+description: Go implementation of JSON Web Tokens.
 repo: https://github.com/golang-jwt/jwt
 package_names:
   go:
@@ -12,6 +12,20 @@ delegates_to:
 applicable_algorithms:
   - ml-dsa
   - slh-dsa
-overall_status: unknown
+overall_status: planned
 algorithms: {}
-last_verified: 2026-11-08
+roadmap:
+  confidence: tentative
+  summary: A maintainer has opened a pull request adding ML-DSA-44, -65 and -87 signing methods, built on crypto/mldsa and only compiled with Go 1.27 or later.
+  sources:
+    - url: https://github.com/golang-jwt/jwt/pull/561
+      title: Add ML-DSA signing methods for Go 1.27 and later
+      kind: pull-request
+      quote: This PR adds the ML-DSA-44, ML-DSA-65, and ML-DSA-87 signing methods using crypto/mldsa from the standard library.
+      retrieved: 2026-11-11
+    - url: https://github.com/golang-jwt/jwt/issues/508
+      title: Support for ML-DSA (FIPS-204) post-quantum signing algorithm
+      kind: issue
+      quote: We would then need to guard it with build tags as we will definitely NOT bump up the minimum version to 1.27
+      retrieved: 2026-11-11
+last_verified: 2026-11-11

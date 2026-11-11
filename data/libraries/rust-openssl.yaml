@@ -1,13 +1,12 @@
 # yaml-language-server: $schema=../schema/library.schema.json
 id: rust-openssl
-name: rust-openssl
+name: rust-openssl (openssl crate)
 ecosystem: rust
-description: OpenSSL bindings for Rust.
+description: Rust bindings to OpenSSL.
 repo: https://github.com/rust-openssl/rust-openssl
 package_names:
   cargo:
     - openssl
-    - openssl-sys
 delegates_to:
   - id: openssl
 applicable_algorithms:
@@ -15,6 +14,31 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
   - hybrid-tls
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-08
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 0.10.79
+    experimental: false
+    sources:
+      - url: https://github.com/rust-openssl/rust-openssl/blob/master/openssl/CHANGELOG.md
+        title: openssl crate CHANGELOG, v0.10.79
+        kind: changelog
+        quote: "* Added `PKey::private_key_from_seed`, which constructs ML-DSA and ML-KEM private keypairs from a `seed` `OSSL_PARAM` via `EVP_PKEY_fromdata`. Requires OpenSSL 3.5 or newer at runtime."
+        retrieved: 2026-11-11
+  ml-dsa:
+    support: yes
+    since_version: 0.10.79
+    experimental: false
+    sources:
+      - url: https://github.com/rust-openssl/rust-openssl/blob/master/openssl/CHANGELOG.md
+        title: openssl crate CHANGELOG, v0.10.79
+        kind: changelog
+        quote: "* Added `PkeyCtxRef::set_context_string`, which binds a context string to an ML-DSA signing or verification operation. Requires OpenSSL 3.5 or newer."
+        retrieved: 2026-11-11
+upgrade_notes: "Use openssl 0.10.79 or later with OpenSSL 3.5 or later for the ML-KEM and ML-DSA key APIs. TLS key exchange follows the linked OpenSSL: see OpenSSL."
+notes: The openssl-sys crate has its own 0.9.x version series, so only the openssl crate is matched here.
+last_verified: 2026-11-11
+pipeline:
+  watch_urls:
+    - https://raw.githubusercontent.com/rust-openssl/rust-openssl/master/openssl/CHANGELOG.md

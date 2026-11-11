@@ -14,9 +14,10 @@ delegates_to:
 applicable_algorithms:
   - ml-dsa
   - slh-dsa
-overall_status: unknown
+overall_status: no-plan
 algorithms: {}
-last_verified: 2026-11-08
+notes: No ML-DSA or other post-quantum algorithm support in the changelog, and no issue or pull request about it in the project's tracker.
+last_verified: 2026-11-11
 pipeline:
   watch_urls:
     - https://pyjwt.readthedocs.io/en/stable/changelog.html
