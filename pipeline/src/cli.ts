@@ -17,15 +17,15 @@
  *          to check a seventh of the catalog each day and stay inside free LLM quotas)
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { isoToday, type Library } from '@pqc-deps/core';
+import { isoNow, isoToday, type Library } from '@pqc-deps/core';
 import { loadLibrariesFromDir, REPO_ROOT } from '@pqc-deps/core/node';
 import { fetchEvidence } from './fetch';
 import { llmFromEnv } from './llm';
 import { libraryToYaml, reportMarkdown } from './output';
 import { proposeForLibrary, type RunResult } from './run';
-import { daysSince, sliceOf } from './stale-util';
+import { bumpLastVerified, daysSince, sliceOf } from './stale-util';
 
 try {
   process.loadEnvFile(join(REPO_ROOT, '.env'));
@@ -117,6 +117,8 @@ async function main() {
   const proposalsDir = join(REPO_ROOT, 'proposals');
   mkdirSync(proposalsDir, { recursive: true });
   const results: Array<{ lib: Library; r: RunResult; report: string }> = [];
+  /** Checked without errors and nothing to change: only last_verified moves. */
+  const verifiedOnly: string[] = [];
 
   for (const [i, lib] of targets.entries()) {
     if (i && args.delay) await sleep(args.delay);
@@ -139,6 +141,19 @@ async function main() {
     );
 
     writeFileSync(join(proposalsDir, `${lib.id}.md`), report);
+    // Checked without errors and nothing to change: still record when it was checked.
+    if ((args.mode === 'apply' || args.mode === 'pr') && !r.error && !r.changes.length) {
+      const file = join(dataDir, `${lib.id}.yaml`);
+      writeFileSync(file, bumpLastVerified(readFileSync(file, 'utf8'), isoNow()));
+      verifiedOnly.push(lib.id);
+      if (branch) {
+        if (git('rev-parse', '--abbrev-ref', 'HEAD') !== branch)
+          throw new Error('Refusing to commit: not on the pipeline branch.');
+        git('add', join('data', 'libraries', `${lib.id}.yaml`));
+        git('commit', '-q', '-m', `data(${lib.id}): re-verified, no changes`);
+      }
+      continue;
+    }
     if (!r.library) continue;
     if (args.mode === 'proposals')
       writeFileSync(join(proposalsDir, `${lib.id}.yaml`), libraryToYaml(r.library));
@@ -160,24 +175,36 @@ async function main() {
 
   if (branch) {
     const changed = results.filter((x) => x.r.library && x.r.changes.length);
-    if (!changed.length) {
+    if (!changed.length && !verifiedOnly.length) {
       git('switch', '-');
       git('branch', '-D', branch);
-      return console.log('No changes to propose; no PR opened.');
+      return console.log('Nothing was checked successfully; no PR opened.');
     }
     git('push', '-q', '-u', 'origin', branch);
     const summary = [
-      `Automated evidence refresh for ${changed.length} librar${changed.length === 1 ? 'y' : 'ies'}. **Every claim needs human review before merging.**`,
+      changed.length
+        ? `Automated evidence refresh for ${changed.length} librar${changed.length === 1 ? 'y' : 'ies'}. **Every claim needs human review before merging.**`
+        : 'Automated evidence refresh: nothing changed, only the last-verified time is updated.',
       '',
-      '| Library | Proposed status | Changes | Dropped claims |',
-      '| --- | --- | --- | --- |',
-      ...changed.map(
-        (x) =>
-          `| \`${x.lib.id}\` | ${x.r.library!.overall_status} | ${x.r.changes.length} | ${x.r.dropped.length} |`,
-      ),
-      '',
-      'Each library has a comment below with its evidence, quotes and anything that failed verification.',
-      '',
+      ...(changed.length
+        ? [
+            '| Library | Proposed status | Changes | Dropped claims |',
+            '| --- | --- | --- | --- |',
+            ...changed.map(
+              (x) =>
+                `| \`${x.lib.id}\` | ${x.r.library!.overall_status} | ${x.r.changes.length} | ${x.r.dropped.length} |`,
+            ),
+            '',
+            'Each library has a comment below with its evidence, quotes and anything that failed verification.',
+            '',
+          ]
+        : []),
+      ...(verifiedOnly.length
+        ? [
+            `Re-verified with no changes (only \`last_verified\` updated): ${verifiedOnly.map((id) => `\`${id}\``).join(', ')}.`,
+            '',
+          ]
+        : []),
       '🤖 Opened by the PQC Deps evidence pipeline',
     ].join('\n');
     const bodyFile = join(proposalsDir, '_pr-body.md');
@@ -192,7 +219,9 @@ async function main() {
         '--head',
         branch,
         '--title',
-        `Evidence refresh ${isoToday()}`,
+        changed.length
+          ? `Evidence refresh ${isoToday()}`
+          : `Re-verified ${verifiedOnly.join(', ')} (no changes)`,
         '--body-file',
         bodyFile,
       ],

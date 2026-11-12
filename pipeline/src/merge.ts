@@ -122,6 +122,8 @@ export function mergeProposal(
   existing: Library,
   v: VerifiedProposal,
   today: string,
+  /** Written to last_verified; defaults to today's date. */
+  verifiedAt: string = today,
 ): { library: Library; changes: FieldChange[]; kept: string[]; warnings: string[] } {
   const kept: string[] = [];
   const warnings: string[] = [];
@@ -163,7 +165,7 @@ export function mergeProposal(
     algorithms,
     ...(roadmap ? { roadmap } : {}),
     ...(fips ? { fips } : {}),
-    last_verified: today,
+    last_verified: verifiedAt,
   });
   if (!roadmap) delete draft.roadmap;
   const notes = upgradeNotes(draft);

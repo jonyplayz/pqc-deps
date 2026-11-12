@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { isDailyQuotaError, openAiCompatibleClient } from '../src/llm/openai-compatible';
-import { sliceOf } from '../src/stale-util';
+import { bumpLastVerified, daysSince, sliceOf } from '../src/stale-util';
+import { isoNow, LibrarySchema, lintLibrary } from '@pqc-deps/core';
 
 const req = { system: 's', user: 'u', schema: { type: 'object' } };
 const ok = (content: string) =>
@@ -94,5 +95,44 @@ describe('sliceOf', () => {
     expect(slices.map((s) => s.length)).toEqual([6, 6, 6, 6, 6, 5, 5]);
     expect(slices.flat().sort((a, b) => a - b)).toEqual(items);
     expect(sliceOf(items)).toBe(items);
+  });
+});
+
+describe('last_verified timestamps', () => {
+  it('bumps only the top-level last_verified line', () => {
+    const y =
+      'id: x\nalgorithms:\n  ml-kem:\n    sources:\n      - retrieved: 2026-01-01\nlast_verified: 2026-01-02\npipeline: {}\n';
+    expect(bumpLastVerified(y, '2026-11-12T13:34:47Z')).toBe(
+      y.replace('last_verified: 2026-01-02', 'last_verified: 2026-11-12T13:34:47Z'),
+    );
+  });
+
+  it('counts days from a date or a timestamp', () => {
+    const now = new Date('2026-11-12T12:00:00Z');
+    expect(daysSince('2026-11-10', now)).toBe(2);
+    expect(daysSince('2026-11-11T13:00:00Z', now)).toBe(0);
+  });
+
+  it('isoNow is a UTC timestamp to the second', () => {
+    expect(isoNow(new Date('2026-11-12T13:34:47.123Z'))).toBe('2026-11-12T13:34:47Z');
+  });
+
+  it('the schema accepts a date or a UTC timestamp, and lint compares by day', () => {
+    const lib = (last_verified: string) =>
+      LibrarySchema.parse({
+        id: 'demo',
+        name: 'x',
+        ecosystem: 'c-cpp',
+        overall_status: 'unknown',
+        last_verified,
+      });
+    expect(lib('2026-11-12T13:34:47Z').last_verified).toBe('2026-11-12T13:34:47Z');
+    expect(() => lib('2026-11-12 13:34')).toThrow();
+    expect(lintLibrary(lib('2026-11-12T23:59:59Z'), '2026-11-12').map((i) => i.path)).not.toContain(
+      'last_verified',
+    );
+    expect(lintLibrary(lib('2026-11-13T00:00:00Z'), '2026-11-12').map((i) => i.path)).toContain(
+      'last_verified',
+    );
   });
 });
