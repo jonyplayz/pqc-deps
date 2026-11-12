@@ -87,6 +87,7 @@ export async function proposeForLibrary(lib: Library, deps: RunDeps): Promise<Ru
   let proposal: Proposal;
   try {
     proposal = await askModel(deps.llm, lib, selected);
+    base.model = deps.llm.label; // the model that answered (it may have fallen back)
   } catch (e) {
     base.error =
       e instanceof LlmRefusalError ? e.message : `LLM step failed: ${(e as Error).message}`;
