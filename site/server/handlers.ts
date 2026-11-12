@@ -17,6 +17,7 @@ import {
   recheckTitle,
   requestKind,
 } from './requests';
+import { adminUrl, notifyAdmins } from './notify';
 import { verifyTurnstile } from './turnstile';
 
 export interface Ctx {
@@ -57,10 +58,18 @@ export async function requestRecheck({ request, env, gh, fetch: f }: Ctx): Promi
   }
   await enforceDailyCap(client, env);
   const note = cleanText(body.note, 1000);
-  await client.createIssue(
+  const issue = await client.createIssue(
     recheckTitle(body.id),
     `A visitor asked for **${body.id}** to be re-checked.${note ? `\n\n> ${note.replace(/\n/g, '\n> ')}` : ''}\n\n_Submitted through the PQC Deps website. An admin approves or rejects it from /admin._`,
     [LABELS.publicRequest, LABELS.recheck],
+  );
+  await notifyAdmins(
+    env,
+    {
+      text: `🔔 PQC Deps: re-check requested for ${body.id} (#${issue.number}). Waiting for your approval.`,
+      button: { label: 'Open admin', url: adminUrl(request.url) },
+    },
+    f,
   );
   return json({ ok: true, message: 'Thanks! A maintainer will review your request.' });
 }
@@ -80,10 +89,18 @@ export async function requestLibrary({ request, env, gh, fetch: f }: Ctx): Promi
     });
   }
   await enforceDailyCap(client, env);
-  await client.createIssue(
+  const issue = await client.createIssue(
     `[Request] ${fields.name}`,
     libraryIssueBody(fields, cleanText(body.notes, 1500)),
     [LABELS.publicRequest, LABELS.newLibrary, 'data'],
+  );
+  await notifyAdmins(
+    env,
+    {
+      text: `🔔 PQC Deps: new library requested: ${fields.name} (#${issue.number}). Waiting for your approval.`,
+      button: { label: 'Open admin', url: adminUrl(request.url) },
+    },
+    f,
   );
   return json({ ok: true, message: 'Thanks! A maintainer will review your request.' });
 }

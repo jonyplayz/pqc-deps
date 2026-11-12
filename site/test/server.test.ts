@@ -44,13 +44,21 @@ interface Call {
 }
 
 /** A fake GitHub API + Turnstile endpoint driven by a small in-memory state. */
-function fakeServices(state: { issues?: any[]; recent?: number; turnstile?: boolean } = {}) {
+function fakeServices(
+  state: { issues?: any[]; recent?: number; turnstile?: boolean; telegramDown?: boolean } = {},
+) {
   const calls: Call[] = [];
+  const telegram: any[] = [];
   const issues = state.issues ?? [];
   const f: typeof fetch = async (input, init) => {
     const url = new URL(String(input));
     if (url.host === 'challenges.cloudflare.com') {
       return new Response(JSON.stringify({ success: state.turnstile ?? true }));
+    }
+    if (url.host === 'api.telegram.org') {
+      if (state.telegramDown) throw new TypeError('network down');
+      telegram.push({ path: url.pathname, body: JSON.parse(String(init?.body)) });
+      return new Response(JSON.stringify({ ok: true }));
     }
     const method = init?.method ?? 'GET';
     const body = init?.body ? JSON.parse(String(init.body)) : undefined;
@@ -107,7 +115,7 @@ function fakeServices(state: { issues?: any[]; recent?: number; turnstile?: bool
     }
     return respond({}, 200);
   };
-  return { calls, fetch: f, gh: () => new GitHub('jonyplayz/pqc-deps', 't', f) };
+  return { calls, telegram, fetch: f, gh: () => new GitHub('jonyplayz/pqc-deps', 't', f) };
 }
 
 const post = (path: string, body: unknown, headers: Record<string, string> = {}) =>
@@ -474,6 +482,60 @@ describe('public requests', () => {
         requestLibrary({ request: post('/x', body), env: env(), gh: dup.gh, fetch: dup.fetch }),
       ),
     ).toMatchObject({ duplicate: true });
+  });
+});
+
+describe('Telegram notifications', () => {
+  const tg = { TELEGRAM_BOT_TOKEN: '123:abc', TELEGRAM_CHAT_ID: '42' };
+  const recheck = (s: ReturnType<typeof fakeServices>, e: Env) =>
+    bodyOf(
+      requestRecheck({
+        request: post('/x', { id: 'openssl', token: 'tok' }),
+        env: e,
+        gh: s.gh,
+        fetch: s.fetch,
+      }),
+    );
+
+  it('messages the admin chat with a link to /admin after a request', async () => {
+    const s = fakeServices();
+    expect((await recheck(s, env(tg))).ok).toBe(true);
+    expect(s.telegram).toHaveLength(1);
+    expect(s.telegram[0].path).toBe('/bot123:abc/sendMessage');
+    expect(s.telegram[0].body).toMatchObject({ chat_id: '42' });
+    expect(s.telegram[0].body.text).toContain('openssl (#99)');
+    expect(s.telegram[0].body.parse_mode).toBeUndefined();
+    expect(s.telegram[0].body.reply_markup.inline_keyboard[0][0].url).toBe(`${ORIGIN}/admin`);
+  });
+
+  it('library requests notify too', async () => {
+    const s = fakeServices();
+    const body = {
+      name: 'Botan',
+      ecosystem: 'c-cpp',
+      repo: 'https://github.com/randombit/botan',
+      token: 't',
+    };
+    await bodyOf(
+      requestLibrary({ request: post('/x', body), env: env(tg), gh: s.gh, fetch: s.fetch }),
+    );
+    expect(s.telegram[0].body.text).toContain('new library requested: Botan');
+  });
+
+  it('does nothing without settings, and a Telegram outage never fails the request', async () => {
+    const quiet = fakeServices();
+    expect((await recheck(quiet, env())).ok).toBe(true);
+    expect(quiet.telegram).toHaveLength(0);
+    const down = fakeServices({ telegramDown: true });
+    expect((await recheck(down, env(tg))).ok).toBe(true);
+  });
+
+  it('duplicates do not notify', async () => {
+    const dup = fakeServices({
+      issues: [{ number: 5, title: '[Re-check] openssl', labels: [{ name: 'recheck-request' }] }],
+    });
+    await recheck(dup, env(tg));
+    expect(dup.telegram).toHaveLength(0);
   });
 });
 
