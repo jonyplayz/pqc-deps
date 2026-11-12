@@ -27,6 +27,8 @@ export * from './constants';
 
 /** YYYY-MM-DD */
 const isoDate = z.iso.date();
+/** YYYY-MM-DD or a UTC timestamp (YYYY-MM-DDTHH:MM:SSZ): when an entry was last checked. */
+const isoDateOrTime = z.union([z.iso.date(), z.iso.datetime()]);
 /** YYYY, YYYY-MM or YYYY-MM-DD: roadmaps are often only month- or year-precise. */
 const fuzzyDate = z
   .string()
@@ -132,7 +134,7 @@ export const LibrarySchema = z.strictObject({
   fips: FipsSchema.optional(),
   upgrade_notes: z.string().optional(),
   notes: z.string().optional(),
-  last_verified: isoDate,
+  last_verified: isoDateOrTime,
   /** Settings for the evidence pipeline. Not shown on the site. */
   pipeline: z
     .strictObject({

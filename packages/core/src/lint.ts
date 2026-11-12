@@ -100,7 +100,8 @@ export function lintLibrary(lib: Library, today: string = isoToday()): LintIssue
   }
 
   // Dates.
-  if (lib.last_verified > today) add('last_verified', `date ${lib.last_verified} is in the future`);
+  if (lib.last_verified.slice(0, 10) > today)
+    add('last_verified', `date ${lib.last_verified} is in the future`);
   const allSources = [
     ...algs(lib).flatMap(([a, s]) =>
       s.sources.map((src, i) => [`algorithms.${a}.sources[${i}]`, src] as const),
@@ -195,4 +196,14 @@ export function lintCatalog(libs: Library[]): LintIssue[] {
 
 export function isoToday(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** Current UTC time to the second, e.g. 2026-11-12T13:34:47Z. */
+export function isoNow(now = new Date()): string {
+  return `${now.toISOString().slice(0, 19)}Z`;
+}
+
+/** Parse a YYYY-MM-DD date (midnight UTC) or a full ISO timestamp. */
+export function parseDateOrTime(s: string): Date {
+  return new Date(s.length === 10 ? `${s}T00:00:00Z` : s);
 }
