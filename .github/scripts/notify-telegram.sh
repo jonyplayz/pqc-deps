@@ -18,11 +18,14 @@ else
   payload=$(jq -n --arg c "$TELEGRAM_CHAT_ID" --arg t "$text" \
     '{chat_id: $c, text: $t, disable_web_page_preview: true}')
 fi
-if curl -sS --max-time 10 -o /dev/null -w '%{http_code}' \
-  -H 'Content-Type: application/json' -d "$payload" \
-  "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" | grep -q '^200$'; then
+resp=$(curl -sS --max-time 20 -H 'Content-Type: application/json' -d "$payload"   "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" 2>&1)
+if [ "$(printf '%s' "$resp" | jq -r '.ok' 2>/dev/null)" = "true" ]; then
   echo "Telegram notification sent."
 else
-  echo "::warning::Telegram notification failed."
+  # Telegram's own error text (e.g. "Unauthorized", "Bad Request: chat not found");
+  # it never contains the token. curl errors are scrubbed of the URL just in case.
+  reason=$(printf '%s' "$resp" | jq -r '.description // empty' 2>/dev/null)
+  [ -n "$reason" ] || reason=$(printf '%s' "$resp" | sed "s#${TELEGRAM_BOT_TOKEN}#***#g" | head -c 200)
+  echo "::warning::Telegram notification failed: ${reason:-no response}"
 fi
 exit 0
