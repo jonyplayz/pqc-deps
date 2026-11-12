@@ -97,7 +97,21 @@ jobs:
           ADD_ID: ${{ inputs.id }}
         run: |
           if [ "$GITHUB_EVENT_NAME" = "issues" ]; then
-            npm run add-library -- --from-issue "$ISSUE" --pipeline --pr
+            npm run add-library -- --from-issue "$ISSUE" --pipeline --pr | tee add-library.log
           else
-            npm run add-library -- --from-env --pipeline --pr
+            npm run add-library -- --from-env --pipeline --pr | tee add-library.log
+          fi
+      - name: Notify admins on Telegram
+        if: always() && true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          pr=$(grep -oE 'Opened https://[^ ]+' add-library.log 2>/dev/null | tail -1 | cut -d' ' -f2 || true)
+          if [ "$JOB_STATUS" != "success" ]; then
+            bash .github/scripts/notify-telegram.sh "⚠️ PQC Deps: adding a library failed." "$run_url" "Open run"
+          elif [ -n "$pr" ]; then
+            bash .github/scripts/notify-telegram.sh "📚 PQC Deps: a new library draft PR is waiting for your review." "$pr" "Review PR"
           fi
