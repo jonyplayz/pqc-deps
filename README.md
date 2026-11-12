@@ -182,18 +182,27 @@ GitHub Actions (`.github/workflows/`):
    API token with the _Cloudflare Pages: Edit_ permission. Add repository
    secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Until they exist,
    the deploy job is skipped with a notice.
-3. **LLM for the weekly refresh**: add a secret `LLM_API_KEY` (free Gemini key)
+3. **LLM for the daily refresh**: add a secret `LLM_API_KEY` (free Gemini key)
    and repository variables `LLM_PROVIDER=openai-compatible`,
    `LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai`,
-   `LLM_MODEL=gemini-3.5-flash`, `LLM_DELAY_MS=5000`. For Claude, set the
-   secret `ANTHROPIC_API_KEY` instead and leave `LLM_PROVIDER` unset.
+   `LLM_MODEL=gemini-3.5-flash,gemini-3.5-flash-lite`, `LLM_DELAY_MS=13000`.
+   For Claude, set the secret `ANTHROPIC_API_KEY` instead and leave
+   `LLM_PROVIDER` unset.
+
+   Free Gemini quotas are per model and per project (see your limits at
+   aistudio.google.com/rate-limit): Flash allows about 5 requests a minute and
+   20 a day, Flash Lite 15 a minute and 500 a day. `LLM_MODEL` takes a
+   comma-separated list, best first; when one model's daily quota runs out the
+   run continues on the next. The scheduled run checks a seventh of the catalog
+   each day (`--slice`), about 6 requests, so every library is re-checked
+   weekly. `LLM_DELAY_MS=13000` keeps it under Flash's per-minute limit.
 
 ```bash
 gh secret set LLM_API_KEY            # paste the key when prompted
 gh variable set LLM_PROVIDER --body openai-compatible
 gh variable set LLM_BASE_URL --body https://generativelanguage.googleapis.com/v1beta/openai
-gh variable set LLM_MODEL --body gemini-3.5-flash
-gh variable set LLM_DELAY_MS --body 5000
+gh variable set LLM_MODEL --body gemini-3.5-flash,gemini-3.5-flash-lite
+gh variable set LLM_DELAY_MS --body 13000
 ```
 
 Note: PRs opened by the workflow's built-in token don't trigger CI on their
