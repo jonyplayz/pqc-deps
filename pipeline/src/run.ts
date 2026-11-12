@@ -1,5 +1,5 @@
 /** Run the pipeline for one library. Dependencies are injected so tests can fake fetch + LLM. */
-import { isoToday, lintLibrary, type Library } from '@pqc-deps/core';
+import { isoNow, isoToday, lintLibrary, type Library } from '@pqc-deps/core';
 import { selectEvidence, type ExcerptOptions, type Excerpted } from './excerpt';
 import type { FetchResult } from './fetch/types';
 import { LlmRefusalError, type LlmClient } from './llm/types';
@@ -12,6 +12,8 @@ export interface RunDeps {
   fetchEvidence: (lib: Library) => Promise<FetchResult>;
   llm?: LlmClient;
   today?: string;
+  /** Timestamp written to last_verified (default: now, UTC). */
+  now?: string;
   excerpt?: ExcerptOptions;
 }
 
@@ -95,7 +97,12 @@ export async function proposeForLibrary(lib: Library, deps: RunDeps): Promise<Ru
   }
 
   const verified = verifyProposal(proposal, selected, lib, today);
-  const merged = mergeProposal(lib, verified, today);
+  const merged = mergeProposal(
+    lib,
+    verified,
+    today,
+    deps.now ?? (deps.today ? `${deps.today}T00:00:00Z` : isoNow()),
+  );
   const lintErrors = lintLibrary(merged.library, today).filter((i) => i.severity === 'error');
   const lintWarnings = lintLibrary(merged.library, today).filter((i) => i.severity === 'warning');
   if (lintErrors.length) {

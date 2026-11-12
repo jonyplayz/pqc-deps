@@ -51,8 +51,15 @@ export function statusCounts(libs: Library[]): Record<Status, number> {
   return counts;
 }
 
+/** Accepts YYYY-MM-DD (midnight UTC) or a full ISO timestamp. */
 export function daysSince(isoDate: string, now = new Date()): number {
-  return Math.floor((now.getTime() - new Date(`${isoDate}T00:00:00Z`).getTime()) / 86_400_000);
+  const t = new Date(isoDate.length === 10 ? `${isoDate}T00:00:00Z` : isoDate);
+  return Math.floor((now.getTime() - t.getTime()) / 86_400_000);
+}
+
+/** "2026-11-12 13:34 UTC" for a timestamp, the date unchanged for a plain date. */
+export function formatVerified(s: string): string {
+  return s.length === 10 ? s : `${s.slice(0, 10)} ${s.slice(11, 16)} UTC`;
 }
 
 export function isStale(lib: Library): boolean {

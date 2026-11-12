@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import StatusBadge from '../components/StatusBadge.astro';
 import SupportMark from '../components/SupportMark.astro';
-import { getLibraries, isStale } from '../lib/catalog';
+import { formatVerified, getLibraries, isStale } from '../lib/catalog';
 import {
   ALGORITHM_INFO,
   ECOSYSTEM_LABEL,
@@ -114,7 +114,9 @@ const supported = (l: (typeof libs)[number]) =>
                 </td>
               ))}
               <td class="small mono">
-                {l.last_verified}
+                <time datetime={l.last_verified} title={formatVerified(l.last_verified)}>
+                  {l.last_verified.slice(0, 10)}
+                </time>
                 {isStale(l) && <span class="stale" title="Not re-verified recently">stale</span>}
               </td>
             </tr>

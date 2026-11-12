@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import DelegationTree from '../../components/DelegationTree.astro';
 import LibraryActions from '../../components/actions/LibraryActions.tsx';
-import { getLibraries, getLibraryMap, daysSince, isStale } from '../../lib/catalog';
+import { getLibraries, getLibraryMap, daysSince, formatVerified, isStale } from '../../lib/catalog';
 import { SITE, correctionUrl, editUrl } from '../../config';
 import {
   ALGORITHMS,
@@ -92,7 +92,7 @@ const desc = `${lib.name} post-quantum status: ${status.label}. ML-KEM, ML-DSA, 
     <div>
       <dt>Last verified</dt>
       <dd>
-        <span class="mono">{lib.last_verified}</span>
+        <time class="mono" datetime={lib.last_verified}>{formatVerified(lib.last_verified)}</time>
         {stale && <span class="stale"> · may be out of date ({daysSince(lib.last_verified)} days)</span>}
       </dd>
     </div>

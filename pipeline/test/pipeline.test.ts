@@ -318,7 +318,7 @@ describe('proposeForLibrary (end to end with fake fetch + fake LLM)', () => {
     expect(l.roadmap).toMatchObject({ target_version: '3.7', target_date: '2027-03' });
     expect(l.fips).toBeUndefined(); // cites a document that doesn't exist
     expect(l.overall_status).toBe('ready');
-    expect(l.last_verified).toBe(TODAY);
+    expect(l.last_verified).toBe(`${TODAY}T00:00:00Z`);
     // Generated from verified claims only, not the model's wording.
     expect(l.upgrade_notes).toBe(
       'ML-KEM and hybrid TLS key exchange: DemoTLS 3.5.0 or later. On by default: hybrid TLS key exchange.',
