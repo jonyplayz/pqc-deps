@@ -1,0 +1,23 @@
+name: Test Telegram notification
+
+# Run by hand (Actions → Test Telegram notification → Run workflow) to check
+# that TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID work.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Send a test message
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          out=$(bash .github/scripts/notify-telegram.sh "✅ PQC Deps: test notification from GitHub Actions. Admin alerts are working." "https://pqc-deps.pages.dev/admin" "Open admin")
+          echo "$out"
+          case "$out" in *"sent"*) ;; *) echo "::error::No message was sent."; exit 1 ;; esac
