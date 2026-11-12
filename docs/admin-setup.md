@@ -84,6 +84,30 @@ callback URL registered above; on preview URLs admin features stay off.
    the Turnstile check. Submitting creates an issue labelled `public-request`
    that appears in the admin queue.
 
+## 5. Phone notifications with Telegram (optional, free)
+
+Admins get a Telegram message, with a button, whenever something waits for
+them:
+
+- a visitor requests a re-check or a new library (sent by the site);
+- an evidence refresh or add-library run opens a PR for review;
+- one of those runs fails.
+
+1. In Telegram, message **@BotFather**, send `/newbot` and follow the steps.
+   It replies with a bot token (`123456:ABC…`). Keep it secret.
+2. Open a chat with your new bot and press **Start** (a bot can't message you
+   until you do). For a shared admin group, add the bot to the group instead.
+3. Find your chat id: message **@userinfobot**; it replies with your numeric id.
+   (A group's id starts with `-`.)
+4. Add both values in two places:
+   - Cloudflare Pages → project → Settings → Variables and secrets (Production):
+     secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
+   - GitHub repo → Settings → Secrets and variables → Actions: the same two secrets.
+5. Redeploy (or push any commit) so the site picks up the new secrets.
+
+Without these secrets nothing is sent and everything else works as before. A
+failed message never fails a request or a workflow.
+
 ## Local development
 
 ```bash

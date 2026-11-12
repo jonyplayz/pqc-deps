@@ -87,12 +87,26 @@ jobs:
             if ! printf '%s' "$LIBS" | grep -Eq '^[a-z0-9 -]+$'; then
               echo "::error::Invalid library ids: $LIBS"; exit 1
             fi
-            npm run pipeline -- $LIBS --pr
+            npm run pipeline -- $LIBS --pr | tee pipeline.log
           elif [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
             # Day of the year mod 7 picks today's slice.
-            npm run pipeline -- --all --slice "$(( 10#$(date -u +%j) % 7 ))/7" --pr
+            npm run pipeline -- --all --slice "$(( 10#$(date -u +%j) % 7 ))/7" --pr | tee pipeline.log
           else
-            npm run pipeline -- --all --pr
+            npm run pipeline -- --all --pr | tee pipeline.log
+          fi
+      - name: Notify admins on Telegram
+        if: always() && steps.llm.outputs.ok == 'true'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          pr=$(grep -oE 'Opened https://[^ ]+' pipeline.log 2>/dev/null | tail -1 | cut -d' ' -f2 || true)
+          if [ "$JOB_STATUS" != "success" ]; then
+            bash .github/scripts/notify-telegram.sh "⚠️ PQC Deps: the evidence refresh failed." "$run_url" "Open run"
+          elif [ -n "$pr" ]; then
+            bash .github/scripts/notify-telegram.sh "📝 PQC Deps: an evidence refresh PR is waiting for your review." "$pr" "Review PR"
           fi
       - uses: actions/upload-artifact@v7
         if: always() && steps.llm.outputs.ok == 'true'

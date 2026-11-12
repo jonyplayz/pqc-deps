@@ -27,4 +27,8 @@ export interface Env {
 
   /** Max public requests (re-checks + library requests) per 24 h. Default 30. */
   PUBLIC_DAILY_CAP?: string;
+
+  /** Optional: Telegram bot token and chat id; when set, admins get a message for each new request. */
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_CHAT_ID?: string;
 }

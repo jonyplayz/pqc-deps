@@ -10,3 +10,7 @@ GITHUB_TOKEN=
 GITHUB_OAUTH_CLIENT_ID=
 GITHUB_OAUTH_CLIENT_SECRET=
 # SESSION_SECRET is optional: derived from the client secret when unset.
+
+# Optional: Telegram notifications for admins (docs/admin-setup.md, section 5)
+# TELEGRAM_BOT_TOKEN=
+# TELEGRAM_CHAT_ID=
