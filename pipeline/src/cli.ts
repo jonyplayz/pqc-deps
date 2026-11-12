@@ -12,7 +12,9 @@
  *   --pr        new branch, one commit per library, push, open a pull request
  *   --dry-run   fetch + filter only, no LLM call; writes proposals/<id>.md
  *
- * Options: --max-chars N (evidence budget, default 80000), --delay ms (between libraries)
+ * Options: --max-chars N (evidence budget, default 80000), --delay ms (between libraries),
+ *          --slice k/n (only every n-th library from index k; the daily run uses this
+ *          to check a seventh of the catalog each day and stay inside free LLM quotas)
  */
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -23,7 +25,7 @@ import { fetchEvidence } from './fetch';
 import { llmFromEnv } from './llm';
 import { libraryToYaml, reportMarkdown } from './output';
 import { proposeForLibrary, type RunResult } from './run';
-import { daysSince } from './stale-util';
+import { daysSince, sliceOf } from './stale-util';
 
 try {
   process.loadEnvFile(join(REPO_ROOT, '.env'));
@@ -39,6 +41,8 @@ interface Args {
   mode: 'proposals' | 'apply' | 'pr' | 'dry-run';
   maxChars: number;
   delay: number;
+  /** Only every n-th library, starting at index k (spreads a daily run over n days). */
+  slice?: { k: number; n: number };
 }
 
 function parseArgs(argv: string[]): Args {
@@ -61,7 +65,11 @@ function parseArgs(argv: string[]): Args {
     else if (x === '--dry-run') a.mode = 'dry-run';
     else if (x === '--max-chars') a.maxChars = Number(next());
     else if (x === '--delay') a.delay = Number(next());
-    else if (x.startsWith('-')) throw new Error(`Unknown option ${x}`);
+    else if (x === '--slice') {
+      const m = /^(\d+)\/(\d+)$/.exec(next() ?? '');
+      if (!m || Number(m[2]) < 1) throw new Error('--slice needs k/n, for example 3/7');
+      a.slice = { k: Number(m[1]) % Number(m[2]), n: Number(m[2]) };
+    } else if (x.startsWith('-')) throw new Error(`Unknown option ${x}`);
     else a.ids.push(x);
   }
   return a;
@@ -72,6 +80,10 @@ const git = (...args: string[]) =>
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function select(libs: Library[], a: Args): Library[] {
+  return sliceOf(selectAll(libs, a), a.slice);
+}
+
+function selectAll(libs: Library[], a: Args): Library[] {
   if (a.ids.length) {
     const missing = a.ids.filter((id) => !libs.some((l) => l.id === id));
     if (missing.length) throw new Error(`Unknown library id(s): ${missing.join(', ')}`);

@@ -1,7 +1,9 @@
 name: Evidence refresh
 run-name: "Evidence refresh${{ inputs.libraries && format(': {0}', inputs.libraries) || '' }}"
 
-# Daily: re-run the evidence pipeline and open a PR with proposed changes
+# Daily: re-run the evidence pipeline on a seventh of the catalog (so every
+# library is re-checked weekly and a run fits free LLM quotas of ~20 requests
+# a day) and open a PR with proposed changes
 # (never commits to main), and keep an issue listing entries past their
 # verification age. Can also be started by hand, for all or chosen libraries.
 # A scheduled run is skipped while the previous refresh PR is still open, so
@@ -86,6 +88,9 @@ jobs:
               echo "::error::Invalid library ids: $LIBS"; exit 1
             fi
             npm run pipeline -- $LIBS --pr
+          elif [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            # Day of the year mod 7 picks today's slice.
+            npm run pipeline -- --all --slice "$(( 10#$(date -u +%j) % 7 ))/7" --pr
           else
             npm run pipeline -- --all --pr
           fi
