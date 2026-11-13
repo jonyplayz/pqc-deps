@@ -16,13 +16,11 @@ algorithms:
     support: yes
     experimental: false
     sources:
-      - url: https://github.com/google/boringssl/blob/main/include/openssl/mlkem.h
-        title: include/openssl/mlkem.h
-        kind: other
-        quote: |-
-          // This implements the Module-Lattice-Based Key-Encapsulation Mechanism from
-          // https://csrc.nist.gov/pubs/fips/203/final
-        retrieved: 2026-11-11
+      - url: https://raw.githubusercontent.com/google/boringssl/main/ssl/ssl_key_share.cc
+        title: https://raw.githubusercontent.com/google/boringssl/main/ssl/ssl_key_share.cc
+        kind: docs
+        quote: '{NID_ML_KEM_1024, SSL_GROUP_MLKEM1024, "MLKEM1024", ""},'
+        retrieved: 2026-11-13
   ml-dsa:
     support: yes
     experimental: false
@@ -41,7 +39,7 @@ algorithms:
       - url: https://github.com/google/boringssl/blob/main/include/openssl/slhdsa.h
         title: include/openssl/slhdsa.h
         kind: other
-        quote: "// SLH-DSA-SHA2-128s public key."
+        quote: // SLH-DSA-SHA2-128s public key.
         retrieved: 2026-11-11
   hybrid-tls:
     support: yes
@@ -55,9 +53,10 @@ algorithms:
           static const uint16_t kDefaultSupportedGroupIds[] = {
                 SSL_GROUP_X25519_MLKEM768,
         retrieved: 2026-11-11
-upgrade_notes: BoringSSL has no numbered releases. Current versions include ML-KEM, ML-DSA and SLH-DSA, and offer X25519MLKEM768 first in the default TLS groups.
+upgrade_notes: "ML-KEM, ML-DSA, SLH-DSA and hybrid TLS key exchange: supported in current releases; the sources don't state the first version. On by default: hybrid TLS key exchange."
 notes: BoringSSL is not intended for general use and makes no API or ABI stability guarantees, so it has no numbered releases to compare against.
-last_verified: 2026-11-11
+last_verified: 2026-11-13T12:11:20Z
 pipeline:
   watch_urls:
     - https://raw.githubusercontent.com/google/boringssl/main/ssl/ssl_key_share.cc
+  locked: []
