@@ -40,6 +40,10 @@ on:
       id:
         description: Catalog id (optional; derived from the name)
         required: false
+      automerge:
+        description: Merge the PR automatically once checks pass (an admin already approved)
+        required: false
+        default: 'false'
   issues:
     types: [labeled]
 
@@ -67,10 +71,12 @@ jobs:
       LLM_MODEL: ${{ vars.LLM_MODEL }}
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}
-      GH_TOKEN: ${{ github.token }}
+      GITHUB_TOKEN: ${{ secrets.PIPELINE_TOKEN || github.token }}
+      GH_TOKEN: ${{ secrets.PIPELINE_TOKEN || github.token }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.PIPELINE_TOKEN || github.token }}
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -101,17 +107,14 @@ jobs:
           else
             npm run add-library -- --from-env --pipeline --pr | tee add-library.log
           fi
-      - name: Notify admins on Telegram
-        if: always() && true
+      - name: Merge or ask for approval, and notify admins
+        if: always()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_STATUS: ${{ job.status }}
-        run: |
-          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          pr=$(grep -oE 'Opened https://[^ ]+' add-library.log 2>/dev/null | tail -1 | cut -d' ' -f2 || true)
-          if [ "$JOB_STATUS" != "success" ]; then
-            bash .github/scripts/notify-telegram.sh "⚠️ PQC Deps: adding a library failed." "$run_url" "Open run"
-          elif [ -n "$pr" ]; then
-            bash .github/scripts/notify-telegram.sh "📚 PQC Deps: a new library draft PR is waiting for your review." "$pr" "Review PR"
-          fi
+          LOG: add-library.log
+          KIND: new library
+          AUTOMERGE: ${{ github.event_name == 'issues' || inputs.automerge == 'true' }}
+          CAN_AUTOMERGE: ${{ secrets.PIPELINE_TOKEN != '' }}
+        run: bash .github/scripts/after-pr.sh

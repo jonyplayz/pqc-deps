@@ -17,6 +17,10 @@ on:
         description: 'Library ids separated by spaces (empty = all)'
         required: false
         default: ''
+      automerge:
+        description: 'Merge the PR automatically once checks pass (an admin already approved)'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write
@@ -39,8 +43,10 @@ jobs:
       LLM_DELAY_MS: ${{ vars.LLM_DELAY_MS }}
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}
-      GH_TOKEN: ${{ github.token }}
+      # PIPELINE_TOKEN (optional): an admin's token, so the PRs this job opens
+      # run CI and can merge themselves. Falls back to the workflow token.
+      GITHUB_TOKEN: ${{ secrets.PIPELINE_TOKEN || github.token }}
+      GH_TOKEN: ${{ secrets.PIPELINE_TOKEN || github.token }}
     steps:
       - name: Decide whether to run
         id: llm
@@ -65,6 +71,7 @@ jobs:
         if: steps.llm.outputs.ok == 'true'
         with:
           fetch-depth: 0
+          token: ${{ secrets.PIPELINE_TOKEN || github.token }}
       - uses: actions/setup-node@v7
         if: steps.llm.outputs.ok == 'true'
         with:
@@ -87,27 +94,24 @@ jobs:
             if ! printf '%s' "$LIBS" | grep -Eq '^[a-z0-9 -]+$'; then
               echo "::error::Invalid library ids: $LIBS"; exit 1
             fi
-            npm run pipeline -- $LIBS --pr | tee pipeline.log
+            npm run pipeline -- $LIBS --batch 5 --pr | tee pipeline.log
           elif [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
             # Day of the year mod 7 picks today's slice.
-            npm run pipeline -- --all --slice "$(( 10#$(date -u +%j) % 7 ))/7" --pr | tee pipeline.log
+            npm run pipeline -- --all --slice "$(( 10#$(date -u +%j) % 7 ))/7" --batch 5 --pr | tee pipeline.log
           else
-            npm run pipeline -- --all --pr | tee pipeline.log
+            npm run pipeline -- --all --batch 5 --pr | tee pipeline.log
           fi
-      - name: Notify admins on Telegram
+      - name: Merge or ask for approval, and notify admins
         if: always() && steps.llm.outputs.ok == 'true'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_STATUS: ${{ job.status }}
-        run: |
-          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          pr=$(grep -oE 'Opened https://[^ ]+' pipeline.log 2>/dev/null | tail -1 | cut -d' ' -f2 || true)
-          if [ "$JOB_STATUS" != "success" ]; then
-            bash .github/scripts/notify-telegram.sh "⚠️ PQC Deps: the evidence refresh failed." "$run_url" "Open run"
-          elif [ -n "$pr" ]; then
-            bash .github/scripts/notify-telegram.sh "📝 PQC Deps: an evidence refresh PR is waiting for your review." "$pr" "Review PR"
-          fi
+          LOG: pipeline.log
+          KIND: evidence refresh
+          AUTOMERGE: ${{ inputs.automerge == 'true' }}
+          CAN_AUTOMERGE: ${{ secrets.PIPELINE_TOKEN != '' }}
+        run: bash .github/scripts/after-pr.sh
       - uses: actions/upload-artifact@v7
         if: always() && steps.llm.outputs.ok == 'true'
         with:
