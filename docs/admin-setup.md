@@ -19,8 +19,14 @@ GitHub → Settings → Developer settings → Personal access tokens →
 - Resource owner: your account. Repository access: **Only select repositories →
   pqc-deps**.
 - Repository permissions: **Actions: Read and write**, **Issues: Read and write**,
-  **Pull requests: Read-only**, **Contents: Read-only** (Metadata is added
-  automatically).
+  **Pull requests: Read and write**, **Contents: Read and write** (Metadata is
+  added automatically). Write access to pull requests and contents lets the
+  Telegram bot merge approved PRs and lets pipeline PRs merge themselves.
+- Also save the same token as the GitHub Actions secret **`PIPELINE_TOKEN`**
+  (repo → Settings → Secrets and variables → Actions). The refresh and
+  add-library workflows open their PRs with it, so CI runs on them and an
+  approved PR can merge itself as soon as CI passes. Without it, PRs are opened
+  by the workflow's own token, CI doesn't run on them, and they wait for you.
 - Expiration: up to a year; set a calendar reminder to rotate it.
 
 Cloudflare variables:
@@ -107,6 +113,26 @@ them:
 
 Without these secrets nothing is sent and everything else works as before. A
 failed message never fails a request or a workflow.
+
+### Approving from Telegram
+
+Each message has buttons, so you never need to open GitHub:
+
+| Message                                 | Buttons                | What happens                                                  |
+| --------------------------------------- | ---------------------- | ------------------------------------------------------------- |
+| A visitor's re-check or library request | ✅ Approve / ❌ Reject | Approve starts the work; its PR merges itself once CI passes. |
+| A daily refresh PR                      | ✅ Merge / ❌ Close    | Merge waits for CI, then merges; the site redeploys.          |
+| Work you already approved               | ❌ Stop and close      | Only if you change your mind.                                 |
+
+Commands: **/pending** lists everything waiting, with buttons and an
+"Approve everything" button; **/approve** (or just "approve") approves every
+pending request and merges every pipeline PR in one go. PRs that only update
+`last_verified` merge without asking.
+
+The deploy job connects the bot to the site automatically
+(`.github/scripts/telegram-webhook.sh`). The webhook only accepts calls that
+carry a secret derived from the bot token, and only from `TELEGRAM_CHAT_ID`.
+Approvals need `PIPELINE_TOKEN` (above) to merge by themselves.
 
 ## Local development
 
