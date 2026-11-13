@@ -12,16 +12,22 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
   - hybrid-tls
-overall_status: available
+overall_status: ready
 algorithms:
   ml-kem:
     support: yes
+    experimental: false
     sources:
       - url: https://pkg.go.dev/crypto/tls
         title: tls package - crypto/tls - Go Packages
         kind: docs
         quote: ML-KEM-768 (0x0041)
-        retrieved: 2026-11-09
+        retrieved: 2026-11-13
+      - url: https://github.com/golang/go/issues/82488
+        title: "Issue #82488: crypto/hpke: hybrid PrivateKey.Bytes returns the key's internal seed slice instead of a copy"
+        kind: issue
+        quote: '{"MLKEM768", hpke.MLKEM768()}'
+        retrieved: 2026-11-13
   ml-dsa:
     support: yes
     sources:
@@ -35,9 +41,26 @@ algorithms:
         kind: pull-request
         quote: Sign/ML-DSA-44   266.4µ ± 0%   234.4µ ± 1%  -12.00% (p=0.000 n=20)
         retrieved: 2026-11-09
-upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-09
+  hybrid-tls:
+    support: yes
+    since_version: "1.24"
+    default_enabled: true
+    experimental: false
+    sources:
+      - url: https://pkg.go.dev/crypto/tls
+        title: tls package - crypto/tls - Go Packages
+        kind: docs
+        quote: From Go 1.24, the default includes the [X25519MLKEM768] hybrid
+        retrieved: 2026-11-13
+      - url: https://pkg.go.dev/crypto/tls
+        title: tls package - crypto/tls - Go Packages
+        kind: docs
+        quote: X25519MLKEM768 CurveID = 4588
+        retrieved: 2026-11-13
+upgrade_notes: "hybrid TLS key exchange: Go standard library crypto 1.24 or later. ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version. On by default: hybrid TLS key exchange."
+last_verified: 2026-11-13T12:12:04Z
 pipeline:
   watch_urls:
     - https://pkg.go.dev/crypto/tls
     - https://go.dev/doc/devel/release
+  locked: []

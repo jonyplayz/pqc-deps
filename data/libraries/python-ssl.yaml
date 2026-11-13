@@ -14,7 +14,7 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: Python's ssl module wraps the OpenSSL it is linked with; with OpenSSL 3.5 or later the hybrid ML-KEM group is used by default.
-last_verified: 2026-11-11
+last_verified: 2026-11-13T12:13:50Z
 pipeline:
   watch_urls:
     - https://docs.python.org/3/library/ssl.html
