@@ -14,7 +14,9 @@
  *
  * Options: --max-chars N (evidence budget, default 80000), --delay ms (between libraries),
  *          --slice k/n (only every n-th library from index k; the daily run uses this
- *          to check a seventh of the catalog each day and stay inside free LLM quotas)
+ *          to check a seventh of the catalog each day and stay inside free LLM quotas),
+ *          --batch N (ask the model about up to N libraries per request; default
+ *          LLM_BATCH or 1. Each library is still verified on its own)
  */
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -24,7 +26,7 @@ import { loadLibrariesFromDir, REPO_ROOT } from '@pqc-deps/core/node';
 import { fetchEvidence } from './fetch';
 import { llmFromEnv } from './llm';
 import { libraryToYaml, reportMarkdown } from './output';
-import { proposeForLibrary, type RunResult } from './run';
+import { proposeForLibraries, type RunResult } from './run';
 import { bumpLastVerified, daysSince, sliceOf } from './stale-util';
 
 try {
@@ -41,6 +43,8 @@ interface Args {
   mode: 'proposals' | 'apply' | 'pr' | 'dry-run';
   maxChars: number;
   delay: number;
+  /** Libraries per model request. */
+  batch: number;
   /** Only every n-th library, starting at index k (spreads a daily run over n days). */
   slice?: { k: number; n: number };
 }
@@ -53,6 +57,7 @@ function parseArgs(argv: string[]): Args {
     mode: 'proposals',
     maxChars: 80_000,
     delay: Number(process.env.LLM_DELAY_MS ?? 0),
+    batch: Number(process.env.LLM_BATCH ?? 1) || 1,
   };
   for (let i = 0; i < argv.length; i++) {
     const x = argv[i]!;
@@ -65,6 +70,7 @@ function parseArgs(argv: string[]): Args {
     else if (x === '--dry-run') a.mode = 'dry-run';
     else if (x === '--max-chars') a.maxChars = Number(next());
     else if (x === '--delay') a.delay = Number(next());
+    else if (x === '--batch') a.batch = Math.max(1, Number(next()) || 1);
     else if (x === '--slice') {
       const m = /^(\d+)\/(\d+)$/.exec(next() ?? '');
       if (!m || Number(m[2]) < 1) throw new Error('--slice needs k/n, for example 3/7');
@@ -77,7 +83,6 @@ function parseArgs(argv: string[]): Args {
 
 const git = (...args: string[]) =>
   execFileSync('git', args, { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function select(libs: Library[], a: Args): Library[] {
   return sliceOf(selectAll(libs, a), a.slice);
@@ -120,14 +125,17 @@ async function main() {
   /** Checked without errors and nothing to change: only last_verified moves. */
   const verifiedOnly: string[] = [];
 
+  console.log(
+    `Checking ${targets.length} librar${targets.length === 1 ? 'y' : 'ies'}${llm && args.batch > 1 ? `, up to ${args.batch} per model request` : ''}…`,
+  );
+  const all = await proposeForLibraries(
+    targets,
+    { fetchEvidence, ...(llm ? { llm } : {}), excerpt: { maxCharsTotal: args.maxChars } },
+    { batchSize: args.batch, delayMs: args.delay },
+  );
   for (const [i, lib] of targets.entries()) {
-    if (i && args.delay) await sleep(args.delay);
+    const r = all[i]!;
     process.stdout.write(`[${i + 1}/${targets.length}] ${lib.id}: `);
-    const r = await proposeForLibrary(lib, {
-      fetchEvidence,
-      ...(llm ? { llm } : {}),
-      excerpt: { maxCharsTotal: args.maxChars },
-    });
     const report = reportMarkdown(r, lib);
     results.push({ lib, r, report });
     console.log(
