@@ -129,7 +129,7 @@ function versionMentioned(
 
 /** Release-note lines about maintenance, which can't show when support began. */
 const MAINTENANCE_PATTERN =
-  /\b(fix(es|ed)?|bug|regression|hardening|harden|side[- ]channel|performance|optimi[sz](e|ed|ation)|speed[- ]?up|faster|refactor(ed)?|rename[sd]?|backport(ed)?)\b/i;
+  /\b(fix(es|ed)?|bug|regression|hardening|harden|side[- ]channel|performance|optimi[sz](e|ed|ation)|speed[- ]?up|faster|refactor(ed)?|rename[sd]?|backport(ed)?|upgrade[sd]?|bump(s|ed)?|yanked)\b/i;
 
 /** "On by default" needs a quote about defaults (OpenSSL's "default provider" is a module name, not a setting). */
 const DEFAULT_ON_PATTERN =
