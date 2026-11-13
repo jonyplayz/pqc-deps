@@ -15,4 +15,4 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: OkHttp uses the platform's TLS implementation (the JDK's on the JVM, Conscrypt or the system's on Android), so post-quantum key exchange depends on that.
-last_verified: 2026-11-11
+last_verified: 2026-11-13T12:13:04Z
