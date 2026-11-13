@@ -7,11 +7,29 @@
  */
 import type { Env } from './env';
 
+export interface KeyButton {
+  text: string;
+  /** Pressing it sends this to the bot's webhook (see telegram.ts). */
+  callback_data?: string;
+  url?: string;
+}
+
 export interface Notice {
   text: string;
-  /** Optional button under the message. */
+  /** Optional link button under the message. */
   button?: { label: string; url: string };
+  /** Optional rows of buttons; replaces `button`. */
+  keyboard?: KeyButton[][];
 }
+
+/** Approve / Reject buttons for a new website request. */
+export const requestKeyboard = (number: number, adminLink: string): KeyButton[][] => [
+  [
+    { text: '✅ Approve', callback_data: `a:r:${number}` },
+    { text: '❌ Reject', callback_data: `x:r:${number}` },
+  ],
+  [{ text: 'Open admin', url: adminLink }],
+];
 
 export function telegramConfigured(env: Env): boolean {
   return Boolean(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID);
@@ -35,13 +53,15 @@ export async function notifyAdmins(
         chat_id: env.TELEGRAM_CHAT_ID,
         text: notice.text.slice(0, 1000),
         disable_web_page_preview: true,
-        ...(notice.button
-          ? {
-              reply_markup: {
-                inline_keyboard: [[{ text: notice.button.label, url: notice.button.url }]],
-              },
-            }
-          : {}),
+        ...(notice.keyboard
+          ? { reply_markup: { inline_keyboard: notice.keyboard } }
+          : notice.button
+            ? {
+                reply_markup: {
+                  inline_keyboard: [[{ text: notice.button.label, url: notice.button.url }]],
+                },
+              }
+            : {}),
       }),
       signal: AbortSignal.timeout(5_000),
     });

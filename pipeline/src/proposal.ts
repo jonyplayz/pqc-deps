@@ -49,12 +49,20 @@ export const ProposalSchema = z.object({
   reviewer_notes: z.string().describe('Anything a human reviewer should double-check'),
 });
 export type Proposal = z.infer<typeof ProposalSchema>;
+
+/** Several libraries in one request: one proposal per library, keyed by id. */
+export const BatchProposalSchema = z.object({
+  results: z.array(ProposalSchema.extend({ library_id: z.string() })),
+});
 export type AlgorithmClaim = z.infer<typeof AlgorithmClaimSchema>;
 export type Evidence = z.infer<typeof EvidenceSchema>;
 
 /** JSON Schema for structured outputs: every object closed, no $schema key. */
-export function proposalJsonSchema(): Record<string, unknown> {
-  const schema = z.toJSONSchema(ProposalSchema) as Record<string, unknown>;
+export function proposalJsonSchema(batch = false): Record<string, unknown> {
+  const schema = z.toJSONSchema(batch ? BatchProposalSchema : ProposalSchema) as Record<
+    string,
+    unknown
+  >;
   delete schema.$schema;
   const close = (node: unknown): void => {
     if (Array.isArray(node)) return node.forEach(close);

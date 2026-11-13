@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: russh
+name: russh
+ecosystem: rust
+description: SSH client and server library for Rust.
+repo: https://github.com/Eugeny/russh
+package_names:
+  cargo:
+    - russh
+applicable_algorithms:
+  - ml-kem
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    sources:
+      - url: https://github.com/Eugeny/russh/releases/tag/v0.55.0
+        title: v0.55.0
+        kind: release-notes
+        quote: upgrade libcrux-ml-kem since 0.0.3 was yanked (#606)
+        retrieved: 2026-11-13
+upgrade_notes: russh offers ML-KEM hybrid key exchange (through libcrux-ml-kem) in current releases; the first version is not stated.
+last_verified: 2026-11-13T12:48:25Z
+pipeline:
+  locked:
+    - path: algorithms.ml-kem.since_version
+      reason: the only version evidence is a dependency upgrade after a yanked crate, not when support started

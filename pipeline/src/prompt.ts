@@ -28,6 +28,15 @@ ${STATUSES.map((s) => `   - ${s}: ${STATUS_INFO[s].description}`).join('\n')}
 12. upgrade_notes: one or two plain sentences telling a developer what to upgrade to or enable, based only on the evidence. null if unknown.
 13. reviewer_notes: briefly flag anything ambiguous for the human reviewer.`;
 
+/** Several libraries in one request; each keeps its own document ids. */
+export function buildBatchPrompt(items: Array<{ lib: Library; docs: Excerpted[] }>): string {
+  return `This request covers ${items.length} separate libraries. Treat each one on its own: use only the documents inside that library's block, and cite those document ids. Return one entry in "results" for every library, with "library_id" set to its id.
+
+${items
+  .map(({ lib, docs }) => `<library id="${lib.id}">\n${buildUserPrompt(lib, docs)}\n</library>`)
+  .join('\n\n')}`;
+}
+
 export function buildUserPrompt(lib: Library, docs: Excerpted[]): string {
   const { pipeline: _p, ...current } = lib;
   const applicable = applicableAlgorithms(lib)

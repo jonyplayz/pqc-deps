@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: deno
+name: Deno
+ecosystem: platform
+description: JavaScript and TypeScript runtime.
+homepage: https://deno.com
+repo: https://github.com/denoland/deno
+applicable_algorithms:
+  - hybrid-tls
+  - ml-kem
+  - ml-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: v2.8.2
+    experimental: false
+    sources:
+      - url: https://github.com/denoland/deno/releases/tag/v2.8.2
+        title: v2.8.2
+        kind: release-notes
+        quote: "- feat(ext/crypto): implement ML-KEM (FIPS 203) post-quantum KEM (#34447)"
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    since_version: v2.8.2
+    experimental: false
+    sources:
+      - url: https://github.com/denoland/deno/releases/tag/v2.8.2
+        title: v2.8.2
+        kind: release-notes
+        quote: "- feat(ext/crypto): add ML-DSA (FIPS 204) post-quantum signatures (#34448)"
+        retrieved: 2026-11-13
+upgrade_notes: "ML-KEM and ML-DSA: Deno v2.8.2 or later."
+last_verified: 2026-11-13T12:44:06Z

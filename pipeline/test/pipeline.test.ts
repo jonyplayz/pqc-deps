@@ -10,7 +10,7 @@ import type { LlmClient, LlmRequest } from '../src/llm/types';
 import { libraryToYaml, reportMarkdown } from '../src/output';
 import { extractJson, buildUserPrompt } from '../src/prompt';
 import { proposalJsonSchema, type Proposal } from '../src/proposal';
-import { proposeForLibrary } from '../src/run';
+import { planBatches, proposeForLibraries, proposeForLibrary } from '../src/run';
 import { checkQuote, normalizeForMatch } from '../src/verify';
 import { deriveStatus } from '../src/merge';
 
@@ -1004,5 +1004,57 @@ describe('htmlToText hardening (CodeQL)', () => {
     const out = htmlToText('<p>ML-KEM <<b>x</b>script>alert(1)<</b>/script> ok</p>');
     expect(out).not.toMatch(/[<>]/);
     expect(out).toContain('ML-KEM');
+  });
+});
+
+describe('batched runs', () => {
+  const fetchEvidence = async () => ({ docs: DOCS, warnings: [] });
+  const libs = ['demo-a', 'demo-b', 'demo-c'].map((id) => lib({ id, name: id }));
+  const answer = (ids: string[]) =>
+    JSON.stringify({ results: ids.map((library_id) => ({ library_id, ...fakeProposal() })) });
+
+  it('asks about several libraries in one request and verifies each on its own', async () => {
+    const llm = fakeLlm(answer(['demo-a', 'demo-b', 'demo-c']));
+    const rs = await proposeForLibraries(
+      libs,
+      { fetchEvidence, llm, today: TODAY },
+      { batchSize: 5 },
+    );
+    expect(llm.calls).toHaveLength(1);
+    expect(llm.calls[0]!.user).toContain('<library id="demo-b">');
+    for (const r of rs) {
+      expect(r.error).toBeUndefined();
+      expect(r.library!.algorithms['ml-kem']).toMatchObject({ support: 'yes' });
+      expect(r.library!.algorithms['slh-dsa']).toBeUndefined(); // fabricated quote, still dropped
+    }
+  });
+
+  it('splits by batch size and asks again for libraries the model left out', async () => {
+    const replies = [answer(['demo-a']), answer(['demo-b']), JSON.stringify(fakeProposal())];
+    const llm = fakeLlm(() => replies.shift()!);
+    const rs = await proposeForLibraries(
+      libs,
+      { fetchEvidence, llm, today: TODAY },
+      { batchSize: 2 },
+    );
+    // Batch 1 (a, b) answered only a; one more request for b; batch 2 is c alone.
+    expect(llm.calls).toHaveLength(3);
+    expect(rs.map((r) => r.error)).toEqual([undefined, undefined, undefined]);
+  });
+
+  it('reports an error per library when the batch answer stays invalid', async () => {
+    const llm = fakeLlm('not json');
+    const rs = await proposeForLibraries(
+      libs.slice(0, 2),
+      { fetchEvidence, llm, today: TODAY },
+      { batchSize: 2 },
+    );
+    expect(rs.every((r) => r.error && !r.library)).toBe(true);
+  });
+
+  it('plans batches by count and total size', () => {
+    const sizes = [100, 100, 250, 50, 50];
+    expect(planBatches(sizes, (n) => n, 3, 300).map((b) => b.length)).toEqual([2, 2, 1]);
+    expect(planBatches([500], (n) => n, 3, 300)).toEqual([[500]]); // one oversized item still runs
   });
 });

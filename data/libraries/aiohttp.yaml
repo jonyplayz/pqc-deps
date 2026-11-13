@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: aiohttp
+name: aiohttp
+ecosystem: python
+description: Async HTTP client and server for Python.
+repo: https://github.com/aio-libs/aiohttp
+package_names:
+  pypi:
+    - aiohttp
+delegates_to:
+  - id: python-ssl
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+notes: "aiohttp uses Python's ssl module (and so the linked OpenSSL) for TLS."
+last_verified: 2026-11-13

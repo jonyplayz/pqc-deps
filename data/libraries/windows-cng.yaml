@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: windows-cng
+name: Windows CNG and SChannel
+ecosystem: platform
+description: The Windows cryptography API (CNG) and its TLS stack (SChannel).
+homepage: https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z
+pipeline:
+  watch_urls:
+    - https://learn.microsoft.com/en-us/windows/win32/seccng/cng-mlkem-examples
+    - https://learn.microsoft.com/en-us/windows/win32/seccng/cng-mldsa-examples
+    - https://learn.microsoft.com/en-us/windows/win32/seccng/cng-algorithm-identifiers

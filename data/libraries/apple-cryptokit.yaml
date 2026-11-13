@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: apple-cryptokit
+name: Apple CryptoKit and Network framework
+ecosystem: platform
+description: Apple's Swift cryptography API and the system TLS stack on iOS and macOS.
+homepage: https://developer.apple.com/documentation/cryptokit
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - hybrid-tls
+overall_status: ready
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: "26.0"
+    experimental: false
+    sources:
+      - url: https://developer.apple.com/tutorials/data/documentation/cryptokit/mlkem768.json
+        title: CryptoKit MLKEM768 (iOS 26.0, macOS 26.0 and later)
+        kind: docs
+        quote: The Module-Lattice key encapsulation mechanism (KEM).
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    since_version: "26.0"
+    experimental: false
+    sources:
+      - url: https://developer.apple.com/tutorials/data/documentation/cryptokit/mldsa65.json
+        title: CryptoKit MLDSA65 (iOS 26.0, macOS 26.0 and later)
+        kind: docs
+        quote: The MLDSA65 Digital Signature Algorithm
+        retrieved: 2026-11-13
+  hybrid-tls:
+    support: yes
+    since_version: "26.0"
+    default_enabled: true
+    experimental: false
+    sources:
+      - url: https://support.apple.com/en-us/122756
+        title: Prepare your network for quantum-secure encryption in TLS - Apple Support
+        kind: docs
+        quote: In iOS 26, iPadOS 26, macOS Tahoe 26, and visionOS 26, TLS-protected connections will automatically advertise support for hybrid, quantum-secure key exchange in TLS 1.3.
+        retrieved: 2026-11-13
+upgrade_notes: iOS, iPadOS, macOS and visionOS 26 offer hybrid post-quantum TLS key exchange automatically, and CryptoKit adds ML-KEM and ML-DSA in the same releases.
+last_verified: 2026-11-13T12:39:15Z
+pipeline:
+  watch_urls:
+    - https://developer.apple.com/tutorials/data/documentation/cryptokit/mlkem768.json
+    - https://developer.apple.com/tutorials/data/documentation/cryptokit/mldsa65.json
+    - https://support.apple.com/en-us/122756
+  locked:
+    - path: overall_status
+      reason: hybrid TLS is on by default from the 26 releases (support.apple.com/en-us/122756)

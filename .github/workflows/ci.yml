@@ -126,3 +126,9 @@ jobs:
         env:
           URL: ${{ steps.deploy.outputs.deployment-url }}
         run: echo "Deployed to $URL" >> "$GITHUB_STEP_SUMMARY"
+      - name: Connect the Telegram bot's buttons to the site
+        if: env.CF_CONFIGURED == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          SITE_URL: https://pqc-deps.pages.dev
+        run: bash .github/scripts/telegram-webhook.sh

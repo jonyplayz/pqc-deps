@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: mldsa-native
+name: mldsa-native
+ecosystem: c-cpp
+description: Portable, optimized ML-DSA implementation in C from the PQ Code Package.
+repo: https://github.com/pq-code-package/mldsa-native
+applicable_algorithms:
+  - ml-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

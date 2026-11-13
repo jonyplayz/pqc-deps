@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: tink-java
+name: Tink (Java)
+ecosystem: jvm
+description: Google's multi-language cryptography library, Java implementation.
+repo: https://github.com/tink-crypto/tink-java
+package_names:
+  maven:
+    - com.google.crypto.tink:tink
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-dsa:
+    support: yes
+    since_version: 1.21.0
+    sources:
+      - url: https://github.com/tink-crypto/tink-java/releases/tag/v1.21.0
+        title: Tink Java v1.21.0
+        kind: release-notes
+        quote: "*   Added general support for `ML-DSA-87`."
+        retrieved: 2026-11-13
+      - url: https://github.com/tink-crypto/tink-java/releases/tag/v1.22.0
+        title: Tink Java v1.22.0
+        kind: release-notes
+        quote: "*   Added support for `ML-DSA-44` signature primitive and PEM import."
+        retrieved: 2026-11-13
+  slh-dsa:
+    support: yes
+    since_version: 1.22.0
+    sources:
+      - url: https://github.com/tink-crypto/tink-java/releases/tag/v1.22.0
+        title: Tink Java v1.22.0
+        kind: release-notes
+        quote: "*   Added predefined signature parameters for `SLH-DSA`."
+        retrieved: 2026-11-13
+upgrade_notes: "ML-DSA: Tink (Java) 1.21.0 or later. SLH-DSA: Tink (Java) 1.22.0 or later."
+last_verified: 2026-11-13T12:48:59Z

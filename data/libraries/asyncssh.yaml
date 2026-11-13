@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: asyncssh
+name: AsyncSSH
+ecosystem: python
+description: Asynchronous SSH client and server for Python.
+repo: https://github.com/ronf/asyncssh
+package_names:
+  pypi:
+    - asyncssh
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: reqwest
+name: reqwest
+ecosystem: rust
+description: Ergonomic HTTP client for Rust.
+repo: https://github.com/seanmonstar/reqwest
+package_names:
+  cargo:
+    - reqwest
+delegates_to:
+  - id: rustls
+  - id: rust-openssl
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+notes: "reqwest uses rustls or the platform's native TLS (OpenSSL on Linux), depending on its features."
+last_verified: 2026-11-13

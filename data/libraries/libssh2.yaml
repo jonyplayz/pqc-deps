@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: libssh2
+name: libssh2
+ecosystem: c-cpp
+description: Client-side SSH library in C, used by curl.
+homepage: https://libssh2.org
+repo: https://github.com/libssh2/libssh2
+applicable_algorithms:
+  - ml-kem
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

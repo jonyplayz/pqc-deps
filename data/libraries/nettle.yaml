@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: nettle
+name: Nettle
+ecosystem: c-cpp
+description: Low-level cryptographic library, used by GnuTLS.
+homepage: https://www.lysator.liu.se/~nisse/nettle/
+repo: https://git.lysator.liu.se/nettle/nettle
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

@@ -10,7 +10,10 @@ fi
 text="$1"
 url="${2:-}"
 label="${3:-Open}"
-if [ -n "$url" ]; then
+# TG_KEYBOARD: optional inline keyboard as JSON (rows of buttons); replaces URL/LABEL.
+if [ -n "${TG_KEYBOARD:-}" ]; then
+  payload=$(jq -n --arg c "$TELEGRAM_CHAT_ID" --arg t "$text" --argjson k "$TG_KEYBOARD"     '{chat_id: $c, text: $t, disable_web_page_preview: true, reply_markup: {inline_keyboard: $k}}')
+elif [ -n "$url" ]; then
   payload=$(jq -n --arg c "$TELEGRAM_CHAT_ID" --arg t "$text" --arg u "$url" --arg l "$label" \
     '{chat_id: $c, text: $t, disable_web_page_preview: true,
       reply_markup: {inline_keyboard: [[{text: $l, url: $u}]]}}')

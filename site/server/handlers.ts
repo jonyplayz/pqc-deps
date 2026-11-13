@@ -17,7 +17,7 @@ import {
   recheckTitle,
   requestKind,
 } from './requests';
-import { adminUrl, notifyAdmins } from './notify';
+import { adminUrl, notifyAdmins, requestKeyboard } from './notify';
 import { verifyTurnstile } from './turnstile';
 
 export interface Ctx {
@@ -66,8 +66,14 @@ export async function requestRecheck({ request, env, gh, fetch: f }: Ctx): Promi
   await notifyAdmins(
     env,
     {
-      text: `🔔 PQC Deps: re-check requested for ${body.id} (#${issue.number}). Waiting for your approval.`,
-      button: { label: 'Open admin', url: adminUrl(request.url) },
+      text: `🔔 PQC Deps: re-check requested for ${body.id} (#${issue.number}).${
+        note
+          ? `
+Note: ${note.slice(0, 300)}`
+          : ''
+      }
+Approve to re-check it and publish the result automatically.`,
+      keyboard: requestKeyboard(issue.number, adminUrl(request.url)),
     },
     f,
   );
@@ -97,8 +103,10 @@ export async function requestLibrary({ request, env, gh, fetch: f }: Ctx): Promi
   await notifyAdmins(
     env,
     {
-      text: `🔔 PQC Deps: new library requested: ${fields.name} (#${issue.number}). Waiting for your approval.`,
-      button: { label: 'Open admin', url: adminUrl(request.url) },
+      text: `🔔 PQC Deps: new library requested: ${fields.name} (#${issue.number})
+${fields.repo}
+Approve to research it and add it to the catalog automatically.`,
+      keyboard: requestKeyboard(issue.number, adminUrl(request.url)),
     },
     f,
   );
@@ -113,10 +121,10 @@ export async function adminRefresh({ request, env, gh }: Ctx): Promise<Response>
   if (!isLibraryId(body.id) || !(await catalogIds(env, request.url)).has(body.id)) {
     throw new HttpError(404, 'Unknown library.');
   }
-  await gh().dispatch('refresh.yml', { libraries: body.id });
+  await gh().dispatch('refresh.yml', { libraries: body.id, automerge: 'true' });
   return json({
     ok: true,
-    message: `Refresh of ${body.id} started. If anything changed, a pull request will appear for review.`,
+    message: `Refresh of ${body.id} started. The result is merged automatically once the checks pass.`,
     runsUrl: actionsUrl(env, 'refresh.yml'),
   });
 }
@@ -135,10 +143,10 @@ export async function adminAdd({ request, env, gh }: Ctx): Promise<Response> {
   ] as const) {
     if (f[k]) inputs[k] = f[k];
   }
-  await gh().dispatch('add-library.yml', inputs);
+  await gh().dispatch('add-library.yml', { ...inputs, automerge: 'true' });
   return json({
     ok: true,
-    message: `Adding ${f.name}. Checks and evidence run first; then a pull request appears for review.`,
+    message: `Adding ${f.name}. Checks and evidence run first; the pull request merges itself once CI passes.`,
     runsUrl: actionsUrl(env, 'add-library.yml'),
   });
 }
@@ -160,52 +168,75 @@ export async function adminRequests({ gh }: Ctx): Promise<Response> {
 }
 
 export async function adminDecide({ request, env, gh }: Ctx, number: number): Promise<Response> {
-  if (!Number.isInteger(number) || number <= 0) throw new HttpError(400, 'Bad request number.');
   const body = await readJsonBody(request);
   const action = body.action;
   if (action !== 'approve' && action !== 'reject')
     throw new HttpError(400, 'Choose approve or reject.');
-  const client = gh();
+  const r = await decideRequest(
+    gh(),
+    env,
+    request.url,
+    number,
+    action,
+    cleanText(body.reason, 500),
+  );
+  return json({ ok: true, ...r });
+}
+
+/**
+ * Approve or reject a website request (shared by /admin and Telegram).
+ * Approving starts the work; the resulting PR merges itself once CI passes
+ * (the workflows get automerge=true), so one approval is enough.
+ */
+export async function decideRequest(
+  client: GitHub,
+  env: Env,
+  siteUrl: string,
+  number: number,
+  action: 'approve' | 'reject',
+  reason = '',
+): Promise<{ message: string; runsUrl?: string }> {
+  if (!Number.isInteger(number) || number <= 0) throw new HttpError(400, 'Bad request number.');
   const issue = await client.issue(number);
   const kind = requestKind(issue);
   if (!kind || !labelNames(issue).includes(LABELS.publicRequest)) {
     throw new HttpError(400, 'That is not a website request.');
   }
+  if (
+    (issue as { state?: string }).state === 'closed' ||
+    labelNames(issue).includes(LABELS.approved)
+  )
+    throw new HttpError(409, `Request #${number} was already handled.`);
 
   if (action === 'reject') {
-    const reason = cleanText(body.reason, 500);
     await client.comment(
       number,
       `Thanks for the request. We're not acting on it${reason ? `: ${reason}` : '.'}`,
     );
     await client.close(number, 'not_planned');
-    return json({ ok: true, message: `Request #${number} closed.` });
+    return { message: `Request #${number} closed.` };
   }
 
   if (kind === 'recheck') {
     const id = recheckId(issue);
-    if (!id || !(await catalogIds(env, request.url)).has(id))
+    if (!id || !(await catalogIds(env, siteUrl)).has(id))
       throw new HttpError(400, 'Unknown library in request.');
-    await client.dispatch('refresh.yml', { libraries: id });
+    await client.dispatch('refresh.yml', { libraries: id, automerge: 'true' });
     await client.comment(
       number,
-      `Approved: a re-check of **${id}** is running. Any changes will arrive as a pull request for review.`,
+      `Approved: a re-check of **${id}** is running. The result is merged automatically once the checks pass.`,
     );
     await client.close(number, 'completed');
-    return json({
-      ok: true,
-      message: `Re-check of ${id} started.`,
-      runsUrl: actionsUrl(env, 'refresh.yml'),
-    });
+    return { message: `Re-check of ${id} started.`, runsUrl: actionsUrl(env, 'refresh.yml') };
   }
 
-  // New library: the "approved" label starts the add-library workflow.
+  // New library: the "approved" label starts the add-library workflow, which
+  // merges its PR automatically once the checks pass.
   await client.addLabels(number, [LABELS.approved]);
-  return json({
-    ok: true,
+  return {
     message: `Request #${number} approved; the library is being added.`,
     runsUrl: actionsUrl(env, 'add-library.yml'),
-  });
+  };
 }
 
 export async function adminActivity({ gh }: Ctx): Promise<Response> {

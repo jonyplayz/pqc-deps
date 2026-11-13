@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: ssh-net
+name: SSH.NET
+ecosystem: dotnet
+description: SSH client library for .NET.
+repo: https://github.com/sshnet/SSH.NET
+package_names:
+  nuget:
+    - SSH.NET
+applicable_algorithms:
+  - ml-kem
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 2025.0.0
+    sources:
+      - url: https://github.com/sshnet/SSH.NET/releases/tag/2025.0.0
+        title: 2025.0.0
+        kind: release-notes
+        quote: "- Add support for post-quantum key exchange methods `sntrup761x25519-sha512` and `mlkem768x25519-sha256`"
+        retrieved: 2026-11-13
+upgrade_notes: "ML-KEM: SSH.NET 2025.0.0 or later."
+last_verified: 2026-11-13T12:48:25Z

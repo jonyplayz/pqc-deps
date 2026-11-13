@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: cryptopp
+name: Crypto++
+ecosystem: c-cpp
+description: Free C++ class library of cryptographic schemes.
+repo: https://github.com/weidai11/cryptopp
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

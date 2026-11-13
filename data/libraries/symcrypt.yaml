@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: symcrypt
+name: SymCrypt
+ecosystem: c-cpp
+description: Microsoft's core cryptographic library, used by Windows.
+repo: https://github.com/microsoft/SymCrypt
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 103.5.0
+    sources:
+      - url: https://github.com/microsoft/SymCrypt/blob/HEAD/CHANGELOG.md
+        title: microsoft/SymCrypt CHANGELOG.md
+        kind: changelog
+        quote: "- Add ML-KEM per final FIPS 203"
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    since_version: 103.7.0
+    sources:
+      - url: https://github.com/microsoft/SymCrypt/blob/HEAD/CHANGELOG.md
+        title: microsoft/SymCrypt CHANGELOG.md
+        kind: changelog
+        quote: "- Add ML-DSA implementation"
+        retrieved: 2026-11-13
+upgrade_notes: "ML-KEM: SymCrypt 103.5.0 or later. ML-DSA: SymCrypt 103.7.0 or later."
+last_verified: 2026-11-13T12:48:59Z

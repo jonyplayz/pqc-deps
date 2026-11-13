@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: apache-httpclient
+name: Apache HttpClient
+ecosystem: jvm
+description: HTTP client for Java from the Apache HttpComponents project.
+repo: https://github.com/apache/httpcomponents-client
+package_names:
+  maven:
+    - org.apache.httpcomponents.client5:httpclient5
+    - org.apache.httpcomponents:httpclient
+delegates_to:
+  - id: openjdk
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+notes: "Apache HttpClient uses the JVM's TLS implementation (JSSE)."
+last_verified: 2026-11-13

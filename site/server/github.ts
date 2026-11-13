@@ -63,6 +63,45 @@ export class GitHub {
     return this.request('GET', '/repos/{repo}/pulls?state=open&per_page=50');
   }
 
+  pull(number: number): Promise<PullRequest> {
+    return this.request('GET', `/repos/{repo}/pulls/${number}`);
+  }
+
+  closePull(number: number): Promise<void> {
+    return this.request('PATCH', `/repos/{repo}/pulls/${number}`, { state: 'closed' });
+  }
+
+  async graphql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
+    const r = await this.request<{ data?: T; errors?: Array<{ message: string }> }>(
+      'POST',
+      '/graphql',
+      { query, variables },
+    );
+    if (r.errors?.length) throw new HttpError(502, r.errors.map((e) => e.message).join('; '));
+    return r.data as T;
+  }
+
+  /**
+   * Merge a PR once its required checks pass: turn on auto-merge, which waits
+   * for CI. If GitHub refuses because the PR is already mergeable (checks done),
+   * merge it right away.
+   */
+  async mergeWhenReady(number: number): Promise<'queued' | 'merged'> {
+    const pr = await this.pull(number);
+    if (pr.state !== 'open')
+      throw new HttpError(409, `PR #${number} is already ${pr.merged ? 'merged' : 'closed'}.`);
+    try {
+      await this.graphql(
+        'mutation($id: ID!) { enablePullRequestAutoMerge(input: { pullRequestId: $id, mergeMethod: MERGE }) { clientMutationId } }',
+        { id: pr.node_id },
+      );
+      return 'queued';
+    } catch {
+      await this.request('PUT', `/repos/{repo}/pulls/${number}/merge`, { merge_method: 'merge' });
+      return 'merged';
+    }
+  }
+
   issues(labels: string): Promise<Issue[]> {
     return this.request(
       'GET',
@@ -121,7 +160,15 @@ export interface PullRequest {
   html_url: string;
   created_at: string;
   head: { ref: string };
+  node_id?: string;
+  state?: string;
+  merged?: boolean;
+  body?: string | null;
 }
+
+/** Branches the pipeline and the add-library workflow open PRs from. */
+export const isPipelinePull = (p: PullRequest) =>
+  p.head.ref.startsWith('pipeline/') || p.head.ref.startsWith('library/');
 export interface Issue {
   number: number;
   title: string;

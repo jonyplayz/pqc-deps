@@ -14,6 +14,7 @@ import {
 } from '../server/handlers';
 import { handle, HttpError } from '../server/http';
 import { cleanText, libraryFields, libraryIssueBody } from '../server/requests';
+import { handleTelegramWebhook, webhookSecret } from '../server/telegram';
 import { normalizeInput, rawInputFromIssue } from '../../pipeline/src/add-library/input';
 
 // ---------------------------------------------------------------- fakes
@@ -57,7 +58,11 @@ function fakeServices(
     }
     if (url.host === 'api.telegram.org') {
       if (state.telegramDown) throw new TypeError('network down');
-      telegram.push({ path: url.pathname, body: JSON.parse(String(init?.body)) });
+      telegram.push({
+        path: url.pathname,
+        method: url.pathname.split('/').pop(),
+        body: JSON.parse(String(init?.body)),
+      });
       return new Response(JSON.stringify({ ok: true }));
     }
     const method = init?.method ?? 'GET';
@@ -95,6 +100,22 @@ function fakeServices(
         ],
       });
     }
+    const onePull = /\/pulls\/(\d+)$/.exec(url.pathname);
+    if (onePull) {
+      const n = Number(onePull[1]);
+      const ref = n === 7 ? 'library/add-botan-x' : 'dependabot/npm';
+      return respond({
+        number: n,
+        title: `PR ${n}`,
+        html_url: `u${n}`,
+        created_at: 'c',
+        head: { ref },
+        node_id: `PR_${n}`,
+        state: 'open',
+      });
+    }
+    if (url.pathname === '/graphql')
+      return respond({ data: { enablePullRequestAutoMerge: { clientMutationId: null } } });
     if (url.pathname.endsWith('/pulls')) {
       return respond([
         {
@@ -505,7 +526,9 @@ describe('Telegram notifications', () => {
     expect(s.telegram[0].body).toMatchObject({ chat_id: '42' });
     expect(s.telegram[0].body.text).toContain('openssl (#99)');
     expect(s.telegram[0].body.parse_mode).toBeUndefined();
-    expect(s.telegram[0].body.reply_markup.inline_keyboard[0][0].url).toBe(`${ORIGIN}/admin`);
+    const keyboard = s.telegram[0].body.reply_markup.inline_keyboard;
+    expect(keyboard[0].map((b: any) => b.callback_data)).toEqual(['a:r:99', 'x:r:99']);
+    expect(keyboard[1][0].url).toBe(`${ORIGIN}/admin`);
   });
 
   it('library requests notify too', async () => {
@@ -571,7 +594,12 @@ describe('admin actions', () => {
     );
     expect(s.calls[0]!.body).toEqual({
       ref: 'main',
-      inputs: { name: 'Botan', ecosystem: 'c-cpp', repo: 'https://github.com/randombit/botan' },
+      inputs: {
+        name: 'Botan',
+        ecosystem: 'c-cpp',
+        repo: 'https://github.com/randombit/botan',
+        automerge: 'true',
+      },
     });
   });
 
@@ -795,5 +823,84 @@ describe('activity list (found in the live test)', () => {
       })
     ).json()) as any;
     expect(r.runs.map((x: any) => x.title)).toEqual(['Evidence refresh: aws-lc-rs']);
+  });
+});
+
+describe('Telegram approvals (webhook)', () => {
+  const tg = { TELEGRAM_BOT_TOKEN: '123:abc', TELEGRAM_CHAT_ID: '42' };
+  const pendingRequest = {
+    number: 5,
+    title: '[Re-check] openssl',
+    state: 'open',
+    labels: [{ name: 'public-request' }, { name: 'recheck-request' }],
+  };
+  const hook = async (s: ReturnType<typeof fakeServices>, update: unknown, secret?: string) =>
+    handleTelegramWebhook(
+      new Request(`${ORIGIN}/api/telegram/webhook`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Telegram-Bot-Api-Secret-Token': secret ?? (await webhookSecret('123:abc')),
+        },
+        body: JSON.stringify(update),
+      }),
+      env(tg),
+      s.gh,
+      s.fetch,
+    );
+  const press = (data: string, chat = 42) => ({
+    callback_query: {
+      id: 'q',
+      from: { id: chat },
+      data,
+      message: { chat: { id: chat }, message_id: 9, text: 'msg' },
+    },
+  });
+
+  it('refuses calls without the secret header, and ignores other chats', async () => {
+    const s = fakeServices({ issues: [pendingRequest] });
+    expect((await hook(s, press('a:r:5'), 'wrong')).status).toBe(403);
+    expect((await hook(s, press('a:r:5', 777))).status).toBe(200);
+    expect(s.calls.some((c) => c.method !== 'GET')).toBe(false);
+  });
+
+  it('Approve on a request starts the re-check with automerge and updates the message', async () => {
+    const s = fakeServices({ issues: [pendingRequest] });
+    await hook(s, press('a:r:5'));
+    const dispatch = s.calls.find((c) => c.path.endsWith('/dispatches'))!;
+    expect(dispatch.body.inputs).toEqual({ libraries: 'openssl', automerge: 'true' });
+    expect(s.calls.some((c) => c.method === 'PATCH' && c.path.endsWith('/issues/5'))).toBe(true);
+    expect(s.telegram.map((t) => t.method)).toEqual(['answerCallbackQuery', 'editMessageText']);
+    expect(s.telegram[1].body.text).toContain('Re-check of openssl started');
+  });
+
+  it('Merge on a pipeline PR turns on auto-merge; other PRs are refused', async () => {
+    const s = fakeServices();
+    await hook(s, press('a:p:7'));
+    expect(s.calls.find((c) => c.path === '/graphql')!.body.variables).toEqual({ id: 'PR_7' });
+    const other = fakeServices();
+    await hook(other, press('a:p:8'));
+    expect(other.calls.some((c) => c.path === '/graphql')).toBe(false);
+    expect(other.telegram[1].body.text).toContain("wasn't opened by the pipeline");
+  });
+
+  it('"approve" approves every pending request and pipeline PR in one message', async () => {
+    const s = fakeServices({ issues: [pendingRequest] });
+    await hook(s, { message: { chat: { id: 42 }, text: 'approve' } });
+    expect(s.calls.some((c) => c.path.endsWith('/dispatches'))).toBe(true);
+    expect(s.calls.some((c) => c.path === '/graphql')).toBe(true); // PR #7 from the fake list
+    const reply = s.telegram.find((t) => t.method === 'sendMessage')!.body.text;
+    expect(reply).toContain('openssl');
+    expect(reply).toContain('PR #7');
+  });
+
+  it('/pending lists the work with buttons', async () => {
+    const s = fakeServices({ issues: [pendingRequest] });
+    await hook(s, { message: { chat: { id: 42 }, text: '/pending' } });
+    const m = s.telegram.find((t) => t.method === 'sendMessage')!.body;
+    expect(m.text).toContain('Request #5');
+    expect(m.text).toContain('PR #7');
+    expect(m.text).not.toContain('PR #8'); // dependabot, not the pipeline's
+    expect(JSON.stringify(m.reply_markup)).toContain('a:all');
   });
 });

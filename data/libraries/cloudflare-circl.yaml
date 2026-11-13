@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: cloudflare-circl
+name: CIRCL (Cloudflare)
+ecosystem: go
+description: Cloudflare's Go library of cryptographic primitives, including post-quantum ones.
+repo: https://github.com/cloudflare/circl
+package_names:
+  go:
+    - github.com/cloudflare/circl
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: v1.4.0
+    experimental: false
+    sources:
+      - url: https://github.com/cloudflare/circl/releases/tag/v1.4.0
+        title: CIRCL v1.4.0
+        kind: release-notes
+        quote: "New: ML-KEM compatible with FIPS-203."
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    since_version: v1.5.0
+    experimental: false
+    sources:
+      - url: https://github.com/cloudflare/circl/releases/tag/v1.5.0
+        title: CIRCL v1.5.0
+        kind: release-notes
+        quote: "New: ML-DSA, Module-Lattice-based Digital Signature Algorithm."
+        retrieved: 2026-11-13
+  slh-dsa:
+    support: yes
+    since_version: v1.6.2
+    experimental: false
+    sources:
+      - url: https://github.com/cloudflare/circl/releases/tag/v1.6.2
+        title: CIRCL v1.6.2
+        kind: release-notes
+        quote: New SLH-DSA, improvements in ML-DSA for arm64.
+        retrieved: 2026-11-13
+upgrade_notes: "ML-KEM: CIRCL (Cloudflare) v1.4.0 or later. ML-DSA: CIRCL (Cloudflare) v1.5.0 or later. SLH-DSA: CIRCL (Cloudflare) v1.6.2 or later."
+last_verified: 2026-11-13T12:44:06Z

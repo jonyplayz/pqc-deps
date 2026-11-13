@@ -145,6 +145,7 @@ npm run pipeline -- openssl             # write proposals/openssl.{yaml,md}
 npm run pipeline -- openssl --apply     # write into data/libraries/ (review with git diff)
 npm run pipeline -- --stale 90 --pr     # new branch + PR with a report per library
 npm run pipeline -- --unknown           # everything still unknown
+npm run pipeline -- --all --batch 5     # ask about up to 5 libraries per model request
 npm run check-quotes                    # re-fetch every source and confirm its quote is still there
 npm run stale -- --days 90              # list entries due for re-verification
 ```

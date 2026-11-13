@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: httpx
+name: HTTPX
+ecosystem: python
+description: HTTP client for Python with sync and async APIs.
+repo: https://github.com/encode/httpx
+package_names:
+  pypi:
+    - httpx
+delegates_to:
+  - id: python-ssl
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+notes: "HTTPX uses Python's ssl module (and so the linked OpenSSL) for TLS."
+last_verified: 2026-11-13

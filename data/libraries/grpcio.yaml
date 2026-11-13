@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: grpcio
+name: gRPC (Python)
+ecosystem: python
+description: Python package of gRPC, built on gRPC core.
+repo: https://github.com/grpc/grpc
+package_names:
+  pypi:
+    - grpcio
+delegates_to:
+  - id: boringssl
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+notes: "gRPC core ships with BoringSSL for TLS."
+last_verified: 2026-11-13

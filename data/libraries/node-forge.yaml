@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: node-forge
+name: node-forge
+ecosystem: javascript
+description: Pure JavaScript TLS, PKI and cryptography toolkit.
+repo: https://github.com/digitalbazaar/forge
+package_names:
+  npm:
+    - node-forge
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

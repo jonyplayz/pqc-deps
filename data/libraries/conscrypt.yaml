@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: conscrypt
+name: Conscrypt
+ecosystem: jvm
+description: Java security provider built on BoringSSL; the TLS stack of Android.
+repo: https://github.com/google/conscrypt
+package_names:
+  maven:
+    - org.conscrypt:conscrypt-openjdk-uber
+    - org.conscrypt:conscrypt-android
+delegates_to:
+  - id: boringssl
+applicable_algorithms:
+  - hybrid-tls
+  - ml-kem
+  - ml-dsa
+overall_status: ready
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 2.6.0
+    experimental: false
+    sources:
+      - url: https://github.com/google/conscrypt/releases/tag/2.6.0
+        title: v2.6.0
+        kind: release-notes
+        quote: It include many new algorithms, such as X25519, Ed25519, ML-DSA, SLH-DSA, ML-KEM, X-Wing.
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    since_version: 2.6.0
+    experimental: false
+    sources:
+      - url: https://github.com/google/conscrypt/releases/tag/2.6.0
+        title: v2.6.0
+        kind: release-notes
+        quote: It include many new algorithms, such as X25519, Ed25519, ML-DSA, SLH-DSA, ML-KEM, X-Wing.
+        retrieved: 2026-11-13
+  hybrid-tls:
+    support: yes
+    since_version: 2.6.0
+    default_enabled: true
+    experimental: false
+    sources:
+      - url: https://github.com/google/conscrypt/releases/tag/2.6.0
+        title: v2.6.0
+        kind: release-notes
+        quote: For TLS, it supports X25519MLKEM768 and MLKEM1024.
+        retrieved: 2026-11-13
+      - url: https://github.com/google/conscrypt/releases/tag/2.7.0
+        title: v2.7.0
+        kind: release-notes
+        quote: TLS uses X25519MLKEM768 by default.
+        retrieved: 2026-11-13
+upgrade_notes: "hybrid TLS key exchange, ML-KEM and ML-DSA: Conscrypt 2.6.0 or later. On by default: hybrid TLS key exchange."
+last_verified: 2026-11-13T12:44:06Z
