@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: picotls
+name: picotls
+ecosystem: c-cpp
+description: TLS 1.3 implementation in C, used by the H2O web server and QUIC stacks.
+repo: https://github.com/h2o/picotls
+applicable_algorithms:
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

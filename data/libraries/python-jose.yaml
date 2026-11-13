@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: python-jose
+name: python-jose
+ecosystem: python
+description: JOSE implementation in Python.
+repo: https://github.com/mpdavis/python-jose
+package_names:
+  pypi:
+    - python-jose
+delegates_to:
+  - id: python-cryptography
+applicable_algorithms:
+  - ml-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

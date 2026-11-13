@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: libssh
+name: libssh
+ecosystem: c-cpp
+description: SSH client and server library in C.
+homepage: https://www.libssh.org
+repo: https://git.libssh.org/projects/libssh.git
+applicable_algorithms:
+  - ml-kem
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

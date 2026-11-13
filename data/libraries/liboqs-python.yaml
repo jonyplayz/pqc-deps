@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: liboqs-python
+name: liboqs-python
+ecosystem: python
+description: Python bindings for liboqs.
+repo: https://github.com/open-quantum-safe/liboqs-python
+package_names:
+  pypi:
+    - liboqs-python
+delegates_to:
+  - id: liboqs
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    sources:
+      - url: https://github.com/open-quantum-safe/liboqs-python/blob/HEAD/CHANGES.md
+        title: open-quantum-safe/liboqs-python CHANGES.md
+        kind: changelog
+        quote: Updated examples to use `ML-KEM` and `ML-DSA` as the defaults
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    sources:
+      - url: https://github.com/open-quantum-safe/liboqs-python/blob/HEAD/CHANGES.md
+        title: open-quantum-safe/liboqs-python CHANGES.md
+        kind: changelog
+        quote: Updated examples to use `ML-KEM` and `ML-DSA` as the defaults
+        retrieved: 2026-11-13
+upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-13T12:45:18Z

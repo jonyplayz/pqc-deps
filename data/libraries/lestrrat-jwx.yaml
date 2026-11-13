@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: lestrrat-jwx
+name: jwx
+ecosystem: go
+description: Go implementation of JWA, JWE, JWK, JWS and JWT.
+repo: https://github.com/lestrrat-go/jwx
+package_names:
+  go:
+    - github.com/lestrrat-go/jwx/v3
+delegates_to:
+  - id: go-crypto
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: v4.0.0
+    sources:
+      - url: https://github.com/lestrrat-go/jwx/releases/tag/v4.0.0
+        title: v4.0.0
+        kind: release-notes
+        quote: "Quantum-Ready: ML-KEM and ML-DSA, HPKE (+Hybrid) are supported through companion modules."
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    since_version: v4.0.0
+    sources:
+      - url: https://github.com/lestrrat-go/jwx/releases/tag/v4.0.0
+        title: v4.0.0
+        kind: release-notes
+        quote: "Quantum-Ready: ML-KEM and ML-DSA, HPKE (+Hybrid) are supported through companion modules."
+        retrieved: 2026-11-13
+upgrade_notes: "ML-KEM and ML-DSA: jwx v4.0.0 or later."
+last_verified: 2026-11-13T12:45:18Z

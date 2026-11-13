@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: undici
+name: undici
+ecosystem: javascript
+description: HTTP client for Node.js; powers Node's built-in fetch.
+repo: https://github.com/nodejs/undici
+package_names:
+  npm:
+    - undici
+delegates_to:
+  - id: nodejs-crypto
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+notes: "undici uses Node.js's TLS stack for HTTPS."
+last_verified: 2026-11-13

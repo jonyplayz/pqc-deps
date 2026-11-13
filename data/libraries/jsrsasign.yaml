@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: jsrsasign
+name: jsrsasign
+ecosystem: javascript
+description: JavaScript library for RSA/ECDSA signatures, X.509 and JWS/JWT.
+repo: https://github.com/kjur/jsrsasign
+package_names:
+  npm:
+    - jsrsasign
+applicable_algorithms:
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

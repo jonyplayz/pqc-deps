@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: quinn
+name: Quinn
+ecosystem: rust
+description: QUIC implementation in Rust.
+repo: https://github.com/quinn-rs/quinn
+package_names:
+  cargo:
+    - quinn
+delegates_to:
+  - id: rustls
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+notes: "Quinn uses rustls for the TLS handshake inside QUIC."
+last_verified: 2026-11-13

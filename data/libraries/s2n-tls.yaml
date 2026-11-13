@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: s2n-tls
+name: s2n-tls
+ecosystem: c-cpp
+description: AWS's TLS implementation in C.
+repo: https://github.com/aws/s2n-tls
+delegates_to:
+  - id: aws-lc
+applicable_algorithms:
+  - hybrid-tls
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: boring-rs
+name: boring (Rust)
+ecosystem: rust
+description: Cloudflare's Rust bindings to BoringSSL.
+repo: https://github.com/cloudflare/boring
+package_names:
+  cargo:
+    - boring
+    - tokio-boring
+    - hyper-boring
+delegates_to:
+  - id: boringssl
+applicable_algorithms:
+  - hybrid-tls
+  - ml-kem
+overall_status: ready
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: v5.0.0
+    experimental: false
+    sources:
+      - url: https://github.com/cloudflare/boring/releases/tag/v5.0.0
+        title: v5.0.0
+        kind: release-notes
+        quote: Added ML-KEM-768 and ML-KEM-1024 support
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://github.com/cloudflare/boring/releases/tag/v5.4.0
+        title: v5.4.0
+        kind: release-notes
+        quote: "* Update to boringssl 0.20261020.0 with ML-DSA by default by @Lekensteyn in https://github.com/cloudflare/boring/pull/544"
+        retrieved: 2026-11-13
+  hybrid-tls:
+    support: yes
+    since_version: v5.0.0
+    default_enabled: true
+    experimental: false
+    sources:
+      - url: https://github.com/cloudflare/boring/releases/tag/v5.0.0
+        title: v5.0.0
+        kind: release-notes
+        quote: Post-quantum is enabled by default (X25519MLKEM768 and P256Kyber768Draft00) and the "pq-experimental" Cargo feature flag is not used any more.
+        retrieved: 2026-11-13
+upgrade_notes: "Use boring v5.0.0 or later: it adds ML-KEM and turns on hybrid post-quantum TLS key exchange (X25519MLKEM768) by default."
+last_verified: 2026-11-13T12:39:15Z
+pipeline:
+  locked:
+    - path: algorithms.hybrid-tls
+      reason: v5.0.0 enables X25519MLKEM768 by default; the draft Kyber group alongside it does not make support partial
+    - path: algorithms.ml-dsa.default_enabled
+      reason: '"ML-DSA by default" in v5.4.0 is about the BoringSSL build, not a protocol default'

@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: liboqs-rust
+name: liboqs-rust (oqs crate)
+ecosystem: rust
+description: Rust bindings for liboqs.
+repo: https://github.com/open-quantum-safe/liboqs-rust
+package_names:
+  cargo:
+    - oqs
+delegates_to:
+  - id: liboqs
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 0.10.0
+    sources:
+      - url: https://github.com/open-quantum-safe/liboqs-rust/releases/tag/v0.10.0
+        title: oqs and oqs-sys 0.10.0
+        kind: release-notes
+        quote: "- New algorithms: ML-KEM (FIPS 203), ML-DSA (FIPS 204), CROSS (NIST Additional Signatures Round 1), and MAYO (NIST Additional Signatures Round 1)."
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    since_version: 0.10.0
+    sources:
+      - url: https://github.com/open-quantum-safe/liboqs-rust/releases/tag/v0.10.0
+        title: oqs and oqs-sys 0.10.0
+        kind: release-notes
+        quote: "- New algorithms: ML-KEM (FIPS 203), ML-DSA (FIPS 204), CROSS (NIST Additional Signatures Round 1), and MAYO (NIST Additional Signatures Round 1)."
+        retrieved: 2026-11-13
+  slh-dsa:
+    support: partial
+    experimental: true
+    sources:
+      - url: https://github.com/open-quantum-safe/liboqs-rust/pull/314
+        title: "PR #314: docs: explain signature generation exclusions"
+        kind: pull-request
+        quote: "- SLH-DSA prehash variants are not exposed because the Rust wrapper currently exposes only the pure variants."
+        retrieved: 2026-11-13
+  hqc:
+    support: yes
+    sources:
+      - url: https://github.com/open-quantum-safe/liboqs-rust/releases/tag/v0.10.0
+        title: oqs and oqs-sys 0.10.0
+        kind: release-notes
+        quote: '- Updated algorithms: HQC (NIST Round 4), Falcon (NIST Round 3, including "padded" variants).'
+        retrieved: 2026-11-13
+upgrade_notes: "ML-KEM and ML-DSA: liboqs-rust (oqs crate) 0.10.0 or later. Partial or experimental: SLH-DSA; check the notes before relying on it."
+last_verified: 2026-11-13T12:46:35Z

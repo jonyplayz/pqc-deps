@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: oqs-provider
+name: oqs-provider
+ecosystem: c-cpp
+description: OpenSSL 3 provider that adds liboqs algorithms.
+repo: https://github.com/open-quantum-safe/oqs-provider
+delegates_to:
+  - id: liboqs
+applicable_algorithms:
+  - hybrid-tls
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-dsa:
+    support: yes
+    since_version: 0.8.0
+    sources:
+      - url: https://github.com/open-quantum-safe/oqs-provider/releases/tag/0.8.0
+        title: 0.8.0
+        kind: release-notes
+        quote: Adds support for ML-DSA (FIPS 204 final version).
+        retrieved: 2026-11-13
+  slh-dsa:
+    support: yes
+    since_version: 0.12.0
+    sources:
+      - url: https://github.com/open-quantum-safe/oqs-provider/releases/tag/0.12.0
+        title: 0.12.0
+        kind: release-notes
+        quote: Added "pure" SLH-DSA algorithms ([#732](https://github.com/open-quantum-safe/oqs-provider/pull/732)).
+        retrieved: 2026-11-13
+upgrade_notes: "ML-DSA: oqs-provider 0.8.0 or later. SLH-DSA: oqs-provider 0.12.0 or later."
+last_verified: 2026-11-13T12:47:26Z

@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: jjwt
+name: JJWT
+ecosystem: jvm
+description: Java JWT, JWS and JWE library.
+repo: https://github.com/jwtk/jjwt
+package_names:
+  maven:
+    - io.jsonwebtoken:jjwt-api
+    - io.jsonwebtoken:jjwt-impl
+delegates_to:
+  - id: openjdk
+applicable_algorithms:
+  - ml-dsa
+  - ml-kem
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

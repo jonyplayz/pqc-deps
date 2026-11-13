@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: axios
+name: axios
+ecosystem: javascript
+description: Promise-based HTTP client for the browser and Node.js.
+repo: https://github.com/axios/axios
+package_names:
+  npm:
+    - axios
+delegates_to:
+  - id: nodejs-crypto
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+notes: "axios leaves TLS to the platform: Node.js's TLS stack on servers and the browser on the web."
+last_verified: 2026-11-13

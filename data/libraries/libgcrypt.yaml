@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: libgcrypt
+name: Libgcrypt
+ecosystem: c-cpp
+description: General-purpose cryptographic library from the GnuPG project.
+homepage: https://gnupg.org/software/libgcrypt/
+repo: https://github.com/gpg/libgcrypt
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: unknown
+algorithms: {}
+last_verified: 2026-11-13T12:48:59Z

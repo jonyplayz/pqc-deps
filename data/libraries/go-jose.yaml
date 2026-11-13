@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: go-jose
+name: go-jose
+ecosystem: go
+description: JOSE (JWS, JWE, JWT) implementation for Go.
+repo: https://github.com/go-jose/go-jose
+package_names:
+  go:
+    - github.com/go-jose/go-jose/v4
+delegates_to:
+  - id: go-crypto
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+overall_status: partial
+algorithms:
+  ml-dsa:
+    support: yes
+    since_version: v4.1.8
+    sources:
+      - url: https://github.com/go-jose/go-jose/releases/tag/v4.1.8
+        title: v4.1.8
+        kind: release-notes
+        quote: ML-DSA support by @james-d-elliott in https://github.com/go-jose/go-jose/pull/282 🎉
+        retrieved: 2026-11-13
+upgrade_notes: "ML-DSA: go-jose v4.1.8 or later."
+last_verified: 2026-11-13T12:45:18Z

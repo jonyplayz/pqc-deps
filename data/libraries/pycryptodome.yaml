@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: pycryptodome
+name: PyCryptodome
+ecosystem: python
+description: Self-contained Python package of low-level cryptographic primitives.
+repo: https://github.com/Legrandin/pycryptodome
+package_names:
+  pypi:
+    - pycryptodome
+    - pycryptodomex
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+  - slh-dsa
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 4.2.0
+    sources:
+      - url: https://github.com/Legrandin/pycryptodome/releases/tag/v4.2.0
+        title: v4.2.0 - Jura
+        kind: release-notes
+        quote: New module ``Crypto.PublicKey.MLKEM``, for ML-KEM keys (FIPS 203).
+        retrieved: 2026-11-13
+  ml-dsa:
+    support: yes
+    since_version: 4.1.0
+    sources:
+      - url: https://github.com/Legrandin/pycryptodome/releases/tag/v4.1.0
+        title: v4.1.0 - Issy-les-Moulineaux
+        kind: release-notes
+        quote: New module ``Crypto.PublicKey.MLDSA``, for ML-DSA keys (FIPS 204).
+        retrieved: 2026-11-13
+upgrade_notes: "ML-DSA: PyCryptodome 4.1.0 or later. ML-KEM: PyCryptodome 4.2.0 or later."
+last_verified: 2026-11-13T12:48:25Z

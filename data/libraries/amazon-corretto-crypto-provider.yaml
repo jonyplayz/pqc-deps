@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: amazon-corretto-crypto-provider
+name: Amazon Corretto Crypto Provider
+ecosystem: jvm
+description: Java security provider backed by AWS-LC.
+repo: https://github.com/corretto/amazon-corretto-crypto-provider
+package_names:
+  maven:
+    - software.amazon.cryptools:AmazonCorrettoCryptoProvider
+delegates_to:
+  - id: aws-lc
+applicable_algorithms:
+  - ml-kem
+  - ml-dsa
+overall_status: available
+algorithms:
+  ml-dsa:
+    support: yes
+    since_version: 2.5.0
+    experimental: false
+    sources:
+      - url: https://github.com/corretto/amazon-corretto-crypto-provider/releases/tag/2.5.0
+        title: AmazonCorrettoCryptoProvider 2.5.0 - 2025-03-05
+        kind: release-notes
+        quote: '* Support "pure" ML-DSA by @WillChilds-Klein in https://github.com/corretto/amazon-corretto-crypto-provider/pull/422'
+        retrieved: 2026-11-13
+upgrade_notes: "ML-DSA: Amazon Corretto Crypto Provider 2.5.0 or later."
+last_verified: 2026-11-13T12:39:15Z

@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=../schema/library.schema.json
+id: grpc-java
+name: gRPC Java
+ecosystem: jvm
+description: Java implementation of gRPC.
+repo: https://github.com/grpc/grpc-java
+package_names:
+  maven:
+    - io.grpc:grpc-netty-shaded
+    - io.grpc:grpc-okhttp
+delegates_to:
+  - id: openjdk
+  - id: netty-tcnative
+applicable_algorithms:
+  - hybrid-tls
+overall_status: n/a
+algorithms: {}
+notes: "gRPC Java uses the JVM's TLS or Netty's BoringSSL-based tcnative, depending on the transport."
+last_verified: 2026-11-13
