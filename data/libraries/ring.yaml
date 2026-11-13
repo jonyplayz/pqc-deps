@@ -14,4 +14,4 @@ applicable_algorithms:
 overall_status: no-plan
 algorithms: {}
 notes: ring has no ML-KEM, ML-DSA or SLH-DSA, and no public plan. The maintainer's proposal to add Kyber (issue 1685) was closed in February 2025 without being implemented. For post-quantum TLS in Rust, see rustls with aws-lc-rs.
-last_verified: 2026-11-11
+last_verified: 2026-11-13T13:09:59Z
