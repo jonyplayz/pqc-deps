@@ -55,7 +55,7 @@ algorithms:
         retrieved: 2026-11-11
 upgrade_notes: "ML-KEM, ML-DSA, SLH-DSA and hybrid TLS key exchange: supported in current releases; the sources don't state the first version. On by default: hybrid TLS key exchange."
 notes: BoringSSL is not intended for general use and makes no API or ABI stability guarantees, so it has no numbered releases to compare against.
-last_verified: 2026-11-13T12:11:20Z
+last_verified: 2026-11-14T11:28:58Z
 pipeline:
   watch_urls:
     - https://raw.githubusercontent.com/google/boringssl/main/ssl/ssl_key_share.cc
