@@ -17,11 +17,12 @@ algorithms:
   ml-dsa:
     support: yes
     since_version: v4.1.8
+    experimental: false
     sources:
       - url: https://github.com/go-jose/go-jose/releases/tag/v4.1.8
         title: v4.1.8
         kind: release-notes
         quote: ML-DSA support by @james-d-elliott in https://github.com/go-jose/go-jose/pull/282 🎉
-        retrieved: 2026-11-13
+        retrieved: 2026-11-14
 upgrade_notes: "ML-DSA: go-jose v4.1.8 or later."
-last_verified: 2026-11-13T12:45:18Z
+last_verified: 2026-11-14T11:28:25Z

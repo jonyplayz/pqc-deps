@@ -14,21 +14,23 @@ overall_status: planned
 algorithms: {}
 roadmap:
   confidence: tentative
-  summary: ML-DSA is in development (first at the driver layer, via mldsa-native); ML-KEM is listed under future work. The maintainers say the dates on the roadmap are rough estimates that have already slipped.
+  summary: ML-DSA and ML-KEM are on the product roadmap for initial support and future development.
   sources:
     - url: https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
-      title: Mbed TLS roadmap
+      title: Roadmap — Mbed TLS documentation
       kind: docs
-      quote: Note that the quarter when a feature is expected to be completed is based on very rough estimates of the effort involved and therefore can change.
-      retrieved: 2026-11-11
-    - url: https://github.com/Mbed-TLS/mbedtls/issues/9803
-      title: "Any plans to support ML-DSA and ML-KEM? (comment by maintainer Gilles Peskine)"
-      kind: issue
-      quote: We're currently integrating [mldsa-native](https://github.com/pq-code-package/mldsa-native) and then we'll integrate [mlkem-native](https://github.com/pq-code-package/mlkem-native).
-      retrieved: 2026-11-11
+      quote: ML-DSA - Initial support
+      retrieved: 2026-11-14
+    - url: https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
+      title: Roadmap — Mbed TLS documentation
+      kind: docs
+      quote: ML-KEM Support
+      retrieved: 2026-11-14
+upgrade_notes: No support yet; a plan exists.
 notes: Mbed TLS has LMS (a stateful hash-based signature) but no ML-KEM, ML-DSA or SLH-DSA in a release yet, including TF-PSA-Crypto 1.2.0.
-last_verified: 2026-11-11
+last_verified: 2026-11-14T11:28:25Z
 pipeline:
   watch_urls:
     - https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
     - https://raw.githubusercontent.com/Mbed-TLS/TF-PSA-Crypto/development/ChangeLog
+  locked: []

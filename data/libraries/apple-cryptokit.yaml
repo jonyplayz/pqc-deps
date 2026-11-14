@@ -40,9 +40,9 @@ algorithms:
         title: Prepare your network for quantum-secure encryption in TLS - Apple Support
         kind: docs
         quote: In iOS 26, iPadOS 26, macOS Tahoe 26, and visionOS 26, TLS-protected connections will automatically advertise support for hybrid, quantum-secure key exchange in TLS 1.3.
-        retrieved: 2026-11-13
-upgrade_notes: iOS, iPadOS, macOS and visionOS 26 offer hybrid post-quantum TLS key exchange automatically, and CryptoKit adds ML-KEM and ML-DSA in the same releases.
-last_verified: 2026-11-13T12:39:15Z
+        retrieved: 2026-11-14
+upgrade_notes: "ML-KEM, ML-DSA and hybrid TLS key exchange: Apple CryptoKit and Network framework 26.0 or later. On by default: hybrid TLS key exchange."
+last_verified: 2026-11-14T11:28:25Z
 pipeline:
   watch_urls:
     - https://developer.apple.com/tutorials/data/documentation/cryptokit/mlkem768.json
