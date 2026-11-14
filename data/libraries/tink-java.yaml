@@ -16,25 +16,27 @@ algorithms:
   ml-dsa:
     support: yes
     since_version: 1.21.0
+    experimental: false
     sources:
       - url: https://github.com/tink-crypto/tink-java/releases/tag/v1.21.0
         title: Tink Java v1.21.0
         kind: release-notes
         quote: "*   Added general support for `ML-DSA-87`."
-        retrieved: 2026-11-13
+        retrieved: 2026-11-14
       - url: https://github.com/tink-crypto/tink-java/releases/tag/v1.22.0
         title: Tink Java v1.22.0
         kind: release-notes
         quote: "*   Added support for `ML-DSA-44` signature primitive and PEM import."
-        retrieved: 2026-11-13
+        retrieved: 2026-11-14
   slh-dsa:
     support: yes
     since_version: 1.22.0
+    experimental: false
     sources:
       - url: https://github.com/tink-crypto/tink-java/releases/tag/v1.22.0
         title: Tink Java v1.22.0
         kind: release-notes
         quote: "*   Added predefined signature parameters for `SLH-DSA`."
-        retrieved: 2026-11-13
+        retrieved: 2026-11-14
 upgrade_notes: "ML-DSA: Tink (Java) 1.21.0 or later. SLH-DSA: Tink (Java) 1.22.0 or later."
-last_verified: 2026-11-13T12:48:59Z
+last_verified: 2026-11-14T11:28:58Z
