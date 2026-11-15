@@ -16,12 +16,13 @@ algorithms:
   ml-kem:
     support: yes
     since_version: 0.2.0
+    experimental: false
     sources:
       - url: https://github.com/paulmillr/noble-post-quantum/releases/tag/0.2.0
         title: 0.2.0
         kind: release-notes
         quote: Update to final FIPS 203, 204, 205 specifications. Remove support for non-FIPS kyber.
-        retrieved: 2026-11-11
+        retrieved: 2026-11-15
   fn-dsa:
     support: partial
     since_version: 0.6.0
@@ -31,6 +32,6 @@ algorithms:
         title: 0.6.0
         kind: release-notes
         quote: Implement Falcon signatures. Prepare for future FN-DSA / FIPS-206.
-        retrieved: 2026-11-11
+        retrieved: 2026-11-15
 upgrade_notes: "ML-KEM: noble-post-quantum 0.2.0 or later."
-last_verified: 2026-11-11
+last_verified: 2026-11-15T11:57:47Z

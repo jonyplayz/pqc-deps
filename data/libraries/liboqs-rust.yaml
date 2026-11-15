@@ -18,21 +18,23 @@ algorithms:
   ml-kem:
     support: yes
     since_version: 0.10.0
+    experimental: false
     sources:
       - url: https://github.com/open-quantum-safe/liboqs-rust/releases/tag/v0.10.0
         title: oqs and oqs-sys 0.10.0
         kind: release-notes
-        quote: "- New algorithms: ML-KEM (FIPS 203), ML-DSA (FIPS 204), CROSS (NIST Additional Signatures Round 1), and MAYO (NIST Additional Signatures Round 1)."
-        retrieved: 2026-11-13
+        quote: "New algorithms: ML-KEM (FIPS 203), ML-DSA (FIPS 204), CROSS (NIST Additional Signatures Round 1), and MAYO (NIST Additional Signatures Round 1)."
+        retrieved: 2026-11-15
   ml-dsa:
     support: yes
     since_version: 0.10.0
+    experimental: false
     sources:
       - url: https://github.com/open-quantum-safe/liboqs-rust/releases/tag/v0.10.0
         title: oqs and oqs-sys 0.10.0
         kind: release-notes
-        quote: "- New algorithms: ML-KEM (FIPS 203), ML-DSA (FIPS 204), CROSS (NIST Additional Signatures Round 1), and MAYO (NIST Additional Signatures Round 1)."
-        retrieved: 2026-11-13
+        quote: "New algorithms: ML-KEM (FIPS 203), ML-DSA (FIPS 204), CROSS (NIST Additional Signatures Round 1), and MAYO (NIST Additional Signatures Round 1)."
+        retrieved: 2026-11-15
   slh-dsa:
     support: partial
     experimental: true
@@ -44,11 +46,13 @@ algorithms:
         retrieved: 2026-11-13
   hqc:
     support: yes
+    since_version: 0.3.0
+    experimental: false
     sources:
-      - url: https://github.com/open-quantum-safe/liboqs-rust/releases/tag/v0.10.0
-        title: oqs and oqs-sys 0.10.0
+      - url: https://github.com/open-quantum-safe/liboqs-rust/releases/tag/v0.3.0
+        title: Version 0.3.0
         kind: release-notes
-        quote: '- Updated algorithms: HQC (NIST Round 4), Falcon (NIST Round 3, including "padded" variants).'
-        retrieved: 2026-11-13
+        quote: Update liboqs (includes e.g. HQC round 3 update)
+        retrieved: 2026-11-15
 upgrade_notes: "ML-KEM and ML-DSA: liboqs-rust (oqs crate) 0.10.0 or later. Partial or experimental: SLH-DSA; check the notes before relying on it."
-last_verified: 2026-11-13T12:46:35Z
+last_verified: 2026-11-15T11:57:47Z
