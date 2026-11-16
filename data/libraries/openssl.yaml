@@ -71,4 +71,4 @@ algorithms:
              `?*X25519MLKEM768 / ?*X25519:?secp256r1 / ?X448:?secp384r1:?secp521r1 / ?ffdhe2048:?ffdhe3072`
         retrieved: 2026-11-09
 upgrade_notes: "ML-KEM, ML-DSA, SLH-DSA and hybrid TLS key exchange: OpenSSL 3.5.0 or later. On by default: ML-DSA and hybrid TLS key exchange."
-last_verified: 2026-11-09
+last_verified: 2026-11-16T12:45:17Z
