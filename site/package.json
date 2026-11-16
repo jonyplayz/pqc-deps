@@ -10,14 +10,14 @@
     "dev:functions": "wrangler pages dev dist --port 8788"
   },
   "dependencies": {
-    "@astrojs/preact": "^6.1.2",
+    "@astrojs/preact": "^6.1.5",
     "@astrojs/sitemap": "^3.7.4",
     "@pqc-deps/core": "^0.1.0",
-    "astro": "^7.4.7",
+    "astro": "^7.4.11",
     "preact": "^11.2.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261109.1",
-    "wrangler": "^4.158.0"
+    "@cloudflare/workers-types": "^5.20261113.1",
+    "wrangler": "^4.161.0"
   }
 }
