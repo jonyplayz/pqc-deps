@@ -6,6 +6,17 @@ description: Portable, optimized ML-DSA implementation in C from the PQ Code Pac
 repo: https://github.com/pq-code-package/mldsa-native
 applicable_algorithms:
   - ml-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+overall_status: available
+algorithms:
+  ml-dsa:
+    support: yes
+    since_version: v2.0.0
+    experimental: false
+    sources:
+      - url: https://github.com/pq-code-package/mldsa-native/releases/tag/v2.0.0
+        title: v2.0.0
+        kind: release-notes
+        quote: v2.0.0 is the first stable release of mldsa-native, a secure, fast and portable C90 implementation of [ML-DSA](https://csrc.nist.gov/pubs/fips/204/final) derived from the [ML-DSA reference implementation](https://github.com/pq-crystals/dilithium).
+        retrieved: 2026-11-16
+upgrade_notes: "ML-DSA: mldsa-native v2.0.0 or later."
+last_verified: 2026-11-16T12:44:47Z
