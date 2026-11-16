@@ -32,4 +32,4 @@ algorithms:
         quote: "- feat(ext/crypto): add ML-DSA (FIPS 204) post-quantum signatures (#34448)"
         retrieved: 2026-11-13
 upgrade_notes: "ML-KEM and ML-DSA: Deno v2.8.2 or later."
-last_verified: 2026-11-13T12:44:06Z
+last_verified: 2026-11-16T12:45:16Z
