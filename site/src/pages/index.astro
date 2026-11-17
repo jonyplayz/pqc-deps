@@ -3,12 +3,27 @@ import Base from '../layouts/Base.astro';
 import StatusBadge from '../components/StatusBadge.astro';
 import { getLibraries, statusCounts } from '../lib/catalog';
 import { SITE } from '../config';
-import { STATUS_INFO, STATUSES } from '@pqc-deps/core';
+import { ECOSYSTEM_LABEL, STATUS_INFO, STATUS_RANK, STATUSES, type Status } from '@pqc-deps/core';
 
 const libs = getLibraries();
 const counts = statusCounts(libs);
 const total = libs.length;
 const supporting = counts.ready + counts.available + counts.partial;
+
+// The lattice: one tile per library, best-supported first, so the colours read
+// as a readiness gradient.
+const ordered = [...libs].sort(
+  (a, b) =>
+    STATUS_RANK[a.overall_status] - STATUS_RANK[b.overall_status] || a.name.localeCompare(b.name),
+);
+const cls = (s: Status) => (s === 'n/a' ? 'na' : s);
+const shown = STATUSES.filter((s) => counts[s] > 0).sort((a, b) => STATUS_RANK[a] - STATUS_RANK[b]);
+
+// A real example of what the checker reports, straight from the catalog.
+const exampleIds = ['openssl', 'rustls', 'bouncycastle-java', 'jsonwebtoken', 'ring'];
+const examples = exampleIds
+  .map((id) => libs.find((l) => l.id === id))
+  .filter((l): l is NonNullable<typeof l> => Boolean(l));
 ---
 
 <Base
@@ -26,128 +41,430 @@ const supporting = counts.ready + counts.available + counts.partial;
   }}
 >
   <section class="hero">
-    <h1>Are your dependencies ready for post-quantum crypto?</h1>
-    <p class="lede">
-      NIST published the first post-quantum standards in August 2024: ML-KEM (FIPS 203), ML-DSA
-      (FIPS 204) and SLH-DSA (FIPS 205). {SITE.name} tracks which open-source libraries support them,
-      since which version, and what's planned. Every claim links to its source.
-    </p>
-    <form class="search" action="/catalog" method="get" role="search">
-      <label for="q" class="sr-only">Search libraries</label>
-      <input id="q" name="q" type="search" placeholder="Search libraries, e.g. openssl, jose, rustls" />
-      <button class="btn btn-primary" type="submit">Search</button>
-    </form>
-    <p>
-      <a class="btn" href="/check">Check my project →</a>
-      <span class="muted small">Paste a package.json, go.mod, requirements.txt… Parsed in your browser.</span>
-    </p>
-  </section>
+    <div class="hero-copy">
+      <p class="eyebrow rise">FIPS 203 · 204 · 205 readiness</p>
+      <h1 class="rise d1">Are your dependencies ready for <em>post-quantum</em> crypto?</h1>
+      <p class="lede rise d2">
+        NIST standardised ML-KEM, ML-DSA and SLH-DSA in 2024. {SITE.name} tracks which open-source
+        libraries support them, since which version, and what's planned. Every claim links to its
+        source.
+      </p>
+      <form class="search rise d3" action="/catalog" method="get" role="search">
+        <label for="q" class="sr-only">Search libraries</label>
+        <input id="q" name="q" type="search" placeholder="openssl, jose, rustls…" />
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+      <p class="cta rise d4">
+        <a class="btn" href="/check">Check my project →</a>
+        <span class="muted small">Paste a package.json, go.mod or requirements.txt. Parsed in your browser.</span>
+      </p>
+    </div>
 
-  <section aria-labelledby="stats-h">
-    <h2 id="stats-h">The catalog at a glance</h2>
     {
-      total === 0 ? (
-        <p class="card">
-          The first batch of libraries is being researched. Each entry is published only after its
-          evidence has been reviewed.
-        </p>
-      ) : (
-        <>
-          <p class="big">
-            <strong>{counts.ready}</strong> of <strong>{total}</strong> tracked libraries are{' '}
-            <em>ready</em>; <strong>{supporting}</strong> support PQC in some form.
-          </p>
-          <ul class="stats">
-            {STATUSES.filter((s) => counts[s] > 0).map((s) => (
-              <li class="card">
-                <a href={`/catalog?status=${encodeURIComponent(s)}`}>
-                  <span class="num">{counts[s]}</span>
-                  <StatusBadge status={s} />
-                </a>
-                <p class="muted small">{STATUS_INFO[s].description}</p>
-              </li>
+      total > 0 && (
+        <figure class="lattice-fig rise d2">
+          <div class="lattice" aria-hidden="true">
+            {ordered.map((l, i) => (
+              <a
+                class={`tile t-${cls(l.overall_status)} w${Math.floor(i / 10) % 10}`}
+                href={`/libraries/${l.id}`}
+                title={`${l.name}: ${STATUS_INFO[l.overall_status].label}`}
+                tabindex="-1"
+              />
             ))}
-          </ul>
-        </>
+          </div>
+          <figcaption>
+            <span class="mono">{total} libraries</span>, one square each, coloured by status.{' '}
+            <a href="/catalog">Browse the catalog</a>
+          </figcaption>
+        </figure>
       )
     }
   </section>
 
-  <section class="how">
-    <div class="card">
+  {
+    total > 0 && (
+      <section class="ledger" aria-labelledby="stats-h">
+        <h2 id="stats-h" class="sr-only">The catalog at a glance</h2>
+        <p class="ledger-line">
+          <span class="big-num">{counts.ready}</span> of <span class="big-num">{total}</span> are{' '}
+          <em>ready</em> today, and <span class="big-num">{supporting}</span> support post-quantum
+          crypto in some form.
+        </p>
+        <ul class="stats">
+          {shown.map((s) => (
+            <li>
+              <a href={`/catalog?status=${encodeURIComponent(s)}`} class={`stat s-${cls(s)}`}>
+                <span class="num">{counts[s]}</span>
+                <StatusBadge status={s} />
+                <span class="desc">{STATUS_INFO[s].description}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section class="principles" aria-label="How it works">
+    <article>
+      <span class="idx">01</span>
       <h3>Evidence, not guesses</h3>
       <p class="muted">
         Every field cites release notes, docs, commits or maintainer posts, with a quote you can
         check. No source means <em>unknown</em>.
       </p>
-    </div>
-    <div class="card">
+    </article>
+    <article>
+      <span class="idx">02</span>
       <h3>Follows the chain</h3>
       <p class="muted">
         A JWT library that calls the platform's crypto, or an HTTP client on top of OpenSSL: we show
         who actually does the cryptography.
       </p>
-    </div>
-    <div class="card">
+    </article>
+    <article>
+      <span class="idx">03</span>
       <h3>Open data</h3>
       <p class="muted">
-        Each library is a YAML file on GitHub. Corrections are pull requests. <a href="/about"
-          >Contribute</a
+        Each library is a YAML file on GitHub, refreshed daily. Corrections are pull requests. <a
+          href="/about">Contribute</a
         >.
       </p>
-    </div>
+    </article>
   </section>
+
+  {
+    examples.length > 0 && (
+      <section class="band" aria-labelledby="band-h">
+        <div class="band-copy">
+          <p class="eyebrow">Check my project</p>
+          <h2 id="band-h">
+            Paste a manifest. <em>See what to upgrade.</em>
+          </h2>
+          <p>
+            The checker reads npm, PyPI, Go, Maven, Cargo and NuGet manifests and lockfiles, matches
+            them against the catalog, and tells you which packages already support post-quantum
+            crypto, from which version, and which delegate to something else.
+          </p>
+          <a class="btn btn-primary" href="/check">
+            Open the checker →
+          </a>
+        </div>
+        <div class="terminal" role="img" aria-label="Example checker results from the catalog">
+          <div class="term-bar">
+            <span />
+            <span />
+            <span />
+            <b class="mono">results</b>
+          </div>
+          <ul>
+            {examples.map((l) => (
+              <li>
+                <span class="mono name">{l.name}</span>
+                <span class="mono eco">{ECOSYSTEM_LABEL[l.ecosystem]}</span>
+                <StatusBadge status={l.overall_status} />
+              </li>
+            ))}
+          </ul>
+          <p class="mono term-foot">Live from the catalog · rebuilt daily</p>
+        </div>
+      </section>
+    )
+  }
 </Base>
 
 <style>
   .hero {
-    padding-block: 1.5rem 1rem;
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+    padding-block: 1rem 2rem;
+  }
+  @media (min-width: 940px) {
+    .hero {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 3.5rem;
+      padding-block: 2.5rem 3rem;
+    }
   }
   .search {
     display: flex;
     gap: 0.5rem;
-    margin: 1.5rem 0 1rem;
-    max-width: 40rem;
+    margin: 1.75rem 0 1rem;
+    max-width: 36rem;
   }
   .search input {
     flex: 1;
     min-width: 0;
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    padding: 0.8rem 0.9rem;
+    border-color: var(--rule);
   }
-  .big {
-    font-size: 1.15rem;
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+  }
+  .cta .small {
+    max-width: 22rem;
+  }
+
+  /* the lattice */
+  .lattice-fig {
+    margin: 0;
+    padding: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 0 var(--border), 0 24px 48px -32px rgb(0 0 0 / 0.35);
+  }
+  .lattice {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+  }
+  .tile {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: var(--c);
+    opacity: 0.92;
+    animation: pop 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    transition:
+      transform 0.15s ease,
+      opacity 0.15s ease;
+  }
+  .tile:hover {
+    transform: scale(1.18);
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--c);
+    position: relative;
+    z-index: 1;
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+  }
+  .w0 { animation-delay: 0.2s; }
+  .w1 { animation-delay: 0.26s; }
+  .w2 { animation-delay: 0.32s; }
+  .w3 { animation-delay: 0.38s; }
+  .w4 { animation-delay: 0.44s; }
+  .w5 { animation-delay: 0.5s; }
+  .w6 { animation-delay: 0.56s; }
+  .w7 { animation-delay: 0.62s; }
+  .w8 { animation-delay: 0.68s; }
+  .w9 { animation-delay: 0.74s; }
+  .t-ready { --c: var(--st-ready); }
+  .t-available { --c: var(--st-available); }
+  .t-partial { --c: var(--st-partial); }
+  .t-planned { --c: var(--st-planned); }
+  .t-no-plan { --c: var(--st-no-plan); }
+  .t-na { --c: var(--st-na); opacity: 0.55; }
+  .t-unknown { --c: var(--st-unknown); opacity: 0.28; }
+  figcaption {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  /* the ledger */
+  .ledger {
+    border-top: 1px solid var(--rule);
+    padding-top: 2rem;
+    margin-top: 1rem;
+  }
+  .ledger-line {
+    font-family: var(--display);
+    font-size: clamp(1.4rem, 2.8vw, 2.1rem);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    max-width: 52rem;
+    margin: 0 0 2rem;
+  }
+  .ledger-line em {
+    color: var(--st-ready);
+  }
+  .big-num {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 0.85em;
+    color: var(--accent);
   }
   .stats {
     list-style: none;
     padding: 0;
-    margin: 1rem 0 0;
+    margin: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+    border-left: 1px solid var(--border);
   }
-  .stats a {
+  .stat {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 0.6rem;
+    align-items: flex-start;
+    height: 100%;
+    padding: 0.9rem 1rem 1.1rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     text-decoration: none;
-  }
-  .stats .num {
-    font-size: 1.75rem;
-    font-weight: 750;
     color: var(--text);
+    transition: background 0.15s ease;
   }
-  .stats p {
-    margin: 0.4rem 0 0;
+  .stat:hover {
+    background: var(--surface);
   }
-  .how {
+  .stat .num {
+    font-family: var(--display);
+    font-size: 2.6rem;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+  }
+  .stat .desc {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  /* principles */
+  .principles {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 0.75rem;
-    margin-top: 2.5rem;
+    gap: 2rem;
+    margin-top: 4rem;
   }
-  .how h3 {
-    margin-top: 0.25rem;
+  .principles article {
+    border-top: 2px solid var(--rule);
+    padding-top: 1rem;
   }
-  .how p {
-    margin-bottom: 0.25rem;
+  .idx {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .principles h3 {
+    font-size: 1.45rem;
+    margin: 0.4rem 0 0.5rem;
+  }
+  .principles p {
+    margin: 0;
+  }
+
+  /* checker band */
+  .band {
+    margin-top: 4.5rem;
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background: var(--ink-band);
+    color: var(--ink-band-text);
+    border-radius: var(--radius);
+    background-image: radial-gradient(rgb(236 232 221 / 0.08) 1px, transparent 1.4px);
+    background-size: 24px 24px;
+  }
+  @media (min-width: 900px) {
+    .band {
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+  }
+  .band h2 {
+    margin-top: 0;
+  }
+  .band h2 em {
+    color: #ff8a3d;
+  }
+  .band p {
+    color: var(--ink-band-muted);
+  }
+  .band .eyebrow {
+    color: var(--ink-band-muted);
+  }
+  .band .eyebrow::before {
+    background: #ff8a3d;
+  }
+  .band .btn-primary {
+    background: #ff8a3d;
+    border-color: #ff8a3d;
+    color: #1a0c02;
+  }
+  .band .btn-primary:hover {
+    background: var(--ink-band-text);
+    border-color: var(--ink-band-text);
+  }
+  .terminal {
+    background: #0d131d;
+    border: 1px solid rgb(236 232 221 / 0.14);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.7);
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid rgb(236 232 221 / 0.1);
+  }
+  .term-bar span {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgb(236 232 221 / 0.2);
+  }
+  .term-bar b {
+    margin-left: auto;
+    font-weight: 400;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-band-muted);
+  }
+  .terminal ul {
+    list-style: none;
+    margin: 0;
+    padding: 0.4rem 0;
+  }
+  .terminal li {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.55rem 1rem;
+    border-bottom: 1px dashed rgb(236 232 221 / 0.08);
+  }
+  .terminal li:last-child {
+    border-bottom: 0;
+  }
+  .terminal .name {
+    color: var(--ink-band-text);
+    font-size: 0.88rem;
+  }
+  .terminal .eco {
+    color: var(--ink-band-muted);
+    font-size: 0.72rem;
+  }
+  .term-foot {
+    margin: 0;
+    padding: 0.6rem 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    border-top: 1px solid rgb(236 232 221 / 0.1);
+  }
+  @media (max-width: 480px) {
+    .terminal .eco {
+      display: none;
+    }
+    .terminal li {
+      grid-template-columns: 1fr auto;
+    }
   }
 </style>
