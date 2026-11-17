@@ -18,10 +18,11 @@ algorithms:
         title: v0.55.0
         kind: release-notes
         quote: upgrade libcrux-ml-kem since 0.0.3 was yanked (#606)
-        retrieved: 2026-11-13
-upgrade_notes: russh offers ML-KEM hybrid key exchange (through libcrux-ml-kem) in current releases; the first version is not stated.
-last_verified: 2026-11-13T12:48:25Z
+        retrieved: 2026-11-17
+upgrade_notes: "ML-KEM: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-17T13:34:53Z
 pipeline:
+  watch_urls: []
   locked:
     - path: algorithms.ml-kem.since_version
       reason: the only version evidence is a dependency upgrade after a yanked crate, not when support started
