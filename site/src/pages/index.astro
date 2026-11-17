@@ -300,8 +300,9 @@ const examples = exampleIds
     padding: 0;
     margin: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     border-left: 1px solid var(--border);
+    border-top: 1px solid var(--border);
   }
   .stat {
     display: flex;
@@ -369,6 +370,7 @@ const examples = exampleIds
     border-radius: var(--radius);
     background-image: radial-gradient(rgb(236 232 221 / 0.08) 1px, transparent 1.4px);
     background-size: 24px 24px;
+    border: 1px solid rgb(236 232 221 / 0.1);
   }
   @media (min-width: 900px) {
     .band {
