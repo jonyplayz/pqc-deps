@@ -325,6 +325,9 @@ tbody tr:last-child th {
   border-bottom: 0;
 }
 .table-wrap {
+  /* Contains the absolutely positioned .sr-only labels, which would otherwise
+     escape the scroll box and widen the page on phones. */
+  position: relative;
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius);
