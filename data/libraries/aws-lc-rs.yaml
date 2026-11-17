@@ -24,7 +24,7 @@ algorithms:
         title: aws-lc-rs v1.12.0
         kind: release-notes
         quote: "The APIs for ***ML-KEM***, ***kbkdf*** and ***sskdf*** are now stable — @justsmth in #628"
-        retrieved: 2026-11-09
+        retrieved: 2026-11-17
   ml-dsa:
     support: yes
     since_version: 1.18.0
@@ -34,6 +34,17 @@ algorithms:
         title: aws-lc-rs v1.18.0
         kind: release-notes
         quote: The ML-DSA signature APIs are now stable 🎉 by @justsmth in https://github.com/aws/aws-lc-rs/pull/1188 and https://github.com/aws/aws-lc-rs/pull/1189
-        retrieved: 2026-11-09
+        retrieved: 2026-11-17
+fips:
+  status: validated
+  algorithms:
+    - ml-kem
+  notes: AWS-LC FIPS v3.0 module includes ML-KEM in FIPS 140-3 validation.
+  sources:
+    - url: https://github.com/aws/aws-lc-rs/releases/tag/v1.12.0
+      title: aws-lc-rs v1.12.0
+      kind: release-notes
+      quote: Please  see our [blog  post](https://aws.amazon.com/blogs/security/aws-lc-fips-3-0-first-cryptographic-library-to-include-ml-kem-in-fips-140-3-validation/) for information about the numerous improvements!
+      retrieved: 2026-11-17
 upgrade_notes: "ML-KEM: aws-lc-rs 1.12.0 or later. ML-DSA: aws-lc-rs 1.18.0 or later."
-last_verified: 2026-11-09
+last_verified: 2026-11-17T13:34:01Z

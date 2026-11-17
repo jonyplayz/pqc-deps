@@ -15,28 +15,25 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
   - hybrid-tls
-overall_status: partial
+overall_status: available
 algorithms:
   ml-kem:
-    support: partial
+    support: yes
+    experimental: false
     sources:
-      - url: https://github.com/dotnet/runtime/pull/133046
-        title: "PR #133046: KEM support for EnvelopedCms"
-        kind: pull-request
-        quote: This implements ML-KEM and Composite ML-KEM API surface for EnvelopedCms.
-        retrieved: 2026-11-09
-      - url: https://github.com/dotnet/runtime/pull/134531
-        title: "PR #134531: HPKE: Managed ML-KEM and Hybrid ML-KEM"
-        kind: pull-request
-        quote: This implements ML-KEM and Hybrid ML-KEM drafts, per IETF https://datatracker.ietf.org/doc/draft-ietf-hpke-pq/.
-        retrieved: 2026-11-09
+      - url: https://github.com/dotnet/runtime/releases/tag/v10.0.12
+        title: .NET 10.0.12
+        kind: release-notes
+        quote: "* [release/10.0] Fix IsSupported tests for ML-KEM by @github-actions[bot] in https://github.com/dotnet/runtime/pull/132512"
+        retrieved: 2026-11-17
   ml-dsa:
-    support: partial
+    support: yes
+    experimental: false
     sources:
-      - url: https://github.com/dotnet/runtime/pull/135062
-        title: "PR #135062: Disable PreHash tests on AZL4 and fix external-mu on AZL4"
-        kind: pull-request
-        quote: SymCrypt, thus SCOSSL, does not support "raw" ML-DSA which .NET uses for PreHash signing.
-        retrieved: 2026-11-11
-upgrade_notes: "Partial or experimental: ML-KEM and ML-DSA; check the notes before relying on it."
-last_verified: 2026-11-11
+      - url: https://github.com/dotnet/runtime/releases/tag/v10.0.10
+        title: .NET 10.0.10
+        kind: release-notes
+        quote: "* [release/10.0] Fix blob type in CopyWithPrivateKey for ML-DSA by @github-actions[bot] in https://github.com/dotnet/runtime/pull/129865"
+        retrieved: 2026-11-17
+upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-17T13:34:01Z

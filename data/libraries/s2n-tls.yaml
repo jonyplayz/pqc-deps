@@ -8,6 +8,33 @@ delegates_to:
   - id: aws-lc
 applicable_algorithms:
   - hybrid-tls
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: v1.6.1
+    sources:
+      - url: https://github.com/aws/s2n-tls/releases/tag/v1.6.1
+        title: Release v1.6.1
+        kind: release-notes
+        quote: "Adds pure ML-KEM-1024 support: s2n_pure_mlkem_1024 KEM group is now negotiable."
+        retrieved: 2026-11-17
+  ml-dsa:
+    support: yes
+    since_version: v1.5.19
+    sources:
+      - url: https://github.com/aws/s2n-tls/releases/tag/v1.5.19
+        title: "Release: v1.5.19"
+        kind: release-notes
+        quote: Adds support for post-quantum ML-DSA certificates
+        retrieved: 2026-11-17
+  hybrid-tls:
+    support: yes
+    sources:
+      - url: https://github.com/aws/s2n-tls/releases/tag/v1.7.14
+        title: v1.7.14
+        kind: release-notes
+        quote: TLS 1.3 clients that send an X25519MLKEM768 key share and prefer X25519 as their classical curve now reuse the hybrid's X25519 key for the classical key share.
+        retrieved: 2026-11-17
+upgrade_notes: "hybrid TLS key exchange: supported in current releases; the sources don't state the first version."
+last_verified: 2026-11-17T13:34:53Z

@@ -51,7 +51,7 @@ algorithms:
           Add support for SLH-DSA keys.
         retrieved: 2026-11-09
 upgrade_notes: "ML-DSA: Node.js crypto and tls v24.6.0 or later. ML-KEM: Node.js crypto and tls v24.7.0 or later. SLH-DSA: Node.js crypto and tls v24.8.0 or later."
-last_verified: 2026-11-09
+last_verified: 2026-11-17T13:36:34Z
 pipeline:
   watch_urls:
     - https://nodejs.org/api/crypto.html

@@ -10,7 +10,7 @@ applicable_algorithms:
   - hybrid-tls
 overall_status: unknown
 algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+last_verified: 2026-11-17T13:36:34Z
 pipeline:
   watch_urls:
     - https://learn.microsoft.com/en-us/windows/win32/seccng/cng-mlkem-examples
