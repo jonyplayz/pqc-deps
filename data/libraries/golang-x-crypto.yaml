@@ -15,7 +15,7 @@ applicable_algorithms:
 overall_status: no-plan
 algorithms: {}
 notes: The module has no ML-KEM, ML-DSA or SLH-DSA package (as of v0.58.0). Go provides post-quantum algorithms in the standard library instead (see Go crypto), and SSH hybrid key exchange is tracked separately under golang.org/x/crypto/ssh.
-last_verified: 2026-11-11
+last_verified: 2026-11-17T13:36:34Z
 pipeline:
   github: golang/go
   watch_urls:
