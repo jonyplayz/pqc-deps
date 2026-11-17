@@ -20,8 +20,8 @@ algorithms:
       - url: https://github.com/libressl/portable/releases/tag/v4.2.0
         title: v4.2.0
         kind: release-notes
-        quote: Added a public API for ML-KEM.
-        retrieved: 2026-11-13
+        quote: Added a public API for ML-KEM. This is not yet documented in a manpage and may not be in its final form.
+        retrieved: 2026-11-17
   ml-dsa:
     support: partial
     experimental: true
@@ -30,21 +30,21 @@ algorithms:
         title: libressl/portable ChangeLog
         kind: changelog
         quote: Added an experimental ML-DSA API based on BoringSSL's code.
-        retrieved: 2026-11-13
+        retrieved: 2026-11-17
   hybrid-tls:
     support: yes
-    since_version: 4.4.0
+    since_version: 4.3.0
     experimental: false
     sources:
       - url: https://github.com/libressl/portable/releases/tag/v4.3.0
         title: v4.3.0
         kind: release-notes
         quote: Support for MLKEM768_X25519 keyshare in TLS.
-        retrieved: 2026-11-13
-      - url: https://github.com/libressl/portable/releases/tag/v4.4.0rc1
-        title: v4.4.0rc1 (pre-release)
+        retrieved: 2026-11-17
+      - url: https://github.com/libressl/portable/releases/tag/v4.4.0
+        title: v4.4.0
         kind: release-notes
         quote: Use X25519MLKEM768 as the preferred group for TLSv1.3 connections in libtls.
-        retrieved: 2026-11-13
-upgrade_notes: "ML-KEM: LibreSSL 4.2.0 or later. hybrid TLS key exchange: LibreSSL 4.4.0 or later. Partial or experimental: ML-DSA; check the notes before relying on it."
-last_verified: 2026-11-13T12:12:38Z
+        retrieved: 2026-11-17
+upgrade_notes: "ML-KEM: LibreSSL 4.2.0 or later. hybrid TLS key exchange: LibreSSL 4.3.0 or later. Partial or experimental: ML-DSA; check the notes before relying on it."
+last_verified: 2026-11-17T13:34:01Z
