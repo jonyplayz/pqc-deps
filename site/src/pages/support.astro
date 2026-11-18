@@ -1,0 +1,101 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config';
+---
+
+<Base
+  title="Support the project"
+  description="PQC Deps is free and non-commercial. How to support it with a donation, a correction or a share."
+>
+  <div class="support">
+    <p class="eyebrow">Non-commercial</p>
+    <h1>Free for everyone. <em>Kept going by its users.</em></h1>
+    <p class="lede">
+      {SITE.name} is a free, non-commercial community project: no ads, no tracking cookies, no paid
+      features, and no sponsor deciding what the data says. Everything, including the data, is open.
+    </p>
+
+    {
+      SITE.donateUrl ? (
+        <section class="donate card" aria-labelledby="donate-h">
+          <h2 id="donate-h">Donate</h2>
+          <p>
+            If {SITE.name} saved you time, a small donation helps keep it running and up to date.
+            One-time or monthly, any amount.
+          </p>
+          <a class="btn btn-primary" href={SITE.donateUrl} rel="noopener">
+            Support on Ko-fi →
+          </a>
+          <p class="muted small">
+            Payments are handled by Ko-fi; this site never sees your payment details. {SITE.name} is
+            run by an individual, not a registered charity, so donations are not tax-deductible.
+          </p>
+        </section>
+      ) : (
+        <p class="card muted">Donations will open soon.</p>
+      )
+    }
+
+    <section aria-labelledby="where-h">
+      <h2 id="where-h">Where the money goes</h2>
+      <ul class="costs">
+        <li>
+          <strong>Research and review time.</strong> Every claim is checked against its source before
+          it goes live; that is most of the work.
+        </li>
+        <li>
+          <strong>The domain and services.</strong> Hosting and the AI quota run on free tiers today;
+          donations make it possible to keep them as the catalog grows.
+        </li>
+        <li>
+          <strong>More coverage.</strong> More ecosystems (PHP, Ruby, Swift) and tools like a GitHub
+          Action and a command-line checker.
+        </li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="other-h">
+      <h2 id="other-h">Other ways to help</h2>
+      <ul class="costs">
+        <li>
+          <strong>Correct something.</strong> Every library page has a one-click correction link.
+        </li>
+        <li>
+          <strong>Request a library.</strong> <a href="/request">Tell us</a> what's missing.
+        </li>
+        <li>
+          <strong>Add the badge</strong> to a project you maintain, or share the site with your team.
+        </li>
+        <li>
+          <strong>Contribute on <a href={SITE.repoUrl}>GitHub</a></strong>: data files, code and docs
+          are all open.
+        </li>
+      </ul>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .support {
+    max-width: 46rem;
+  }
+  .donate {
+    margin: 2rem 0;
+    border-top: 3px solid var(--accent);
+  }
+  .donate h2 {
+    margin-top: 0.25rem;
+  }
+  .donate .btn {
+    margin: 0.5rem 0 0.75rem;
+  }
+  .donate .small {
+    margin: 0;
+  }
+  .costs {
+    padding-left: 1.1rem;
+  }
+  .costs li + li {
+    margin-top: 0.6rem;
+  }
+</style>

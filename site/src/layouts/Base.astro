@@ -29,6 +29,7 @@ const nav = [
   { href: '/check', label: 'Check my project' },
   { href: '/methodology', label: 'Methodology' },
   { href: '/about', label: 'About' },
+  { href: '/support', label: 'Support' },
 ];
 const path = cleanPath.replace(/\/$/, '');
 ---
@@ -101,14 +102,24 @@ const path = cleanPath.replace(/\/$/, '');
       <div class="container">
         <p class="footer-brand">PQC <i>Deps</i></p>
         <p>
-          {SITE.name} is a community project. Every claim links to a public source; corrections are
-          welcome on <a href={SITE.repoUrl}>GitHub</a>.
+          {SITE.name} is a free, non-commercial community project: no ads, no tracking cookies, no paid
+          features. Every claim links to a public source; corrections are welcome on
+          <a href={SITE.repoUrl}>GitHub</a>.
+          {
+            SITE.donateUrl && (
+              <>
+                {' '}
+                If it helps you, you can <a href="/support">support it</a>.
+              </>
+            )
+          }
         </p>
         <p class="muted small">
           Code: MIT. Data: <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
           Not affiliated with any library listed. Not security advice.
         </p>
         <nav class="footer-nav small" aria-label="Footer">
+          <a href="/support">Support the project</a>
           <a href="/request">Request a library</a>
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
