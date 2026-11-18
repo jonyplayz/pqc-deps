@@ -3,8 +3,7 @@ id: nettle
 name: Nettle
 ecosystem: c-cpp
 description: Low-level cryptographic library, used by GnuTLS.
-homepage: https://www.lysator.liu.se/~nisse/nettle/
-repo: https://git.lysator.liu.se/nettle/nettle
+repo: https://github.com/gnutls/nettle
 applicable_algorithms:
   - ml-kem
   - ml-dsa
