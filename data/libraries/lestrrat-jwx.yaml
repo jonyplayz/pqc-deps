@@ -33,4 +33,4 @@ algorithms:
         quote: "Quantum-Ready: ML-KEM and ML-DSA, HPKE (+Hybrid) are supported through companion modules."
         retrieved: 2026-11-13
 upgrade_notes: "ML-KEM and ML-DSA: jwx v4.0.0 or later."
-last_verified: 2026-11-13T12:45:18Z
+last_verified: 2026-11-18T13:06:09Z

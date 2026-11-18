@@ -14,4 +14,4 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: "aiohttp uses Python's ssl module (and so the linked OpenSSL) for TLS."
-last_verified: 2026-11-13
+last_verified: 2026-11-18T13:06:09Z
