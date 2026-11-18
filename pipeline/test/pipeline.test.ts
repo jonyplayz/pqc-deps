@@ -1178,3 +1178,85 @@ describe('refreshes keep reviewed claims', () => {
     expect(r.library.algorithms['ml-kem']).toMatchObject({ support: 'partial', sources: [weak] });
   });
 });
+
+describe('second opinion and status direction', () => {
+  const fetchEvidence = async () => ({ docs: DOCS, warnings: [] });
+  /** First answer: the proposal. Second: the verdicts. */
+  const twoStep = (verdicts: unknown[]) => {
+    const answers = [JSON.stringify(fakeProposal()), JSON.stringify({ verdicts })];
+    return fakeLlm(() => answers.shift() ?? '{}');
+  };
+
+  it('drops changed claims the second opinion rejects, and versions it cannot confirm', async () => {
+    const llm = twoStep([
+      {
+        key: 'ml-kem',
+        supports_claim: true,
+        version_ok: false,
+        default_ok: null,
+        reason: 'not introduced there',
+      },
+      {
+        key: 'hybrid-tls',
+        supports_claim: false,
+        version_ok: null,
+        default_ok: null,
+        reason: 'not shown',
+      },
+    ]);
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence,
+      llm,
+      today: TODAY,
+      secondOpinion: true,
+    });
+    expect(llm.calls).toHaveLength(2);
+    expect(r.library!.algorithms['ml-kem']).toMatchObject({ support: 'yes' });
+    expect(r.library!.algorithms['ml-kem']!.since_version).toBeUndefined();
+    expect(r.library!.algorithms['hybrid-tls']).toBeUndefined();
+    expect(r.dropped.map((d) => d.reason).join(' ')).toContain('second opinion: not shown');
+  });
+
+  it('without a second opinion, changed claims do not go through', async () => {
+    const answers = [JSON.stringify(fakeProposal())];
+    const llm = fakeLlm(() => {
+      const a = answers.shift();
+      if (!a) throw new Error('quota');
+      return a;
+    });
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence,
+      llm,
+      today: TODAY,
+      secondOpinion: true,
+    });
+    expect(r.library?.algorithms['ml-kem']).toBeUndefined();
+    expect(r.dropped.some((d) => d.reason.startsWith('second opinion unavailable'))).toBe(true);
+  });
+
+  it('the overall status only moves when a verdict does', () => {
+    const src = {
+      url: 'https://example.com/r',
+      title: 'r',
+      kind: 'release-notes' as const,
+      quote: 'q',
+      retrieved: TODAY,
+    };
+    const existing = lib({
+      overall_status: 'ready',
+      algorithms: { 'hybrid-tls': { support: 'yes', default_enabled: true, sources: [src] } },
+    } as never);
+    const same = {
+      algorithms: {
+        'hybrid-tls': { support: 'yes' as const, default_enabled: true, sources: [src] },
+      },
+      overall_status: 'available' as const,
+      reviewer_notes: '',
+      dropped: [],
+      warnings: [],
+    };
+    const r = mergeProposal(existing, same, TODAY);
+    expect(r.library.overall_status).toBe('ready');
+    expect(r.warnings.join(' ')).toContain('no algorithm verdict changed');
+  });
+});

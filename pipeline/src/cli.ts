@@ -139,7 +139,7 @@ async function main() {
     targets,
     {
       fetchEvidence,
-      ...(llm ? { llm, codeSearch } : {}),
+      ...(llm ? { llm, codeSearch, secondOpinion: true } : {}),
       excerpt: { maxCharsTotal: args.maxChars },
     },
     { batchSize: args.batch, delayMs: args.delay },
@@ -214,7 +214,18 @@ async function main() {
                 `| \`${x.lib.id}\` | ${x.r.library!.overall_status} | ${x.r.changes.length} | ${x.r.dropped.length} |`,
             ),
             '',
-            'Each library has a comment below with its evidence, quotes and anything that failed verification.',
+            '**What changes** (before → after):',
+            '',
+            ...changed.flatMap((x) =>
+              x.r.changes
+                .filter((c) => c.field !== 'upgrade_notes')
+                .map(
+                  (c) =>
+                    `- \`${x.lib.id}\` ${c.field.replace(/^algorithms\./, '')}: ${c.before.slice(0, 60)} → ${c.after.slice(0, 60)}`,
+                ),
+            ),
+            '',
+            'Each library has a comment below with its evidence, quotes and anything that failed verification or the second opinion.',
             '',
           ]
         : []),

@@ -7,7 +7,8 @@ import { LlmRefusalError, type LlmClient } from './llm/types';
 import { mergeProposal, type FieldChange } from './merge';
 import { buildBatchPrompt, buildUserPrompt, extractJson, SYSTEM_PROMPT } from './prompt';
 import { BatchProposalSchema, ProposalSchema, proposalJsonSchema, type Proposal } from './proposal';
-import { verifyProposal, type Dropped } from './verify';
+import { secondOpinion, type JudgeItem } from './judge';
+import { sectionHeadingFor, verifyProposal, type Dropped, type VerifiedProposal } from './verify';
 
 export interface RunDeps {
   fetchEvidence: (lib: Library) => Promise<FetchResult>;
@@ -18,6 +19,8 @@ export interface RunDeps {
   excerpt?: ExcerptOptions;
   /** Look for PQC identifiers in the repository when no document mentions PQC. */
   codeSearch?: (lib: Library) => Promise<CodeSearchResult | undefined>;
+  /** Ask a second, strict model request to confirm every claim the run changes. */
+  secondOpinion?: boolean;
 }
 
 export interface RunResult {
@@ -141,10 +144,96 @@ async function fromCodeSearch(lib: Library, base: RunResult, deps: RunDeps): Pro
   };
 }
 
-function finish(p: Prepared, proposal: Proposal, deps: RunDeps): RunResult {
+/** Claims this run would add or change, as items for the second opinion. */
+function changedClaims(lib: Library, v: VerifiedProposal, docs: Excerpted[]): JudgeItem[] {
+  const items: JudgeItem[] = [];
+  for (const [a, c] of Object.entries(v.algorithms) as Array<
+    [
+      keyof Library['algorithms'],
+      NonNullable<VerifiedProposal['algorithms'][keyof Library['algorithms']]>,
+    ]
+  >) {
+    if (!c || c.support === 'unknown') continue;
+    const prev = lib.algorithms[a];
+    const sameSupport = prev?.support === c.support;
+    const newVersion = Boolean(c.since_version) && (!sameSupport || !prev?.since_version);
+    const newDefault = c.default_enabled === true && (!sameSupport || !prev?.default_enabled);
+    if (sameSupport && !newVersion && !newDefault) continue;
+    items.push({
+      key: a,
+      algorithm: a,
+      support: c.support as JudgeItem['support'],
+      ...(newVersion ? { since_version: c.since_version } : {}),
+      ...(newDefault ? { default_enabled: true } : {}),
+      quotes: c.sources.map((s) => {
+        const d = docs.find((x) => x.url === s.url);
+        const heading = d ? sectionHeadingFor(d.text, s.quote) : undefined;
+        return {
+          text: s.quote,
+          release: [s.title, heading].filter(Boolean).join(' / ') || undefined,
+        };
+      }),
+    });
+  }
+  return items;
+}
+
+/** Drop whatever the second opinion can't confirm; the reviewed value on file then stays. */
+async function applySecondOpinion(p: Prepared, v: VerifiedProposal, deps: RunDeps): Promise<void> {
+  const items = changedClaims(p.lib, v, p.selected);
+  if (!items.length) return;
+  let verdicts: Awaited<ReturnType<typeof secondOpinion>>;
+  try {
+    verdicts = await secondOpinion(deps.llm!, p.lib, items);
+  } catch (e) {
+    // Accuracy first: without a second opinion, changed claims don't go through.
+    for (const it of items) {
+      delete v.algorithms[it.algorithm];
+      v.dropped.push({
+        field: `algorithms.${it.algorithm}`,
+        claim: it.support,
+        reason: `second opinion unavailable (${(e as Error).message.slice(0, 120)}); not changed this run`,
+      });
+    }
+    return;
+  }
+  for (const it of items) {
+    const verdict = verdicts.get(it.key);
+    const c = v.algorithms[it.algorithm];
+    if (!c) continue;
+    if (!verdict || !verdict.supports_claim) {
+      delete v.algorithms[it.algorithm];
+      v.dropped.push({
+        field: `algorithms.${it.algorithm}`,
+        claim: it.support,
+        reason: `second opinion: ${verdict?.reason ?? 'no verdict returned'}`,
+      });
+      continue;
+    }
+    if (it.since_version && verdict.version_ok === false) {
+      delete c.since_version;
+      v.dropped.push({
+        field: `algorithms.${it.algorithm}.since_version`,
+        claim: it.since_version,
+        reason: `second opinion: ${verdict.reason}`,
+      });
+    }
+    if (it.default_enabled && verdict.default_ok === false) {
+      delete c.default_enabled;
+      v.dropped.push({
+        field: `algorithms.${it.algorithm}.default_enabled`,
+        claim: 'true',
+        reason: `second opinion: ${verdict.reason}`,
+      });
+    }
+  }
+}
+
+async function finish(p: Prepared, proposal: Proposal, deps: RunDeps): Promise<RunResult> {
   const { lib, base, selected } = p;
   const today = deps.today ?? isoToday();
   const verified = verifyProposal(proposal, selected, lib, today);
+  if (deps.secondOpinion && deps.llm) await applySecondOpinion(p, verified, deps);
   const merged = mergeProposal(
     lib,
     verified,
@@ -184,7 +273,7 @@ export async function proposeForLibrary(lib: Library, deps: RunDeps): Promise<Ru
   try {
     const proposal = await askModel(deps.llm!, lib, p.selected);
     p.base.model = deps.llm!.label; // the model that answered (it may have fallen back)
-    return finish(p, proposal, deps);
+    return await finish(p, proposal, deps);
   } catch (e) {
     return failed(p, e);
   }
@@ -294,7 +383,7 @@ export async function proposeForLibraries(
       try {
         const proposal = await askModel(deps.llm!, p.lib, p.selected);
         p.base.model = deps.llm!.label;
-        results.set(p.lib.id, finish(p, proposal, deps));
+        results.set(p.lib.id, await finish(p, proposal, deps));
       } catch (e) {
         results.set(p.lib.id, failed(p, e));
       }
@@ -316,7 +405,7 @@ export async function proposeForLibraries(
         const proposal = answer.proposals.get(p.lib.id);
         if (proposal) {
           p.base.model = deps.llm!.label;
-          results.set(p.lib.id, finish(p, proposal, deps));
+          results.set(p.lib.id, await finish(p, proposal, deps));
         } else if (round === 0 && !answer.error) {
           missing.push(p);
         } else {
