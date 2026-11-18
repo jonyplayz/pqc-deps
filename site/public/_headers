@@ -22,5 +22,10 @@
   Cache-Control: public, max-age=300
   Access-Control-Allow-Origin: *
 
+# README badges: embedded on other sites (GitHub proxies and caches them).
+/badge/*
+  Cache-Control: public, max-age=3600
+  Access-Control-Allow-Origin: *
+
 /admin
   X-Robots-Tag: noindex
