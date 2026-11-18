@@ -1260,3 +1260,36 @@ describe('second opinion and status direction', () => {
     expect(r.warnings.join(' ')).toContain('no algorithm verdict changed');
   });
 });
+
+describe('maintenance-only evidence for new support', () => {
+  it('is dropped in code, without asking the second opinion', async () => {
+    const docs: FetchedDoc[] = [
+      {
+        url: 'https://example.com/releases/10.0.1',
+        title: 'Release 10.0.1',
+        kind: 'release-notes',
+        text: 'Release 10.0.1\n- Fix IsSupported tests for ML-KEM',
+      },
+    ];
+    const p = fakeProposal();
+    for (const a of Object.keys(p.algorithms) as Array<keyof Proposal['algorithms']>)
+      p.algorithms[a] = claim();
+    p.algorithms['ml-kem'] = claim({
+      support: 'yes',
+      evidence: [{ doc: 'D1', quote: 'Fix IsSupported tests for ML-KEM' }],
+    });
+    p.roadmap = null;
+    p.fips = null;
+    p.overall_status = 'available';
+    const llm = fakeLlm(JSON.stringify(p));
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence: async () => ({ docs, warnings: [] }),
+      llm,
+      today: TODAY,
+      secondOpinion: true,
+    });
+    expect(llm.calls).toHaveLength(1); // no second-opinion request
+    expect(r.library?.algorithms['ml-kem']).toBeUndefined();
+    expect(r.dropped.map((d) => d.reason).join(' ')).toContain('only maintenance lines');
+  });
+});

@@ -44,7 +44,7 @@ For each item you get a library, an algorithm, a claimed support level, and the 
 Answer per item:
 - supports_claim: do the quotes show that THIS library provides the algorithm at the claimed level? "yes" means usable in a stable release; "partial" means experimental, draft-only or limited. A bug fix, test change, refactor, documentation change, dependency update or performance change may only count if it clearly shows the feature already exists in this library; a mention of another product, a proposal or a discussion does not count.
 - version_ok: only if a first version is claimed (otherwise null). True only if a quote shows the feature was added or introduced in that version (or the quote is a new-feature entry listed under that version). A change, fix, test, optimisation or default switch in that version is false: it does not show when support began.
-- default_ok: only if "on by default" is claimed (otherwise null). True only if a quote says it is enabled, offered or preferred by default. Being in a "default provider", "default build" or "default implementation" is false.
+- default_ok: only if "on by default" is claimed (otherwise null). True only if a quote says the algorithm is used, offered or preferred by default when the library runs (for example a TLS group offered in the default handshake, or certificates accepted by default). Being in a "default provider", "default build" or "default implementation", or being compiled in / enabled in the build options by default (for example "KEM_x is now enabled by default" in a library's build configuration), is false: that only makes it available, not used.
 - reason: one short sentence.
 
 Return JSON: {"verdicts":[{"key":...,"supports_claim":...,"version_ok":...,"default_ok":...,"reason":...}]}`;
