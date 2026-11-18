@@ -904,3 +904,24 @@ describe('Telegram approvals (webhook)', () => {
     expect(JSON.stringify(m.reply_markup)).toContain('a:all');
   });
 });
+
+describe('canonical host redirect', () => {
+  const req = (url: string, method = 'GET') => new Request(url, { method });
+  it('sends the pages.dev name and www to pqcdeps.com, keeping path and query', async () => {
+    const { canonicalRedirect } = await import('../server/canonical');
+    const r = canonicalRedirect(req('https://pqc-deps.pages.dev/libraries/openssl?x=1'))!;
+    expect(r.status).toBe(301);
+    expect(r.headers.get('Location')).toBe('https://pqcdeps.com/libraries/openssl?x=1');
+    expect(canonicalRedirect(req('https://www.pqcdeps.com/'))!.headers.get('Location')).toBe(
+      'https://pqcdeps.com/',
+    );
+  });
+  it('leaves the canonical host, previews and POSTs alone', async () => {
+    const { canonicalRedirect } = await import('../server/canonical');
+    expect(canonicalRedirect(req('https://pqcdeps.com/catalog'))).toBeUndefined();
+    expect(canonicalRedirect(req('https://abc123.pqc-deps.pages.dev/'))).toBeUndefined();
+    expect(
+      canonicalRedirect(req('https://pqc-deps.pages.dev/api/telegram/webhook', 'POST')),
+    ).toBeUndefined();
+  });
+});

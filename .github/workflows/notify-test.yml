@@ -18,6 +18,6 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          out=$(bash .github/scripts/notify-telegram.sh "✅ PQC Deps: test notification from GitHub Actions. Admin alerts are working." "https://pqc-deps.pages.dev/admin" "Open admin")
+          out=$(bash .github/scripts/notify-telegram.sh "✅ PQC Deps: test notification from GitHub Actions. Admin alerts are working." "https://pqcdeps.com/admin" "Open admin")
           echo "$out"
           case "$out" in *"sent"*) ;; *) echo "::error::No message was sent."; exit 1 ;; esac

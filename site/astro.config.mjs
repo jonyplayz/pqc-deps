@@ -10,7 +10,7 @@ const ANALYTICS_BEACON = 'https://cloudflareinsights.com';
 
 export default defineConfig({
   // Change when a custom domain is bought.
-  site: 'https://pqc-deps.pages.dev',
+  site: 'https://pqcdeps.com',
   // Emit /libraries/openssl.html (not .../openssl/index.html): Cloudflare Pages
   // serves it at /libraries/openssl with no trailing-slash redirect, which
   // matches every internal link and canonical URL.

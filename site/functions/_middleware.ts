@@ -1,6 +1,7 @@
 // Security headers on every Functions response (site/public/_headers only
 // covers static files). API responses get a locked-down CSP; the sign-in
 // error page needs inline styles, so it sets its own.
+import { canonicalRedirect } from '../server/canonical';
 import type { Env } from '../server/env';
 
 const HEADERS: Record<string, string> = {
@@ -12,7 +13,9 @@ const HEADERS: Record<string, string> = {
   'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
 };
 
-export const onRequest: PagesFunction<Env> = async ({ next }) => {
+export const onRequest: PagesFunction<Env> = async ({ request, next }) => {
+  const redirect = canonicalRedirect(request);
+  if (redirect) return redirect;
   const res = await next();
   const out = new Response(res.body, res);
   for (const [k, v] of Object.entries(HEADERS)) {

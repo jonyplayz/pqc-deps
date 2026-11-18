@@ -130,5 +130,5 @@ jobs:
         if: env.CF_CONFIGURED == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          SITE_URL: https://pqc-deps.pages.dev
+          SITE_URL: https://pqcdeps.com
         run: bash .github/scripts/telegram-webhook.sh

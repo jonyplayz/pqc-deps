@@ -14,7 +14,7 @@ within a week and will credit you in the fix unless you'd rather stay anonymous.
 
 ## Scope
 
-In scope: https://pqc-deps.pages.dev and the code in this repository, for
+In scope: https://pqcdeps.com and the code in this repository, for
 example authentication on `/admin`, the request forms and their abuse
 protection, the workflows and how they handle untrusted input.
 

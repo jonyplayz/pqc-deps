@@ -40,7 +40,7 @@ Cloudflare variables:
 
 Cloudflare dashboard → **Turnstile** → Add widget.
 
-- Hostnames: `pqc-deps.pages.dev` (and your own domain later).
+- Hostnames: `pqcdeps.com`, `www.pqcdeps.com` and `pqc-deps.pages.dev`.
 - Widget mode: **Managed**.
 
 | Name                 | Value                                    | Type       |
@@ -61,8 +61,8 @@ again on every admin action.
 (https://github.com/settings/applications/new):
 
 - Application name: `PQC Deps admin`
-- Homepage URL: `https://pqc-deps.pages.dev`
-- Authorization callback URL: `https://pqc-deps.pages.dev/api/auth/callback`
+- Homepage URL: `https://pqcdeps.com`
+- Authorization callback URL: `https://pqcdeps.com/api/auth/callback`
 - Leave "Enable Device Flow" off, then **Register application**.
 - On the next page, copy the **Client ID**, click **Generate a new client
   secret** and copy the secret.
@@ -78,12 +78,12 @@ again on every admin action.
 
 The site requests **no GitHub permissions** from admins (only who they are),
 doesn't store their GitHub token, and keeps them signed in for 12 hours with a
-signed, HttpOnly cookie. Sign-in only works on `pqc-deps.pages.dev`, the
+signed, HttpOnly cookie. Sign-in only works on `pqcdeps.com`, the
 callback URL registered above; on preview URLs admin features stay off.
 
 ## 4. Check it works
 
-1. Open `https://pqc-deps.pages.dev/admin` and click **Sign in with GitHub**.
+1. Open `https://pqcdeps.com/admin` and click **Sign in with GitHub**.
    After approving, you see the requests queue, Refresh, Add library and activity.
 2. Open any library page while signed in: it shows **Refresh now**.
 3. In a private window, open a library page: it shows **Request a re-check** with
