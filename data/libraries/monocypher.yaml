@@ -21,4 +21,4 @@ algorithms:
         retrieved: 2026-11-18
   ml-dsa: *a1
 notes: The maintainer considers post-quantum algorithms out of scope for Monocypher ("Won't fix").
-last_verified: 2026-11-18T08:29:17Z
+last_verified: 2026-11-18T13:06:09Z
