@@ -1,6 +1,7 @@
 /** Run the pipeline for one library. Dependencies are injected so tests can fake fetch + LLM. */
 import { isoNow, isoToday, lintLibrary, type Library } from '@pqc-deps/core';
 import { selectEvidence, type ExcerptOptions, type Excerpted } from './excerpt';
+import { noPqcCode, totalHits, type CodeSearchResult } from './fetch/codesearch';
 import type { FetchResult } from './fetch/types';
 import { LlmRefusalError, type LlmClient } from './llm/types';
 import { mergeProposal, type FieldChange } from './merge';
@@ -15,6 +16,8 @@ export interface RunDeps {
   /** Timestamp written to last_verified (default: now, UTC). */
   now?: string;
   excerpt?: ExcerptOptions;
+  /** Look for PQC identifiers in the repository when no document mentions PQC. */
+  codeSearch?: (lib: Library) => Promise<CodeSearchResult | undefined>;
 }
 
 export interface RunResult {
@@ -88,11 +91,54 @@ async function prepare(lib: Library, deps: RunDeps): Promise<Prepared> {
   base.model = deps.llm.label;
   if (!selected.length) {
     base.warnings.push(
-      'No fetched document mentions post-quantum cryptography; nothing to propose.',
+      'No fetched document mentions post-quantum cryptography; nothing to propose from documents.',
     );
-    return { lib, base, selected, needsModel: false };
+    return { lib, base: await fromCodeSearch(lib, base, deps), selected, needsModel: false };
   }
   return { lib, base, selected, needsModel: true };
+}
+
+/**
+ * No document mentions PQC. A library that never added it has no document
+ * saying so, so instead of leaving it "unknown", look at its code: an indexed
+ * repository without any PQC identifiers is "no-plan"; one with them needs a
+ * human, because the evidence lives somewhere the pipeline didn't read.
+ */
+async function fromCodeSearch(lib: Library, base: RunResult, deps: RunDeps): Promise<RunResult> {
+  if (!deps.codeSearch || lib.overall_status !== 'unknown' || lib.roadmap) return base;
+  let cs: CodeSearchResult | undefined;
+  try {
+    cs = await deps.codeSearch(lib);
+  } catch (e) {
+    base.warnings.push(`Code search failed: ${(e as Error).message}`);
+    return base;
+  }
+  if (!cs) return base;
+  if (totalHits(cs) > 0) {
+    const found = Object.entries(cs.terms)
+      .filter(([, n]) => n > 0)
+      .map(([t, n]) => `${t} (${n})`)
+      .join(', ');
+    base.warnings.push(
+      `The repository has post-quantum code (${found}) but no fetched document describes it. Research it by hand or add watch_urls.`,
+    );
+    return base;
+  }
+  if (!noPqcCode(cs)) {
+    base.warnings.push('Code search could not confirm the repository is indexed; left unknown.');
+    return base;
+  }
+  const note = `Searched on ${cs.date}: the ${cs.repo} repository has no ML-KEM, ML-DSA, Kyber or Dilithium code, and no fetched release note or document mentions post-quantum cryptography.`;
+  return {
+    ...base,
+    library: {
+      ...lib,
+      overall_status: 'no-plan',
+      notes: lib.notes ? `${lib.notes} ${note}` : note,
+      last_verified: deps.now ?? (deps.today ? `${deps.today}T00:00:00Z` : isoNow()),
+    },
+    changes: [{ field: 'overall_status', before: 'unknown', after: 'no-plan' }],
+  };
 }
 
 function finish(p: Prepared, proposal: Proposal, deps: RunDeps): RunResult {

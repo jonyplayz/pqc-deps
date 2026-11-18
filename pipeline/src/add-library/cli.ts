@@ -17,6 +17,8 @@ import { join } from 'node:path';
 import { isoToday, type Library } from '@pqc-deps/core';
 import { loadLibrariesFromDir, REPO_ROOT } from '@pqc-deps/core/node';
 import { fetchEvidence } from '../fetch';
+import { pqcCodeSearch } from '../fetch/codesearch';
+import { githubRepo } from '../fetch/github';
 import { checkIdentity } from '../identity';
 import { llmFromEnv, type LlmClient } from '../llm';
 import { libraryToYaml, reportMarkdown } from '../output';
@@ -159,7 +161,14 @@ async function main() {
       pipelineNote =
         'No LLM configured, so the evidence pipeline was skipped; the entry starts as `unknown`.';
     else {
-      run = await proposeForLibrary(library, { fetchEvidence, llm });
+      run = await proposeForLibrary(library, {
+        fetchEvidence,
+        llm,
+        codeSearch: async (l) => {
+          const repo = githubRepo(l);
+          return repo ? pqcCodeSearch(repo) : undefined;
+        },
+      });
       if (run.library) library = run.library;
       pipelineNote = run.error
         ? `Evidence pipeline failed: ${run.error}. The entry starts as \`unknown\`.`

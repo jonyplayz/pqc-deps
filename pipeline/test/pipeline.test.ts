@@ -11,6 +11,7 @@ import { libraryToYaml, reportMarkdown } from '../src/output';
 import { extractJson, buildUserPrompt } from '../src/prompt';
 import { proposalJsonSchema, type Proposal } from '../src/proposal';
 import { planBatches, proposeForLibraries, proposeForLibrary } from '../src/run';
+import { noPqcCode, pqcCodeSearch } from '../src/fetch/codesearch';
 import { checkQuote, normalizeForMatch } from '../src/verify';
 import { deriveStatus } from '../src/merge';
 
@@ -1056,5 +1057,78 @@ describe('batched runs', () => {
     const sizes = [100, 100, 250, 50, 50];
     expect(planBatches(sizes, (n) => n, 3, 300).map((b) => b.length)).toEqual([2, 2, 1]);
     expect(planBatches([500], (n) => n, 3, 300)).toEqual([[500]]); // one oversized item still runs
+  });
+});
+
+describe('code search when no document mentions PQC', () => {
+  const noDocs = async () => ({ docs: [], warnings: [] });
+  const cs =
+    (terms: Record<string, number>, control = 50) =>
+    async () => ({
+      repo: 'demo/demo-tls',
+      terms,
+      control,
+      date: TODAY,
+    });
+  const llm = fakeLlm('{}');
+
+  it('an indexed repository with no PQC code becomes "no-plan", with a dated note', async () => {
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence: noDocs,
+      llm,
+      today: TODAY,
+      codeSearch: cs({ mlkem: 0, kyber: 0, mldsa: 0, dilithium: 0, X25519MLKEM768: 0 }),
+    });
+    expect(r.library).toMatchObject({ overall_status: 'no-plan' });
+    expect(r.library!.notes).toContain(`Searched on ${TODAY}`);
+    expect(r.changes).toEqual([{ field: 'overall_status', before: 'unknown', after: 'no-plan' }]);
+    expect(lintLibrary(r.library!, TODAY).filter((i) => i.severity === 'error')).toEqual([]);
+    expect(llm.calls).toHaveLength(0);
+  });
+
+  it('PQC code without documents stays unknown and asks for a human', async () => {
+    const r = await proposeForLibrary(lib(), {
+      fetchEvidence: noDocs,
+      llm,
+      today: TODAY,
+      codeSearch: cs({ mlkem: 12 }),
+    });
+    expect(r.library).toBeUndefined();
+    expect(r.warnings.join(' ')).toContain('has post-quantum code (mlkem (12))');
+  });
+
+  it('an unindexed repository, or a library that already has a status, is left alone', async () => {
+    const none = { mlkem: 0, kyber: 0, mldsa: 0, dilithium: 0, X25519MLKEM768: 0 };
+    const unindexed = await proposeForLibrary(lib(), {
+      fetchEvidence: noDocs,
+      llm,
+      today: TODAY,
+      codeSearch: cs(none, 0),
+    });
+    expect(unindexed.library).toBeUndefined();
+    let searched = false;
+    const known = await proposeForLibrary(lib({ overall_status: 'available' as never }), {
+      fetchEvidence: noDocs,
+      llm,
+      today: TODAY,
+      codeSearch: async () => ((searched = true), undefined),
+    });
+    expect(known.library).toBeUndefined();
+    expect(searched).toBe(false);
+  });
+
+  it('pqcCodeSearch stops at the first hit and checks the index otherwise', async () => {
+    const asked: string[] = [];
+    const hit = await pqcCodeSearch('demo/demo-tls', {
+      delayMs: 0,
+      search: async (q) => (asked.push(q), q.endsWith('kyber') ? 3 : 0),
+    });
+    expect(hit.terms).toEqual({ mlkem: 0, kyber: 3 });
+    expect(asked).toHaveLength(2);
+    const miss = await pqcCodeSearch('demo/demo-tls', {
+      delayMs: 0,
+      search: async (q) => (q.endsWith(' demo') ? 40 : 0),
+    });
+    expect(noPqcCode(miss)).toBe(true);
   });
 });
