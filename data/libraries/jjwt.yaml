@@ -13,6 +13,7 @@ delegates_to:
 applicable_algorithms:
   - ml-dsa
   - ml-kem
-overall_status: unknown
+overall_status: no-plan
 algorithms: {}
-last_verified: 2026-11-14T11:28:58Z
+notes: "Searched on 2026-11-18: the jwtk/jjwt repository has no ML-KEM, ML-DSA, Kyber or Dilithium code, and no maintainer has proposed adding post-quantum algorithms in its issue tracker."
+last_verified: 2026-11-18T08:29:17Z

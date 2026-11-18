@@ -8,6 +8,17 @@ repo: https://github.com/LoupVaillant/Monocypher
 applicable_algorithms:
   - ml-kem
   - ml-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+overall_status: no-plan
+algorithms:
+  ml-kem: &a1
+    support: no
+    experimental: false
+    sources:
+      - url: https://github.com/LoupVaillant/Monocypher/issues/226
+        title: Post-quantum cryptography algorithms? (reply by the maintainer)
+        kind: issue
+        quote: quantum-resistant algorithms are indeed out of scope. Not only do I want to stick to stable, conservative choices
+        retrieved: 2026-11-18
+  ml-dsa: *a1
+notes: The maintainer considers post-quantum algorithms out of scope for Monocypher ("Won't fix").
+last_verified: 2026-11-18T08:29:17Z

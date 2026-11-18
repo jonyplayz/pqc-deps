@@ -7,6 +7,16 @@ homepage: https://libssh2.org
 repo: https://github.com/libssh2/libssh2
 applicable_algorithms:
   - ml-kem
-overall_status: unknown
+overall_status: planned
 algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+roadmap:
+  confidence: confirmed
+  summary: Hybrid ML-KEM key exchange is merged for the next release (1.11.2-dev); the latest release, 1.11.1, does not have it.
+  sources:
+    - url: https://github.com/libssh2/libssh2/blob/master/RELEASE-NOTES
+      title: libssh2 1.11.2_DEV release notes
+      kind: changelog
+      quote: "- src: add hybrid ML-KEM KEX algorithms support with OpenSSL 3.5 (3ba252e2 #1644)"
+      retrieved: 2026-11-18
+upgrade_notes: No support yet; a plan exists.
+last_verified: 2026-11-18T08:18:37Z

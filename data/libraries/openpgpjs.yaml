@@ -11,6 +11,17 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
+overall_status: planned
 algorithms: {}
-last_verified: 2026-11-14T11:28:58Z
+roadmap:
+  confidence: confirmed
+  target_version: v7
+  summary: "ML-KEM-768+X25519 and ML-DSA-65+Ed25519 are merged into the v7 branch, which is not released yet (latest release: v6.3.2)."
+  sources:
+    - url: https://github.com/openpgpjs/openpgpjs/pull/2022
+      title: "[v7] PQC: implement ML-KEM-768+X25519 and ML-DSA-65+Ed25519"
+      kind: pull-request
+      quote: "[v7] PQC: implement ML-KEM-768+X25519 and ML-DSA-65+Ed25519"
+      retrieved: 2026-11-18
+upgrade_notes: "No support yet; a plan exists (target: v7)."
+last_verified: 2026-11-18T08:18:37Z

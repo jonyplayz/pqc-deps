@@ -12,6 +12,58 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 2.4.0
+    experimental: false
+    notes: Post-quantum OpenPGP per RFC 9980, with the OpenSSL or RustCrypto backends.
+    sources:
+      - url: https://gitlab.com/sequoia-pgp/sequoia/-/raw/main/openpgp/NEWS
+        title: sequoia-openpgp NEWS, 2.4.0
+        kind: changelog
+        quote: This version adds support for post-quantum cryptography as defined in RFC 9980.
+        retrieved: 2026-11-18
+      - url: https://gitlab.com/sequoia-pgp/sequoia/-/raw/main/openpgp/NEWS
+        title: sequoia-openpgp NEWS, 2.4.0
+        kind: changelog
+        quote: includes support for Post-Quantum algorithms like ML-DSA, SLH-DSA, and ML-KEM.
+        retrieved: 2026-11-18
+  ml-dsa:
+    support: yes
+    since_version: 2.4.0
+    experimental: false
+    notes: Post-quantum OpenPGP per RFC 9980, with the OpenSSL or RustCrypto backends.
+    sources:
+      - url: https://gitlab.com/sequoia-pgp/sequoia/-/raw/main/openpgp/NEWS
+        title: sequoia-openpgp NEWS, 2.4.0
+        kind: changelog
+        quote: This version adds support for post-quantum cryptography as defined in RFC 9980.
+        retrieved: 2026-11-18
+      - url: https://gitlab.com/sequoia-pgp/sequoia/-/raw/main/openpgp/NEWS
+        title: sequoia-openpgp NEWS, 2.4.0
+        kind: changelog
+        quote: includes support for Post-Quantum algorithms like ML-DSA, SLH-DSA, and ML-KEM.
+        retrieved: 2026-11-18
+  slh-dsa:
+    support: yes
+    since_version: 2.4.0
+    experimental: false
+    notes: Post-quantum OpenPGP per RFC 9980, with the OpenSSL or RustCrypto backends.
+    sources:
+      - url: https://gitlab.com/sequoia-pgp/sequoia/-/raw/main/openpgp/NEWS
+        title: sequoia-openpgp NEWS, 2.4.0
+        kind: changelog
+        quote: This version adds support for post-quantum cryptography as defined in RFC 9980.
+        retrieved: 2026-11-18
+      - url: https://gitlab.com/sequoia-pgp/sequoia/-/raw/main/openpgp/NEWS
+        title: sequoia-openpgp NEWS, 2.4.0
+        kind: changelog
+        quote: includes support for Post-Quantum algorithms like ML-DSA, SLH-DSA, and ML-KEM.
+        retrieved: 2026-11-18
+upgrade_notes: "ML-KEM, ML-DSA and SLH-DSA: Sequoia PGP 2.4.0 or later."
+last_verified: 2026-11-18T08:18:37Z
+pipeline:
+  watch_urls:
+    - https://gitlab.com/sequoia-pgp/sequoia/-/raw/main/openpgp/NEWS

@@ -11,6 +11,7 @@ delegates_to:
   - id: python-cryptography
 applicable_algorithms:
   - ml-dsa
-overall_status: unknown
+overall_status: no-plan
 algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+notes: "Searched on 2026-11-18: the mpdavis/python-jose repository has no ML-KEM, ML-DSA, Kyber or Dilithium code, and no maintainer has proposed adding post-quantum algorithms in its issue tracker."
+last_verified: 2026-11-18T08:29:17Z

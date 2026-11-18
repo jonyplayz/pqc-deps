@@ -6,6 +6,17 @@ description: TLS 1.3 implementation in C, used by the H2O web server and QUIC st
 repo: https://github.com/h2o/picotls
 applicable_algorithms:
   - hybrid-tls
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+overall_status: available
+algorithms:
+  hybrid-tls:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://github.com/h2o/picotls/blob/master/include/picotls.h
+        title: picotls include/picotls.h
+        kind: other
+        quote: '#define PTLS_GROUP_NAME_X25519MLKEM768 "X25519MLKEM768"'
+        retrieved: 2026-11-18
+upgrade_notes: "hybrid TLS key exchange: supported in current releases; the sources don't state the first version."
+notes: picotls has no numbered releases. X25519MLKEM768 and SecP256r1MLKEM768 are available with a crypto backend that provides ML-KEM (BoringSSL, or OpenSSL 3.5+).
+last_verified: 2026-11-18T08:29:17Z
