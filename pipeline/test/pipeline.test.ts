@@ -13,7 +13,7 @@ import { proposalJsonSchema, type Proposal } from '../src/proposal';
 import { planBatches, proposeForLibraries, proposeForLibrary } from '../src/run';
 import { noPqcCode, pqcCodeSearch } from '../src/fetch/codesearch';
 import { checkQuote, normalizeForMatch } from '../src/verify';
-import { deriveStatus } from '../src/merge';
+import { deriveStatus, mergeProposal } from '../src/merge';
 
 const TODAY = '2026-11-08';
 const lib = (o: Partial<Library> = {}): Library =>
@@ -955,7 +955,9 @@ describe('review locks and stricter rules (from reviewing evidence PR #10)', () 
     });
     const r = await run(docs, p, existing);
     expect(r.library!.algorithms['ml-kem']!.since_version).toBe('3.8.8');
-    expect(r.kept.join()).toMatch(/since_version 3\.8\.8 \(kept/);
+    expect(r.kept.join()).toMatch(
+      /algorithms\.ml-kem sources and first version \(reviewed claim kept\)/,
+    );
   });
 
   it('reviewer locks win: a removed since_version stays removed, a status stays put', async () => {
@@ -1130,5 +1132,49 @@ describe('code search when no document mentions PQC', () => {
       search: async (q) => (q.endsWith(' demo') ? 40 : 0),
     });
     expect(noPqcCode(miss)).toBe(true);
+  });
+});
+
+describe('refreshes keep reviewed claims', () => {
+  const good = {
+    url: 'https://example.com/releases/0.11.0',
+    title: 'Release 0.11.0',
+    kind: 'release-notes' as const,
+    quote: 'This release updates ML-KEM implementations to their final FIPS 203 versions.',
+    retrieved: '2026-11-11',
+  };
+  const weak = {
+    url: 'https://example.com/releases/0.13.0',
+    title: 'Release 0.13.0',
+    kind: 'release-notes' as const,
+    quote: 'ML-KEM: Changed the default ML-KEM implementation to mlkem-native.',
+    retrieved: TODAY,
+  };
+  const existing = lib({
+    overall_status: 'available',
+    algorithms: { 'ml-kem': { support: 'yes', since_version: '0.11.0', sources: [good] } },
+  } as never);
+  const verified = (since: string | undefined, support: 'yes' | 'partial' = 'yes') => ({
+    algorithms: {
+      'ml-kem': { support, ...(since ? { since_version: since } : {}), sources: [weak] },
+    },
+    overall_status: 'available' as const,
+    reviewer_notes: '',
+    dropped: [],
+    warnings: [],
+  });
+
+  it('a same-verdict refresh keeps the reviewed sources and first version, and flags the difference', () => {
+    const r = mergeProposal(existing, verified('0.13.0'), TODAY);
+    expect(r.library.algorithms['ml-kem']).toMatchObject({
+      since_version: '0.11.0',
+      sources: [good],
+    });
+    expect(r.warnings.join(' ')).toContain('suggests 0.13.0, the reviewed entry says 0.11.0');
+  });
+
+  it('a changed verdict still takes the new evidence', () => {
+    const r = mergeProposal(existing, verified(undefined, 'partial'), TODAY);
+    expect(r.library.algorithms['ml-kem']).toMatchObject({ support: 'partial', sources: [weak] });
   });
 });
