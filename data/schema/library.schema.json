@@ -475,6 +475,6 @@
     "last_verified"
   ],
   "additionalProperties": false,
-  "$id": "https://pqc-deps.pages.dev/schema/library.schema.json",
+  "$id": "https://pqcdeps.com/schema/library.schema.json",
   "title": "PQC Deps library entry"
 }

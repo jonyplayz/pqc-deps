@@ -18,7 +18,7 @@ open an issue with the source link.
 
 ## Add a library
 
-Use the [request form](https://pqc-deps.pages.dev/request) or the
+Use the [request form](https://pqcdeps.com/request) or the
 _Request a library_ issue template. Maintainers can also run
 `npm run add-library` (see the README).
 
