@@ -62,7 +62,7 @@ algorithms:
         quote: "`KEM_hqc_<1|3|5>` is now enabled by default."
         retrieved: 2026-11-16
 upgrade_notes: "ML-KEM: liboqs 0.11.0 or later. ML-DSA: liboqs 0.12.0 or later. SLH-DSA: liboqs 0.15.0 or later."
-last_verified: 2026-11-18T08:58:39Z
+last_verified: 2026-11-18T09:33:09Z
 pipeline:
   watch_urls:
     - https://openquantumsafe.org/liboqs/
