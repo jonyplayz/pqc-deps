@@ -136,3 +136,32 @@ describe('last_verified timestamps', () => {
     );
   });
 });
+
+describe('fallback on overload', () => {
+  it('a model still answering 503 after retries hands over to the next one', async () => {
+    const busy = () =>
+      new Response(JSON.stringify({ error: { code: 503, status: 'UNAVAILABLE' } }), {
+        status: 503,
+      });
+    const ok = new Response(JSON.stringify({ choices: [{ message: { content: '{"a":1}' } }] }), {
+      status: 200,
+    });
+    const answers: Record<string, Array<() => Response>> = {
+      best: [busy, busy, busy],
+      lite: [() => ok],
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_u: string, init: { body: string }) =>
+        answers[JSON.parse(init.body).model]!.shift()!(),
+      ),
+    );
+    const llm = openAiCompatibleClient({
+      baseUrl: 'https://llm.example/v1',
+      model: 'best,lite',
+      retryDelaysMs: [1, 1],
+    });
+    expect(await llm.completeJson({ system: 's', user: 'u', schema: {} })).toBe('{"a":1}');
+    expect(llm.label).toBe('llm.example/lite');
+  });
+});

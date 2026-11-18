@@ -150,6 +150,15 @@ cp .env.example .env   # then fill in a provider
 Weaker free models usually produce more `unknown` fields, because more of
 their quotes fail verification. They don't produce more wrong claims.
 
+### How it avoids mistakes
+
+- Every quote must appear verbatim in a fetched source; claims without one are dropped.
+- Rules in code: a first version needs a stable, non-maintenance line that names the algorithm; "on by default" needs default wording; hybrid TLS needs TLS context; issues and unmerged PRs alone are not enough.
+- **Second opinion**: a separate, strict model request re-reads every claim a run wants to change, with only its quotes, and must confirm it. Unconfirmed claims, versions and defaults are dropped (and if the second opinion can't run, changes don't go through). `npm run judge-eval -w pipeline` replays real past mistakes against it.
+- A refresh can't overwrite a reviewed claim's sources or first version, and the overall status only moves when an algorithm's verdict does, in the same direction.
+- Reviewer locks (`pipeline.locked`) pin fields that a human corrected.
+- PRs list every change as before → after.
+
 ### Running
 
 ```bash

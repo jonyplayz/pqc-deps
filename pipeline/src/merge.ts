@@ -5,6 +5,7 @@
  */
 import {
   ALGORITHMS,
+  STATUS_RANK,
   LibrarySchema,
   applicableAlgorithms,
   lintLibrary,
@@ -17,6 +18,29 @@ export interface FieldChange {
   field: string;
   before: string;
   after: string;
+}
+
+const SUPPORT_RANK = { unknown: 0, no: 1, partial: 2, yes: 3 } as const;
+
+/** Did any algorithm's verdict get better or worse between two versions of an entry? */
+export function verdictMoves(before: Library, after: Library): { up: boolean; down: boolean } {
+  let up = false;
+  let down = false;
+  for (const a of ALGORITHMS) {
+    const x = before.algorithms[a];
+    const y = after.algorithms[a];
+    const sx = SUPPORT_RANK[x?.support ?? 'unknown'];
+    const sy = SUPPORT_RANK[y?.support ?? 'unknown'];
+    if (sy > sx) up = true;
+    if (sy < sx) down = true;
+    if (sx === sy && x && y) {
+      if (!x.default_enabled && y.default_enabled) up = true;
+      if (x.default_enabled && !y.default_enabled) down = true;
+      if (x.experimental && !y.experimental) up = true;
+      if (!x.experimental && y.experimental) down = true;
+    }
+  }
+  return { up, down };
 }
 
 /** Conservative status derived only from the per-algorithm data. */
@@ -201,6 +225,28 @@ export function mergeProposal(
   if (draft.overall_status === 'unknown' && existing.overall_status !== 'unknown') {
     draft.overall_status = existing.overall_status;
     kept.push(`overall_status "${existing.overall_status}" (the model found no new evidence)`);
+  }
+
+  // The overall status moves only when an algorithm's verdict does, and in the
+  // same direction. The model re-picks a status on every run; without this a
+  // refresh that changed nothing could still flip "ready" to "available".
+  if (existing.overall_status !== 'unknown' && draft.overall_status !== existing.overall_status) {
+    const { up, down } = verdictMoves(existing, draft);
+    const better = STATUS_RANK[draft.overall_status] < STATUS_RANK[existing.overall_status];
+    const reason =
+      !up && !down
+        ? 'no algorithm verdict changed'
+        : up && !down && !better
+          ? 'only upgrades, but the status went down'
+          : down && !up && better
+            ? 'only downgrades, but the status went up'
+            : undefined;
+    if (reason) {
+      warnings.push(
+        `Model moved overall_status from "${existing.overall_status}" to "${draft.overall_status}", but ${reason}; kept "${existing.overall_status}".`,
+      );
+      draft.overall_status = existing.overall_status;
+    }
   }
 
   // If overall_status contradicts the data, fall back to the conservative derivation.

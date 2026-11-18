@@ -164,6 +164,7 @@ async function main() {
       run = await proposeForLibrary(library, {
         fetchEvidence,
         llm,
+        secondOpinion: true,
         codeSearch: async (l) => {
           const repo = githubRepo(l);
           return repo ? pqcCodeSearch(repo) : undefined;

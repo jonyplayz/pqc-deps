@@ -94,13 +94,14 @@ export function openAiCompatibleClient(opts: {
           return await askOne(models[current]!, messages);
         } catch (e) {
           const status = (e as { status?: number }).status;
-          const outOfQuota = status === -429 || status === 429;
+          // Out of quota, or still overloaded (503) after the retries: try the next model.
+          const outOfQuota = status === -429 || status === 429 || status === 503;
           if (!outOfQuota || current === models.length - 1) {
             if (status === -429) (e as { status?: number }).status = 429;
             throw e;
           }
           console.warn(
-            `\n  ${models[current]} is out of quota; using ${models[current + 1]} from now on.`,
+            `\n  ${models[current]} is out of quota or overloaded; using ${models[current + 1]} from now on.`,
           );
           current++;
         }
