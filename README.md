@@ -18,6 +18,19 @@ exchange, since which version, and what's planned. Every claim links to a source
 Contributing: see [CONTRIBUTING.md](CONTRIBUTING.md). Security reports:
 [SECURITY.md](SECURITY.md).
 
+## Badges
+
+Every library has a status badge for its README, rebuilt on each deploy:
+
+```markdown
+[![PQC status](https://pqcdeps.com/badge/openssl.svg)](https://pqcdeps.com/libraries/openssl)
+```
+
+[![PQC status](https://pqcdeps.com/badge/openssl.svg)](https://pqcdeps.com/libraries/openssl)
+
+Replace `openssl` with the library's id (the last part of its page URL). Each
+library page has the snippet ready to copy.
+
 ## Repository layout
 
 | Path                              | What                                                                                                                        |

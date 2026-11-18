@@ -5,6 +5,7 @@ import DelegationTree from '../../components/DelegationTree.astro';
 import LibraryActions from '../../components/actions/LibraryActions.tsx';
 import { getLibraries, getLibraryMap, daysSince, formatVerified, isStale } from '../../lib/catalog';
 import { SITE, correctionUrl, editUrl } from '../../config';
+import { badgeMarkdown, badgeUrl } from '../../lib/badge';
 import {
   ALGORITHMS,
   ALGORITHM_INFO,
@@ -234,6 +235,27 @@ const desc = `${lib.name} post-quantum status: ${status.label}. ML-KEM, ML-DSA, 
     }
   </section>
 
+  <section class="badge-box" aria-labelledby="badge-h">
+    <div>
+      <h2 id="badge-h">Badge for your README</h2>
+      <p class="muted small">
+        Show {lib.name}'s post-quantum status in a README or docs. It updates with every catalog
+        refresh and links back to this page.
+      </p>
+    </div>
+    <div class="badge-embed">
+      <img src={`/badge/${lib.id}.svg`} alt={`PQC status of ${lib.name}`} height="20" />
+      <label class="sr-only" for="badge-md">Markdown for the badge</label>
+      <div class="badge-copy">
+        <input id="badge-md" class="mono" type="text" readonly value={badgeMarkdown(Astro.site!, lib.id)} />
+        <button class="btn act-small" type="button" data-copy="badge-md">Copy</button>
+      </div>
+      <p class="muted small">
+        HTML: <code>&lt;a href="{new URL(`/libraries/${lib.id}`, Astro.site)}"&gt;&lt;img src="{badgeUrl(Astro.site!, lib.id)}" alt="PQC status"&gt;&lt;/a&gt;</code>
+      </p>
+    </div>
+  </section>
+
   <section class="fix card">
     <p>
       Out of date? Ask us to re-check {lib.name} against its latest releases, or{' '}
@@ -247,7 +269,64 @@ const desc = `${lib.name} post-quantum status: ${status.label}. ML-KEM, ML-DSA, 
   </p>
 </Base>
 
+<script>
+  // Copy the badge Markdown; fall back to selecting it if the clipboard is unavailable.
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+    btn.addEventListener('click', async () => {
+      const input = document.getElementById(btn.dataset.copy!) as HTMLInputElement;
+      try {
+        await navigator.clipboard.writeText(input.value);
+        btn.textContent = 'Copied';
+        setTimeout(() => (btn.textContent = 'Copy'), 1500);
+      } catch {
+        input.select();
+      }
+    });
+  }
+</script>
+
 <style>
+  .badge-box {
+    display: grid;
+    gap: 1rem 2rem;
+    margin-top: 3rem;
+    padding: 1.25rem 1.3rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  @media (min-width: 860px) {
+    .badge-box {
+      grid-template-columns: 1fr 1.4fr;
+      align-items: center;
+    }
+  }
+  .badge-box h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.35rem;
+  }
+  .badge-box p {
+    margin: 0;
+  }
+  .badge-embed {
+    display: grid;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+  .badge-copy {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .badge-copy input {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.78rem;
+  }
+  .badge-embed code {
+    word-break: break-all;
+    font-size: 0.72rem;
+  }
+
   .crumbs {
     margin-bottom: 0.75rem;
     color: var(--muted);
