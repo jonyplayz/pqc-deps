@@ -44,15 +44,9 @@ algorithms:
         kind: pull-request
         quote: "- SLH-DSA prehash variants are not exposed because the Rust wrapper currently exposes only the pure variants."
         retrieved: 2026-11-13
-  hqc:
-    support: yes
-    since_version: 0.3.0
-    experimental: false
-    sources:
-      - url: https://github.com/open-quantum-safe/liboqs-rust/releases/tag/v0.3.0
-        title: Version 0.3.0
-        kind: release-notes
-        quote: Update liboqs (includes e.g. HQC round 3 update)
-        retrieved: 2026-11-15
 upgrade_notes: "ML-KEM and ML-DSA: liboqs-rust (oqs crate) 0.10.0 or later. Partial or experimental: SLH-DSA; check the notes before relying on it."
-last_verified: 2026-11-15T11:57:47Z
+last_verified: 2026-11-18T08:58:39Z
+pipeline:
+  locked:
+    - path: algorithms.hqc
+      reason: the only evidence is a dependency update line; HQC is not tracked for this binding

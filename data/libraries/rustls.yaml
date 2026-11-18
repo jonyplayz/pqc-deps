@@ -48,8 +48,14 @@ algorithms:
         kind: release-notes
         quote: "* **Support for post-quantum-secure key exchange using X25519MLKEM768** when using the `aws-lc-rs` provider."
         retrieved: 2026-11-16
-upgrade_notes: "hybrid TLS key exchange: rustls 0.23.22 or later. ML-DSA: rustls 0.23.44 or later. ML-KEM: supported in current releases; the sources don't state the first version. On by default: ML-DSA."
-last_verified: 2026-11-16T12:45:16Z
+      - url: https://github.com/rustls/rustls/releases/tag/v%2F0.23.27
+        title: rustls 0.23.27
+        kind: release-notes
+        quote: "* Prefer post-quantum key exchange algorithms by default."
+        retrieved: 2026-11-18
+    default_enabled: true
+upgrade_notes: "hybrid TLS key exchange: rustls 0.23.22 or later. ML-DSA: rustls 0.23.44 or later. ML-KEM: supported in current releases; the sources don't state the first version. On by default: ML-DSA and hybrid TLS key exchange."
+last_verified: 2026-11-18T08:58:39Z
 pipeline:
   watch_urls: []
   locked:

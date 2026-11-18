@@ -132,8 +132,25 @@ export function mergeProposal(
   for (const a of ALGORITHMS) {
     let next = v.algorithms[a];
     const prev = existing.algorithms[a];
-    // Same verdict but this run found fewer details: keep the verified details
-    // already on file (e.g. a since-version from an older changelog section).
+    // Same verdict: the claim on file was reviewed, so it wins. A refresh tends
+    // to re-find support through whatever lines are recent (bug fixes, test
+    // changes, dependency bumps); those must not replace the release note that
+    // introduced the feature, nor move its first version. A different version
+    // is reported for a human instead.
+    if (next && prev && next.support === prev.support && prev.sources.length) {
+      if (next.since_version && prev.since_version && next.since_version !== prev.since_version) {
+        warnings.push(
+          `algorithms.${a}.since_version: this run suggests ${next.since_version}, the reviewed entry says ${prev.since_version}; kept ${prev.since_version}. Check by hand.`,
+        );
+      }
+      next = {
+        ...next,
+        sources: prev.sources,
+        ...(prev.since_version ? { since_version: prev.since_version } : {}),
+        ...(prev.notes && !next.notes ? { notes: prev.notes } : {}),
+      };
+      kept.push(`algorithms.${a} sources and first version (reviewed claim kept)`);
+    }
     if (next && prev && next.support === prev.support) {
       if (!next.since_version && prev.since_version) {
         next = { ...next, since_version: prev.since_version };
