@@ -21,19 +21,31 @@ algorithms:
     support: yes
     experimental: false
     sources:
-      - url: https://github.com/dotnet/runtime/releases/tag/v10.0.12
-        title: .NET 10.0.12
-        kind: release-notes
-        quote: "* [release/10.0] Fix IsSupported tests for ML-KEM by @github-actions[bot] in https://github.com/dotnet/runtime/pull/132512"
-        retrieved: 2026-11-17
+      - url: https://techcommunity.microsoft.com/blog/microsoft-security-blog/post-quantum-cryptography-apis-now-generally-available-on-microsoft-platforms/4469093
+        title: Post-Quantum Cryptography APIs Now Generally Available on Microsoft Platforms
+        kind: blog
+        quote: Post-Quantum Cryptography (PQC) algorithms are now generally available in Windows Server 2025 and Windows 11 clients
+        retrieved: 2026-11-18
+      - url: https://techcommunity.microsoft.com/blog/microsoft-security-blog/post-quantum-cryptography-apis-now-generally-available-on-microsoft-platforms/4469093
+        title: Post-Quantum Cryptography APIs Now Generally Available on Microsoft Platforms
+        kind: blog
+        quote: PQC Algorithms Debut in Windows Server 2025, Windows 11, and .NET 10
+        retrieved: 2026-11-18
+    since_version: "10.0"
   ml-dsa:
     support: yes
     experimental: false
     sources:
-      - url: https://github.com/dotnet/runtime/releases/tag/v10.0.10
-        title: .NET 10.0.10
-        kind: release-notes
-        quote: "* [release/10.0] Fix blob type in CopyWithPrivateKey for ML-DSA by @github-actions[bot] in https://github.com/dotnet/runtime/pull/129865"
-        retrieved: 2026-11-17
-upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-17T13:34:01Z
+      - url: https://techcommunity.microsoft.com/blog/microsoft-security-blog/post-quantum-cryptography-apis-now-generally-available-on-microsoft-platforms/4469093
+        title: Post-Quantum Cryptography APIs Now Generally Available on Microsoft Platforms
+        kind: blog
+        quote: Post-Quantum Cryptography (PQC) algorithms are now generally available in Windows Server 2025 and Windows 11 clients
+        retrieved: 2026-11-18
+      - url: https://techcommunity.microsoft.com/blog/microsoft-security-blog/post-quantum-cryptography-apis-now-generally-available-on-microsoft-platforms/4469093
+        title: Post-Quantum Cryptography APIs Now Generally Available on Microsoft Platforms
+        kind: blog
+        quote: PQC Algorithms Debut in Windows Server 2025, Windows 11, and .NET 10
+        retrieved: 2026-11-18
+    since_version: "10.0"
+upgrade_notes: "ML-KEM and ML-DSA: .NET cryptography 10.0 or later."
+last_verified: 2026-11-18T08:58:39Z

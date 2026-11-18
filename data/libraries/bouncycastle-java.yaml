@@ -17,38 +17,38 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
   - hybrid-tls
-overall_status: available
+overall_status: ready
 algorithms:
   ml-kem:
     support: yes
     since_version: "1.79"
     experimental: false
     sources:
-      - url: https://raw.githubusercontent.com/bcgit/bc-java/main/docs/releasenotes.md
-        title: https://raw.githubusercontent.com/bcgit/bc-java/main/docs/releasenotes.md
+      - url: https://github.com/bcgit/bc-java/blob/main/docs/releasenotes.md
+        title: Bouncy Castle release notes, 1.79
         kind: release-notes
-        quote: The ML-KEM KeyGenerator, Cipher, javax.crypto.KEM and KeyFactory.translateKey services accepted only BC's own key objects, breaking BCJSSE handshakes over the ML-KEM groups when another provider supplied the key.
-        retrieved: 2026-11-17
+        quote: "- The PQC algorithms, ML-KEM, ML-DSA (including pre-hash), and SLH-DSA (including pre-hash) have been added to the BC provider and the lightweight API."
+        retrieved: 2026-11-11
   ml-dsa:
     support: yes
     since_version: "1.79"
     experimental: false
     sources:
-      - url: https://raw.githubusercontent.com/bcgit/bc-java/main/docs/releasenotes.md
-        title: https://raw.githubusercontent.com/bcgit/bc-java/main/docs/releasenotes.md
+      - url: https://github.com/bcgit/bc-java/blob/main/docs/releasenotes.md
+        title: Bouncy Castle release notes, 1.79
         kind: release-notes
-        quote: The ML-DSA and SLH-DSA KeyFactory.translateKey refused keys from other providers, such as the JDK's ML-DSA keys; they are now converted from their encoding.
-        retrieved: 2026-11-17
+        quote: "- The PQC algorithms, ML-KEM, ML-DSA (including pre-hash), and SLH-DSA (including pre-hash) have been added to the BC provider and the lightweight API."
+        retrieved: 2026-11-11
   slh-dsa:
     support: yes
     since_version: "1.79"
     experimental: false
     sources:
-      - url: https://raw.githubusercontent.com/bcgit/bc-java/main/docs/releasenotes.md
-        title: https://raw.githubusercontent.com/bcgit/bc-java/main/docs/releasenotes.md
+      - url: https://github.com/bcgit/bc-java/blob/main/docs/releasenotes.md
+        title: Bouncy Castle release notes, 1.79
         kind: release-notes
-        quote: The ML-DSA and SLH-DSA KeyFactory.translateKey refused keys from other providers, such as the JDK's ML-DSA keys; they are now converted from their encoding.
-        retrieved: 2026-11-17
+        quote: "- The PQC algorithms, ML-KEM, ML-DSA (including pre-hash), and SLH-DSA (including pre-hash) have been added to the BC provider and the lightweight API."
+        retrieved: 2026-11-11
   hybrid-tls:
     support: yes
     since_version: "1.81"
@@ -66,10 +66,12 @@ algorithms:
         quote: NamedGroupInfo's default candidate list, which applies when jdk.tls.namedGroups is not set, gains SecP256r1MLKEM768 and SecP384r1MLKEM1024, appended so the classical groups keep their existing preference.
         retrieved: 2026-11-11
 upgrade_notes: "ML-KEM, ML-DSA and SLH-DSA: Bouncy Castle (Java) 1.79 or later. hybrid TLS key exchange: Bouncy Castle (Java) 1.81 or later. On by default: hybrid TLS key exchange."
-last_verified: 2026-11-17T13:34:01Z
+last_verified: 2026-11-18T08:58:39Z
 pipeline:
   watch_urls:
     - https://raw.githubusercontent.com/bcgit/bc-java/main/docs/releasenotes.md
   locked:
     - path: algorithms.hqc
       reason: the only evidence is a 1.86 hardening note, which shows neither support nor a first version
+    - path: overall_status
+      reason: hybrid TLS groups are in the default list since 1.86 (release notes); reviewed 2026-11-18

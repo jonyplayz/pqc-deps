@@ -16,11 +16,13 @@ algorithms:
     support: yes
     experimental: false
     sources:
-      - url: https://raw.githubusercontent.com/google/boringssl/main/ssl/ssl_key_share.cc
-        title: https://raw.githubusercontent.com/google/boringssl/main/ssl/ssl_key_share.cc
-        kind: docs
-        quote: '{NID_ML_KEM_1024, SSL_GROUP_MLKEM1024, "MLKEM1024", ""},'
-        retrieved: 2026-11-13
+      - url: https://github.com/google/boringssl/blob/main/include/openssl/mlkem.h
+        title: include/openssl/mlkem.h
+        kind: other
+        quote: |-
+          // This implements the Module-Lattice-Based Key-Encapsulation Mechanism from
+          // https://csrc.nist.gov/pubs/fips/203/final
+        retrieved: 2026-11-11
   ml-dsa:
     support: yes
     experimental: false
@@ -55,7 +57,7 @@ algorithms:
         retrieved: 2026-11-11
 upgrade_notes: "ML-KEM, ML-DSA, SLH-DSA and hybrid TLS key exchange: supported in current releases; the sources don't state the first version. On by default: hybrid TLS key exchange."
 notes: BoringSSL is not intended for general use and makes no API or ABI stability guarantees, so it has no numbered releases to compare against.
-last_verified: 2026-11-14T11:28:58Z
+last_verified: 2026-11-18T08:58:39Z
 pipeline:
   watch_urls:
     - https://raw.githubusercontent.com/google/boringssl/main/ssl/ssl_key_share.cc
