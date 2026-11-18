@@ -8,7 +8,13 @@ import { mergeProposal, type FieldChange } from './merge';
 import { buildBatchPrompt, buildUserPrompt, extractJson, SYSTEM_PROMPT } from './prompt';
 import { BatchProposalSchema, ProposalSchema, proposalJsonSchema, type Proposal } from './proposal';
 import { secondOpinion, type JudgeItem } from './judge';
-import { sectionHeadingFor, verifyProposal, type Dropped, type VerifiedProposal } from './verify';
+import {
+  MAINTENANCE_PATTERN,
+  sectionHeadingFor,
+  verifyProposal,
+  type Dropped,
+  type VerifiedProposal,
+} from './verify';
 
 export interface RunDeps {
   fetchEvidence: (lib: Library) => Promise<FetchResult>;
@@ -180,7 +186,24 @@ function changedClaims(lib: Library, v: VerifiedProposal, docs: Excerpted[]): Ju
 
 /** Drop whatever the second opinion can't confirm; the reviewed value on file then stays. */
 async function applySecondOpinion(p: Prepared, v: VerifiedProposal, deps: RunDeps): Promise<void> {
-  const items = changedClaims(p.lib, v, p.selected);
+  // Deterministic first: support that is new (or better than what's on file)
+  // can't rest on maintenance lines alone (fixes, tests, refactors, bumps).
+  // The model is inconsistent on exactly these, so don't ask it.
+  const items = changedClaims(p.lib, v, p.selected).filter((it) => {
+    const prev = p.lib.algorithms[it.algorithm];
+    const newSupport = !prev || prev.support !== it.support;
+    if (newSupport && it.quotes.every((q) => MAINTENANCE_PATTERN.test(q.text))) {
+      delete v.algorithms[it.algorithm];
+      v.dropped.push({
+        field: `algorithms.${it.algorithm}`,
+        claim: it.support,
+        reason:
+          'only maintenance lines (fixes, tests, refactors, bumps) as evidence for new support',
+      });
+      return false;
+    }
+    return true;
+  });
   if (!items.length) return;
   let verdicts: Awaited<ReturnType<typeof secondOpinion>>;
   try {

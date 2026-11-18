@@ -67,7 +67,7 @@ const cases: Array<{ lib: ReturnType<typeof lib>; item: JudgeItem; expect: strin
   },
   {
     lib: lib('dotnet-crypto', '.NET (System.Security.Cryptography)'),
-    expect: 'supports_claim=false (test fix only)',
+    expect: 'supports=false (also blocked in code first)',
     item: {
       key: 'd',
       algorithm: 'ml-kem',
@@ -92,6 +92,35 @@ const cases: Array<{ lib: ReturnType<typeof lib>; item: JudgeItem; expect: strin
         {
           text: 'Integrated into the default and FIPS providers.',
           release: 'Changes between 3.4 and 3.5.0',
+        },
+      ],
+    },
+  },
+  {
+    lib: lib('liboqs', 'liboqs'),
+    expect: 'default_ok=false (build-config default)',
+    item: {
+      key: 'i',
+      algorithm: 'hqc',
+      support: 'yes',
+      default_enabled: true,
+      quotes: [
+        { text: '`KEM_hqc_<1|3|5>` is now enabled by default.', release: 'liboqs version 0.16.0' },
+      ],
+    },
+  },
+  {
+    lib: lib('rustls', 'rustls'),
+    expect: 'default=true (false = safe miss)',
+    item: {
+      key: 'j',
+      algorithm: 'ml-dsa',
+      support: 'yes',
+      default_enabled: true,
+      quotes: [
+        {
+          text: 'Support for post-quantum secure ML-DSA certificates is now enabled by default in the aws-lc-rs crypto provider.',
+          release: 'rustls 0.23.44',
         },
       ],
     },
