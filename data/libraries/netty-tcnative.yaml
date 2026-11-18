@@ -11,6 +11,7 @@ delegates_to:
   - id: boringssl
 applicable_algorithms:
   - hybrid-tls
-overall_status: unknown
+overall_status: n/a
 algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+notes: netty-tcnative is Netty's binding to a statically linked BoringSSL; the TLS key exchange, including X25519MLKEM768, comes from BoringSSL.
+last_verified: 2026-11-18T08:29:17Z

@@ -27,6 +27,15 @@ const CHANGELOG_CANDIDATES = [
   'CHANGELOG',
   'HISTORY.md',
   'RELEASE-NOTES.md',
+  // reStructuredText and docs/ changelogs (Python projects, AsyncSSH, …).
+  'CHANGES.rst',
+  'CHANGELOG.rst',
+  'NEWS.rst',
+  'HISTORY.rst',
+  'docs/changes.rst',
+  'docs/changelog.rst',
+  'docs/CHANGELOG.md',
+  'docs/changelog.md',
 ];
 
 interface GhRelease {

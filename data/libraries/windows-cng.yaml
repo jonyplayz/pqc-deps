@@ -8,11 +8,40 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - hybrid-tls
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-17T13:36:34Z
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://techcommunity.microsoft.com/blog/microsoft-security-blog/post-quantum-cryptography-apis-now-generally-available-on-microsoft-platforms/4469093
+        title: Post-Quantum Cryptography APIs Now Generally Available on Microsoft Platforms
+        kind: blog
+        quote: Developers now have access to ML-KEM for use in scenarios requiring key encapsulation or key exchange
+        retrieved: 2026-11-18
+  ml-dsa:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://techcommunity.microsoft.com/blog/microsoft-security-blog/post-quantum-cryptography-apis-now-generally-available-on-microsoft-platforms/4469093
+        title: Post-Quantum Cryptography APIs Now Generally Available on Microsoft Platforms
+        kind: blog
+        quote: Additionally, developers can adopt ML-DSA for scenarios involving identity verification, integrity checks, or digital signatu
+        retrieved: 2026-11-18
+roadmap:
+  confidence: tentative
+  summary: Post-quantum TLS in SChannel is in development, following the IETF standards.
+  sources:
+    - url: https://techcommunity.microsoft.com/blog/microsoft-security-blog/post-quantum-cryptography-apis-now-generally-available-on-microsoft-platforms/4469093
+      title: Post-Quantum Cryptography APIs Now Generally Available on Microsoft Platforms
+      kind: blog
+      quote: The development of PQC support for securing TLS is proceeding in alignment with IETF standards
+      retrieved: 2026-11-18
+upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
+notes: ML-KEM and ML-DSA are generally available in the CNG API on Windows 11 (24H2, 25H2) and Windows Server 2025. Post-quantum TLS (SChannel) is not available yet.
+last_verified: 2026-11-18T08:18:37Z
 pipeline:
   watch_urls:
+    - https://techcommunity.microsoft.com/blog/microsoft-security-blog/post-quantum-cryptography-apis-now-generally-available-on-microsoft-platforms/4469093
     - https://learn.microsoft.com/en-us/windows/win32/seccng/cng-mlkem-examples
-    - https://learn.microsoft.com/en-us/windows/win32/seccng/cng-mldsa-examples
-    - https://learn.microsoft.com/en-us/windows/win32/seccng/cng-algorithm-identifiers
+  locked: []

@@ -11,6 +11,7 @@ delegates_to:
   - id: libsodium
 applicable_algorithms:
   - ml-kem
-overall_status: unknown
+overall_status: no-plan
 algorithms: {}
-last_verified: 2026-11-15T11:58:14Z
+notes: "Searched on 2026-11-18: the pyca/pynacl repository has no ML-KEM, ML-DSA, Kyber or Dilithium code, and no maintainer has proposed adding post-quantum algorithms in its issue tracker. libsodium itself has ML-KEM, but PyNaCl does not expose it."
+last_verified: 2026-11-18T08:29:17Z

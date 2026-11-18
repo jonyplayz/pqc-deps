@@ -9,6 +9,30 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: "4.1"
+    experimental: false
+    sources:
+      - url: https://github.com/gnutls/nettle/blob/master/NEWS
+        title: Nettle NEWS, 4.1 release
+        kind: changelog
+        quote: "* Support for ML-KEM key encapsulation mechanism."
+        retrieved: 2026-11-18
+  slh-dsa:
+    support: yes
+    since_version: "4.0"
+    experimental: false
+    sources:
+      - url: https://github.com/gnutls/nettle/blob/master/NEWS
+        title: Nettle NEWS, 4.0 release
+        kind: changelog
+        quote: "* Support for SLH-DSA signatures (stateless hash-based digital signature algorithm)."
+        retrieved: 2026-11-18
+upgrade_notes: "SLH-DSA: Nettle 4.0 or later. ML-KEM: Nettle 4.1 or later."
+last_verified: 2026-11-18T08:18:37Z
+pipeline:
+  watch_urls:
+    - https://raw.githubusercontent.com/gnutls/nettle/master/NEWS

@@ -9,6 +9,28 @@ applicable_algorithms:
   - ml-kem
   - ml-dsa
   - slh-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 1.12.0
+    experimental: false
+    notes: Kyber per the FIPS 203 draft was added in 1.11.0; 1.12.0 updates it to final FIPS 203.
+    sources:
+      - url: https://github.com/gpg/libgcrypt/blob/master/NEWS
+        title: Libgcrypt NEWS, version 1.12.0
+        kind: changelog
+        quote: "- Apply changes to Kyber from upstream for final FIPS 203."
+        retrieved: 2026-11-18
+  ml-dsa:
+    support: yes
+    since_version: 1.12.0
+    experimental: false
+    sources:
+      - url: https://github.com/gpg/libgcrypt/blob/master/NEWS
+        title: Libgcrypt NEWS, version 1.12.0
+        kind: changelog
+        quote: "- Add Dilithium (ML-DSA) support."
+        retrieved: 2026-11-18
+upgrade_notes: "ML-KEM and ML-DSA: Libgcrypt 1.12.0 or later."
+last_verified: 2026-11-18T08:18:37Z

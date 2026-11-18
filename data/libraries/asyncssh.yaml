@@ -9,7 +9,23 @@ package_names:
     - asyncssh
 applicable_algorithms:
   - ml-kem
-  - ml-dsa
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-15T11:58:14Z
+overall_status: available
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 2.18.0
+    experimental: false
+    notes: Hybrid ML-KEM SSH key exchange. Before 2.24.0 it needs liboqs; from 2.24.0 the cryptography package is enough.
+    sources:
+      - url: https://github.com/ronf/asyncssh/blob/develop/docs/changes.rst
+        title: AsyncSSH change log, release 2.18.0
+        kind: changelog
+        quote: "* Added support for post-quantum ML-KEM key exchange algorithms,"
+        retrieved: 2026-11-18
+      - url: https://github.com/ronf/asyncssh/blob/develop/docs/changes.rst
+        title: AsyncSSH change log, release 2.24.0
+        kind: changelog
+        quote: "* Added support for ML-KEM key exchange from the PyCA cryptography"
+        retrieved: 2026-11-18
+upgrade_notes: "ML-KEM: AsyncSSH 2.18.0 or later."
+last_verified: 2026-11-18T08:18:37Z

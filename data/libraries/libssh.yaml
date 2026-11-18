@@ -7,6 +7,27 @@ homepage: https://www.libssh.org
 repo: https://git.libssh.org/projects/libssh.git
 applicable_algorithms:
   - ml-kem
-overall_status: unknown
-algorithms: {}
-last_verified: 2026-11-13T12:48:59Z
+overall_status: ready
+algorithms:
+  ml-kem:
+    support: yes
+    since_version: 0.12.0
+    default_enabled: true
+    experimental: false
+    notes: Hybrid SSH key exchange (mlkem768x25519-sha256 and others), preferred by default.
+    sources:
+      - url: https://gitlab.com/libssh/libssh-mirror/-/raw/master/CHANGELOG
+        title: libssh CHANGELOG, version 0.12.0
+        kind: changelog
+        quote: "Add support for hybrid key exchange mechanisms using Quantum Resistant cryptography for all backends. These are now preferred:"
+        retrieved: 2026-11-18
+      - url: https://gitlab.com/libssh/libssh-mirror/-/raw/master/CHANGELOG
+        title: libssh CHANGELOG, version 0.12.0
+        kind: changelog
+        quote: "* mlkem768x25519-sha256"
+        retrieved: 2026-11-18
+upgrade_notes: "ML-KEM: libssh 0.12.0 or later. On by default: ML-KEM."
+last_verified: 2026-11-18T08:18:37Z
+pipeline:
+  watch_urls:
+    - https://gitlab.com/libssh/libssh-mirror/-/raw/master/CHANGELOG

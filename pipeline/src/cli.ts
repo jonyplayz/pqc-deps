@@ -24,6 +24,13 @@ import { join } from 'node:path';
 import { isoNow, isoToday, type Library } from '@pqc-deps/core';
 import { loadLibrariesFromDir, REPO_ROOT } from '@pqc-deps/core/node';
 import { fetchEvidence } from './fetch';
+import { pqcCodeSearch } from './fetch/codesearch';
+import { githubRepo } from './fetch/github';
+
+const codeSearch = async (lib: Library) => {
+  const repo = githubRepo(lib);
+  return repo ? pqcCodeSearch(repo) : undefined;
+};
 import { llmFromEnv } from './llm';
 import { libraryToYaml, reportMarkdown } from './output';
 import { proposeForLibraries, type RunResult } from './run';
@@ -130,7 +137,11 @@ async function main() {
   );
   const all = await proposeForLibraries(
     targets,
-    { fetchEvidence, ...(llm ? { llm } : {}), excerpt: { maxCharsTotal: args.maxChars } },
+    {
+      fetchEvidence,
+      ...(llm ? { llm, codeSearch } : {}),
+      excerpt: { maxCharsTotal: args.maxChars },
+    },
     { batchSize: args.batch, delayMs: args.delay },
   );
   for (const [i, lib] of targets.entries()) {
