@@ -31,7 +31,7 @@ algorithms:
         quote: "* Support for SLH-DSA signatures (stateless hash-based digital signature algorithm)."
         retrieved: 2026-11-18
 upgrade_notes: "SLH-DSA: Nettle 4.0 or later. ML-KEM: Nettle 4.1 or later."
-last_verified: 2026-11-18T08:18:37Z
+last_verified: 2026-11-19T13:06:08Z
 pipeline:
   watch_urls:
     - https://raw.githubusercontent.com/gnutls/nettle/master/NEWS

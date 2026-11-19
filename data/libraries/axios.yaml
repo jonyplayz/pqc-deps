@@ -14,4 +14,4 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: "axios leaves TLS to the platform: Node.js's TLS stack on servers and the browser on the web."
-last_verified: 2026-11-13
+last_verified: 2026-11-19T13:06:08Z

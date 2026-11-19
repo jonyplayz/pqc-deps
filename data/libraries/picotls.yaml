@@ -19,4 +19,4 @@ algorithms:
         retrieved: 2026-11-18
 upgrade_notes: "hybrid TLS key exchange: supported in current releases; the sources don't state the first version."
 notes: picotls has no numbered releases. X25519MLKEM768 and SecP256r1MLKEM768 are available with a crypto backend that provides ML-KEM (BoringSSL, or OpenSSL 3.5+).
-last_verified: 2026-11-18T08:29:17Z
+last_verified: 2026-11-19T13:06:08Z

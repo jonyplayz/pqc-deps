@@ -25,4 +25,4 @@ algorithms:
         quote: '* Support "pure" ML-DSA by @WillChilds-Klein in https://github.com/corretto/amazon-corretto-crypto-provider/pull/422'
         retrieved: 2026-11-13
 upgrade_notes: "ML-DSA: Amazon Corretto Crypto Provider 2.5.0 or later."
-last_verified: 2026-11-13T12:39:15Z
+last_verified: 2026-11-19T13:06:08Z
