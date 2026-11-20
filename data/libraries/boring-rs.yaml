@@ -46,9 +46,10 @@ algorithms:
         kind: release-notes
         quote: Post-quantum is enabled by default (X25519MLKEM768 and P256Kyber768Draft00) and the "pq-experimental" Cargo feature flag is not used any more.
         retrieved: 2026-11-13
-upgrade_notes: "Use boring v5.0.0 or later: it adds ML-KEM and turns on hybrid post-quantum TLS key exchange (X25519MLKEM768) by default."
-last_verified: 2026-11-13T12:39:15Z
+upgrade_notes: "hybrid TLS key exchange and ML-KEM: boring (Rust) v5.0.0 or later. On by default: hybrid TLS key exchange."
+last_verified: 2026-11-20T12:54:55Z
 pipeline:
+  watch_urls: []
   locked:
     - path: algorithms.hybrid-tls
       reason: v5.0.0 enables X25519MLKEM768 by default; the draft Kyber group alongside it does not make support partial

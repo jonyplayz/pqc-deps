@@ -17,6 +17,7 @@ algorithms:
   ml-kem:
     support: yes
     since_version: 4.2.0
+    experimental: false
     sources:
       - url: https://github.com/Legrandin/pycryptodome/releases/tag/v4.2.0
         title: v4.2.0 - Jura
@@ -26,6 +27,7 @@ algorithms:
   ml-dsa:
     support: yes
     since_version: 4.1.0
+    experimental: false
     sources:
       - url: https://github.com/Legrandin/pycryptodome/releases/tag/v4.1.0
         title: v4.1.0 - Issy-les-Moulineaux
@@ -33,4 +35,4 @@ algorithms:
         quote: New module ``Crypto.PublicKey.MLDSA``, for ML-DSA keys (FIPS 204).
         retrieved: 2026-11-13
 upgrade_notes: "ML-DSA: PyCryptodome 4.1.0 or later. ML-KEM: PyCryptodome 4.2.0 or later."
-last_verified: 2026-11-13T12:48:25Z
+last_verified: 2026-11-20T12:55:26Z

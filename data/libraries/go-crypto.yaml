@@ -30,6 +30,7 @@ algorithms:
         retrieved: 2026-11-13
   ml-dsa:
     support: yes
+    experimental: false
     sources:
       - url: https://pkg.go.dev/crypto/tls
         title: tls package - crypto/tls - Go Packages
@@ -58,7 +59,7 @@ algorithms:
         quote: X25519MLKEM768 CurveID = 4588
         retrieved: 2026-11-13
 upgrade_notes: "hybrid TLS key exchange: Go standard library crypto 1.24 or later. ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version. On by default: hybrid TLS key exchange."
-last_verified: 2026-11-13T12:12:04Z
+last_verified: 2026-11-20T12:55:11Z
 pipeline:
   watch_urls:
     - https://pkg.go.dev/crypto/tls
