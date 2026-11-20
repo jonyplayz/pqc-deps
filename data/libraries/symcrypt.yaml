@@ -13,6 +13,7 @@ algorithms:
   ml-kem:
     support: yes
     since_version: 103.5.0
+    experimental: false
     sources:
       - url: https://github.com/microsoft/SymCrypt/blob/HEAD/CHANGELOG.md
         title: microsoft/SymCrypt CHANGELOG.md
@@ -22,6 +23,7 @@ algorithms:
   ml-dsa:
     support: yes
     since_version: 103.7.0
+    experimental: false
     sources:
       - url: https://github.com/microsoft/SymCrypt/blob/HEAD/CHANGELOG.md
         title: microsoft/SymCrypt CHANGELOG.md
@@ -29,4 +31,4 @@ algorithms:
         quote: "- Add ML-DSA implementation"
         retrieved: 2026-11-13
 upgrade_notes: "ML-KEM: SymCrypt 103.5.0 or later. ML-DSA: SymCrypt 103.7.0 or later."
-last_verified: 2026-11-13T12:48:59Z
+last_verified: 2026-11-20T12:57:19Z
