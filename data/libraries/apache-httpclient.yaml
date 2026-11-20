@@ -15,4 +15,4 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: "Apache HttpClient uses the JVM's TLS implementation (JSSE)."
-last_verified: 2026-11-13
+last_verified: 2026-11-20T12:57:19Z
