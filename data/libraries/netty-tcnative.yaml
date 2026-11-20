@@ -14,4 +14,4 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: netty-tcnative is Netty's binding to a statically linked BoringSSL; the TLS key exchange, including X25519MLKEM768, comes from BoringSSL.
-last_verified: 2026-11-18T08:29:17Z
+last_verified: 2026-11-20T12:57:19Z
