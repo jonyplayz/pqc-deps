@@ -10,25 +10,35 @@ applicable_algorithms:
   - ml-dsa
   - slh-dsa
   - hybrid-tls
-overall_status: planned
-algorithms: {}
+overall_status: partial
+algorithms:
+  ml-dsa:
+    support: partial
+    default_enabled: false
+    experimental: true
+    sources:
+      - url: https://raw.githubusercontent.com/Mbed-TLS/TF-PSA-Crypto/development/ChangeLog
+        title: https://raw.githubusercontent.com/Mbed-TLS/TF-PSA-Crypto/development/ChangeLog
+        kind: release-notes
+        quote: "A limited subset of ML-DSA is available from the driver dispatch layer: key generation, export public key, one-shot sign and verify, multipart sign and verify. Only pureML-DSA-87 is supported for now. This interface is experimental and may change without notice."
+        retrieved: 2026-11-21
 roadmap:
   confidence: tentative
-  summary: ML-DSA and ML-KEM are on the product roadmap for initial support and future development.
+  summary: ML-DSA and ML-KEM are included in the Mbed TLS roadmap for initial support and future development.
   sources:
     - url: https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
       title: Roadmap — Mbed TLS documentation
       kind: docs
       quote: ML-DSA - Initial support
-      retrieved: 2026-11-14
+      retrieved: 2026-11-21
     - url: https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
       title: Roadmap — Mbed TLS documentation
       kind: docs
       quote: ML-KEM Support
-      retrieved: 2026-11-14
-upgrade_notes: No support yet; a plan exists.
+      retrieved: 2026-11-21
+upgrade_notes: "Partial or experimental: ML-DSA; check the notes before relying on it."
 notes: Mbed TLS has LMS (a stateful hash-based signature) but no ML-KEM, ML-DSA or SLH-DSA in a release yet, including TF-PSA-Crypto 1.2.0.
-last_verified: 2026-11-14T11:28:25Z
+last_verified: 2026-11-21T12:49:40Z
 pipeline:
   watch_urls:
     - https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
