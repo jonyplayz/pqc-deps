@@ -32,4 +32,4 @@ algorithms:
         quote: Available in Node.js >= 24.7.0
         retrieved: 2026-11-09
 upgrade_notes: "ML-DSA: jose (panva) 6.1.0 or later."
-last_verified: 2026-11-18T08:58:39Z
+last_verified: 2026-11-22T12:36:09Z
