@@ -28,4 +28,4 @@ roadmap:
       kind: issue
       quote: We would then need to guard it with build tags as we will definitely NOT bump up the minimum version to 1.27
       retrieved: 2026-11-11
-last_verified: 2026-11-15T11:58:14Z
+last_verified: 2026-11-22T12:36:09Z
