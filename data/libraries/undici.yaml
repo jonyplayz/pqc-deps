@@ -14,4 +14,4 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: "undici uses Node.js's TLS stack for HTTPS."
-last_verified: 2026-11-15T11:58:14Z
+last_verified: 2026-11-22T12:36:09Z
