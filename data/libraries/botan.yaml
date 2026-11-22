@@ -49,7 +49,7 @@ algorithms:
         quote: "In TLS enable the hybrid x25519/ML-KEM-768 post quantum secure key exchange by default for clients and servers. (GH #4305)"
         retrieved: 2026-11-15
 upgrade_notes: "ML-KEM, ML-DSA and SLH-DSA: Botan 3.6.0 or later. hybrid TLS key exchange: Botan 3.7.0 or later. On by default: hybrid TLS key exchange."
-last_verified: 2026-11-15T11:57:47Z
+last_verified: 2026-11-22T12:36:09Z
 pipeline:
   watch_urls:
     - https://botan.randombit.net/news.html
