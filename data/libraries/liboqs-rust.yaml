@@ -45,7 +45,7 @@ algorithms:
         quote: "- SLH-DSA prehash variants are not exposed because the Rust wrapper currently exposes only the pure variants."
         retrieved: 2026-11-13
 upgrade_notes: "ML-KEM and ML-DSA: liboqs-rust (oqs crate) 0.10.0 or later. Partial or experimental: SLH-DSA; check the notes before relying on it."
-last_verified: 2026-11-18T08:58:39Z
+last_verified: 2026-11-22T12:36:09Z
 pipeline:
   locked:
     - path: algorithms.hqc

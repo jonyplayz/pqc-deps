@@ -34,4 +34,4 @@ algorithms:
         quote: Implement Falcon signatures. Prepare for future FN-DSA / FIPS-206.
         retrieved: 2026-11-15
 upgrade_notes: "ML-KEM: noble-post-quantum 0.2.0 or later."
-last_verified: 2026-11-15T11:57:47Z
+last_verified: 2026-11-22T12:36:09Z
