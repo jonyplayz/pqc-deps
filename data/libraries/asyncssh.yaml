@@ -28,4 +28,4 @@ algorithms:
         quote: "* Added support for ML-KEM key exchange from the PyCA cryptography"
         retrieved: 2026-11-18
 upgrade_notes: "ML-KEM: AsyncSSH 2.18.0 or later."
-last_verified: 2026-11-18T08:18:37Z
+last_verified: 2026-11-22T12:36:09Z
