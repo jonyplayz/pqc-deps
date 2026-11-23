@@ -14,7 +14,7 @@
     "add-library": "tsx src/add-library/cli.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.6.0",
+    "@anthropic-ai/sdk": "^1.11.0",
     "yaml": "^2.9.1",
     "zod": "^4.6.7",
     "@pqc-deps/core": "^0.1.0"
