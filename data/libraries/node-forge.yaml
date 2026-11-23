@@ -15,4 +15,4 @@ applicable_algorithms:
 overall_status: no-plan
 algorithms: {}
 notes: "Searched on 2026-11-18: the digitalbazaar/forge repository has no ML-KEM, ML-DSA, Kyber or Dilithium code, and no maintainer has proposed adding post-quantum algorithms in its issue tracker."
-last_verified: 2026-11-18T08:29:17Z
+last_verified: 2026-11-23T14:43:24Z
