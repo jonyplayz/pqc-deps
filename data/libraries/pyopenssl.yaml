@@ -16,4 +16,4 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: pyOpenSSL wraps OpenSSL through the cryptography package and has no post-quantum APIs of its own; TLS key exchange follows the OpenSSL it is linked with. For ML-KEM and ML-DSA in Python, use cryptography.
-last_verified: 2026-11-18T08:29:17Z
+last_verified: 2026-11-23T14:43:24Z
