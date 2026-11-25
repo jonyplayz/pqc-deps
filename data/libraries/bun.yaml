@@ -34,7 +34,7 @@ algorithms:
         quote: ML-DSA (FIPS 204 signatures) at parameter sets 44/65/87
         retrieved: 2026-11-18
 upgrade_notes: "ML-KEM and ML-DSA: Bun 1.4.0 or later."
-last_verified: 2026-11-18T13:06:09Z
+last_verified: 2026-11-25T14:21:16Z
 pipeline:
   watch_urls:
     - https://bun.sh/blog
