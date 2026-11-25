@@ -16,4 +16,4 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: "gRPC Java uses the JVM's TLS or Netty's BoringSSL-based tcnative, depending on the transport."
-last_verified: 2026-11-18T13:06:09Z
+last_verified: 2026-11-25T14:21:16Z
