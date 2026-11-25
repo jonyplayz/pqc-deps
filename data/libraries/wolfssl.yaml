@@ -25,6 +25,7 @@ algorithms:
         retrieved: 2026-11-11
   ml-dsa:
     support: yes
+    since_version: 5.7.2
     experimental: false
     sources:
       - url: https://github.com/wolfSSL/wolfssl/releases/tag/v5.9.2-stable
@@ -42,8 +43,17 @@ algorithms:
         kind: release-notes
         quote: FIPS 205, SLH-DSA implementation by @SparkiDev (PR 9838).
         retrieved: 2026-11-11
-upgrade_notes: "SLH-DSA: wolfSSL 5.9.0 or later. ML-KEM: wolfSSL 5.9.1 or later. ML-DSA: supported in current releases; the sources don't state the first version. On by default: ML-KEM."
-last_verified: 2026-11-18T13:06:09Z
+  fn-dsa:
+    support: yes
+    experimental: false
+    sources:
+      - url: https://github.com/wolfSSL/wolfssl/releases/tag/v5.9.4-stable
+        title: wolfSSL Release 5.9.4 (September 25, 2026)
+        kind: release-notes
+        quote: Replaced the liboqs-based Falcon wrapper with a native wolfCrypt implementation (levels 1 and 5) with crypto callbacks, ARM DSP and AArch64 NEON acceleration, and removed the liboqs dependency.
+        retrieved: 2026-11-25
+upgrade_notes: "ML-DSA: wolfSSL 5.7.2 or later. SLH-DSA: wolfSSL 5.9.0 or later. ML-KEM: wolfSSL 5.9.1 or later. On by default: ML-KEM."
+last_verified: 2026-11-25T14:21:16Z
 pipeline:
   watch_urls: []
   locked:
