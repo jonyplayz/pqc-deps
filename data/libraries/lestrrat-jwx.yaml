@@ -17,6 +17,7 @@ algorithms:
   ml-kem:
     support: yes
     since_version: v4.0.0
+    experimental: false
     sources:
       - url: https://github.com/lestrrat-go/jwx/releases/tag/v4.0.0
         title: v4.0.0
@@ -26,6 +27,7 @@ algorithms:
   ml-dsa:
     support: yes
     since_version: v4.0.0
+    experimental: false
     sources:
       - url: https://github.com/lestrrat-go/jwx/releases/tag/v4.0.0
         title: v4.0.0
@@ -33,4 +35,4 @@ algorithms:
         quote: "Quantum-Ready: ML-KEM and ML-DSA, HPKE (+Hybrid) are supported through companion modules."
         retrieved: 2026-11-13
 upgrade_notes: "ML-KEM and ML-DSA: jwx v4.0.0 or later."
-last_verified: 2026-11-18T13:06:09Z
+last_verified: 2026-11-25T14:20:40Z
