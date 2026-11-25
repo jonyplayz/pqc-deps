@@ -63,7 +63,7 @@ algorithms:
         quote: includes support for Post-Quantum algorithms like ML-DSA, SLH-DSA, and ML-KEM.
         retrieved: 2026-11-18
 upgrade_notes: "ML-KEM, ML-DSA and SLH-DSA: Sequoia PGP 2.4.0 or later."
-last_verified: 2026-11-18T13:06:09Z
+last_verified: 2026-11-25T14:21:16Z
 pipeline:
   watch_urls:
     - https://gitlab.com/sequoia-pgp/sequoia/-/raw/main/openpgp/NEWS
