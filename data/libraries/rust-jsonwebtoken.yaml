@@ -14,4 +14,4 @@ applicable_algorithms:
 overall_status: no-plan
 algorithms: {}
 notes: "Searched on 2026-11-18: the Keats/jsonwebtoken repository has no ML-KEM, ML-DSA, Kyber or Dilithium code, and no maintainer has proposed adding post-quantum algorithms in its issue tracker."
-last_verified: 2026-11-18T13:06:09Z
+last_verified: 2026-11-25T14:21:16Z

@@ -13,6 +13,7 @@ overall_status: ready
 algorithms:
   ml-kem:
     support: yes
+    experimental: false
     sources:
       - url: https://github.com/aws/aws-lc/releases/tag/v1.72.0
         title: v1.72.0
@@ -21,6 +22,7 @@ algorithms:
         retrieved: 2026-11-11
   ml-dsa:
     support: yes
+    experimental: false
     sources:
       - url: https://github.com/aws/aws-lc/releases/tag/v5.0.0
         title: v5.0.0
@@ -30,6 +32,7 @@ algorithms:
   hybrid-tls:
     support: yes
     default_enabled: true
+    experimental: false
     sources:
       - url: https://github.com/aws/aws-lc/releases/tag/AWS-LC-FIPS-3.6.0
         title: AWS-LC-FIPS-3.6.0
@@ -37,7 +40,7 @@ algorithms:
         quote: "[Cherry-pick 2024] Enable Hybrid PQ KeyShares by default (#2531) by @WillChilds-Klein in https://github.com/aws/aws-lc/pull/3394"
         retrieved: 2026-11-11
 upgrade_notes: "ML-KEM, ML-DSA and hybrid TLS key exchange: supported in current releases; the sources don't state the first version. On by default: hybrid TLS key exchange."
-last_verified: 2026-11-18T13:06:09Z
+last_verified: 2026-11-25T14:20:40Z
 pipeline:
   watch_urls: []
   locked:

@@ -48,7 +48,7 @@ algorithms:
         quote: Bug 1983313 - support secp256r1mlkem768
         retrieved: 2026-11-11
 upgrade_notes: Use NSS 3.105 or later for ML-KEM and the X25519 + ML-KEM-768 hybrid TLS group, 3.116 or later for ML-DSA, and 3.118 or later for the secp256r1/secp384r1 hybrid groups. Applications choose which TLS groups to enable.
-last_verified: 2026-11-18T13:06:09Z
+last_verified: 2026-11-25T14:21:16Z
 pipeline:
   watch_urls:
     - https://firefox-source-docs.mozilla.org/security/nss/releases/index.html

@@ -19,6 +19,7 @@ overall_status: available
 algorithms:
   ml-kem:
     support: yes
+    experimental: false
     sources:
       - url: https://www.paramiko.org/changelog.html
         title: Changelog — Paramiko documentation
@@ -31,7 +32,8 @@ algorithms:
         quote: The new method is enabled automatically when the installed cryptography library exposes ML-KEM
         retrieved: 2026-11-09
 upgrade_notes: "ML-KEM: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-18T13:06:09Z
+last_verified: 2026-11-25T14:20:40Z
 pipeline:
   watch_urls:
     - https://www.paramiko.org/changelog.html
+  locked: []
