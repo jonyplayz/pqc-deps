@@ -25,4 +25,4 @@ algorithms:
         retrieved: 2026-11-19
 upgrade_notes: "hybrid TLS key exchange: supported in current releases; the sources don't state the first version. On by default: hybrid TLS key exchange."
 notes: gRPC core ships with BoringSSL for TLS.
-last_verified: 2026-11-19T13:05:44Z
+last_verified: 2026-11-26T13:56:17Z

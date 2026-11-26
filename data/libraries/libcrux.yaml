@@ -32,4 +32,4 @@ algorithms:
         quote: "(libcrux-ml-dsa) [#1398](https://github.com/celabshq/libcrux/pull/1398): Fix incorrect AVX2 use_hint implementation"
         retrieved: 2026-11-13
 upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-19T13:05:44Z
+last_verified: 2026-11-26T13:56:17Z

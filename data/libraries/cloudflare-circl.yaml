@@ -45,6 +45,7 @@ algorithms:
         retrieved: 2026-11-13
   hybrid-tls:
     support: partial
+    since_version: v1.5.0
     experimental: true
     sources:
       - url: https://github.com/cloudflare/circl/releases/tag/v1.5.0
@@ -53,4 +54,4 @@ algorithms:
         quote: "* kem: add X25519MLKEM768 TLS hybrid KEM by @bwesterb in https://github.com/cloudflare/circl/pull/510"
         retrieved: 2026-11-19
 upgrade_notes: "ML-KEM: CIRCL (Cloudflare) v1.4.0 or later. ML-DSA: CIRCL (Cloudflare) v1.5.0 or later. SLH-DSA: CIRCL (Cloudflare) v1.6.2 or later."
-last_verified: 2026-11-19T13:05:27Z
+last_verified: 2026-11-26T13:55:48Z

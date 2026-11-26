@@ -22,4 +22,4 @@ algorithms:
         quote: "- Add support for post-quantum key exchange methods `sntrup761x25519-sha512` and `mlkem768x25519-sha256`"
         retrieved: 2026-11-13
 upgrade_notes: "ML-KEM: SSH.NET 2025.0.0 or later."
-last_verified: 2026-11-19T13:06:08Z
+last_verified: 2026-11-26T13:56:17Z
