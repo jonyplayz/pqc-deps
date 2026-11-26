@@ -38,7 +38,7 @@ algorithms:
         retrieved: 2026-11-11
 upgrade_notes: "ML-KEM and ML-DSA: rust-openssl (openssl crate) 0.10.79 or later."
 notes: The openssl-sys crate has its own 0.9.x version series, so only the openssl crate is matched here.
-last_verified: 2026-11-19T13:06:08Z
+last_verified: 2026-11-26T13:56:17Z
 pipeline:
   watch_urls:
     - https://raw.githubusercontent.com/rust-openssl/rust-openssl/master/openssl/CHANGELOG.md
