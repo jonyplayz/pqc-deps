@@ -33,7 +33,7 @@ algorithms:
           - ML-DSA-87 (NIST Category 5)
         retrieved: 2026-11-09
 upgrade_notes: "ML-DSA: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-20T12:57:20Z
+last_verified: 2026-11-27T13:52:48Z
 pipeline:
   watch_urls:
     - https://docs.rs/ml-dsa
