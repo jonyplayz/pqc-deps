@@ -31,4 +31,4 @@ algorithms:
         quote: "- Add ML-DSA implementation"
         retrieved: 2026-11-13
 upgrade_notes: "ML-KEM: SymCrypt 103.5.0 or later. ML-DSA: SymCrypt 103.7.0 or later."
-last_verified: 2026-11-20T12:57:19Z
+last_verified: 2026-11-27T13:52:48Z

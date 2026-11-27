@@ -63,4 +63,4 @@ algorithms:
         quote: TLS uses X25519MLKEM768 by default.
         retrieved: 2026-11-13
 upgrade_notes: "hybrid TLS key exchange, ML-KEM and ML-DSA: Conscrypt 2.6.0 or later. On by default: hybrid TLS key exchange."
-last_verified: 2026-11-20T12:55:11Z
+last_verified: 2026-11-27T13:52:48Z

@@ -14,7 +14,7 @@ delegates_to:
 applicable_algorithms:
   - hybrid-tls
   - ml-kem
-overall_status: ready
+overall_status: available
 algorithms:
   ml-kem:
     support: yes
@@ -47,7 +47,7 @@ algorithms:
         quote: Post-quantum is enabled by default (X25519MLKEM768 and P256Kyber768Draft00) and the "pq-experimental" Cargo feature flag is not used any more.
         retrieved: 2026-11-13
 upgrade_notes: "hybrid TLS key exchange and ML-KEM: boring (Rust) v5.0.0 or later. On by default: hybrid TLS key exchange."
-last_verified: 2026-11-20T12:54:55Z
+last_verified: 2026-11-27T13:52:19Z
 pipeline:
   watch_urls: []
   locked:

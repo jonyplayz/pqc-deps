@@ -14,4 +14,4 @@ applicable_algorithms:
 overall_status: n/a
 algorithms: {}
 notes: "Quinn uses rustls for the TLS handshake inside QUIC."
-last_verified: 2026-11-20T12:57:20Z
+last_verified: 2026-11-27T13:52:48Z

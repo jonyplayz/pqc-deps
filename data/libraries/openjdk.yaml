@@ -34,6 +34,7 @@ algorithms:
         retrieved: 2026-11-09
   hybrid-tls:
     support: no
+    experimental: false
     sources:
       - url: https://openjdk.org/jeps/496
         title: "JEP 496: Quantum-Resistant Module-Lattice-Based Key Encapsulation Mechanism"
@@ -41,7 +42,7 @@ algorithms:
         quote: It is not a goal to add support for ML-KEM to components of the Java Platform for which the necessary standards do not yet exist. That is the case for, in particular, the implementation of Transport Layer Security (TLS) in the javax.net.ssl package.
         retrieved: 2026-11-20
 upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-20T12:55:26Z
+last_verified: 2026-11-27T13:52:19Z
 pipeline:
   watch_urls:
     - https://openjdk.org/jeps/496
