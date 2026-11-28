@@ -24,21 +24,21 @@ algorithms:
         retrieved: 2026-11-21
 roadmap:
   confidence: tentative
-  summary: ML-DSA and ML-KEM are included in the Mbed TLS roadmap for initial support and future development.
+  summary: ML-DSA and ML-KEM support are included in the project roadmap.
   sources:
     - url: https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
       title: Roadmap — Mbed TLS documentation
       kind: docs
       quote: ML-DSA - Initial support
-      retrieved: 2026-11-21
+      retrieved: 2026-11-28
     - url: https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
       title: Roadmap — Mbed TLS documentation
       kind: docs
       quote: ML-KEM Support
-      retrieved: 2026-11-21
+      retrieved: 2026-11-28
 upgrade_notes: "Partial or experimental: ML-DSA; check the notes before relying on it."
 notes: Mbed TLS has LMS (a stateful hash-based signature) but no ML-KEM, ML-DSA or SLH-DSA in a release yet, including TF-PSA-Crypto 1.2.0.
-last_verified: 2026-11-21T12:49:40Z
+last_verified: 2026-11-28T12:58:52Z
 pipeline:
   watch_urls:
     - https://mbed-tls.readthedocs.io/en/latest/project/roadmap/
