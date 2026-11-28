@@ -24,4 +24,4 @@ roadmap:
       quote: "[v7] PQC: implement ML-KEM-768+X25519 and ML-DSA-65+Ed25519"
       retrieved: 2026-11-18
 upgrade_notes: "No support yet; a plan exists (target: v7)."
-last_verified: 2026-11-21T12:51:11Z
+last_verified: 2026-11-28T13:00:01Z
