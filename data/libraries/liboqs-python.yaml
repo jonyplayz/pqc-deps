@@ -34,4 +34,4 @@ algorithms:
         quote: Updated examples to use `ML-KEM` and `ML-DSA` as the defaults
         retrieved: 2026-11-14
 upgrade_notes: "ML-KEM and ML-DSA: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-21T12:51:11Z
+last_verified: 2026-11-28T13:00:01Z
