@@ -36,7 +36,7 @@ algorithms:
         quote: pub use ml_kem_1024::MlKem1024;
         retrieved: 2026-11-11
 upgrade_notes: "ML-KEM: supported in current releases; the sources don't state the first version."
-last_verified: 2026-11-21T12:51:11Z
+last_verified: 2026-11-28T13:00:01Z
 pipeline:
   watch_urls:
     - https://docs.rs/ml-kem
